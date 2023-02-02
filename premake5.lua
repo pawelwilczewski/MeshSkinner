@@ -35,10 +35,10 @@ group ""
 		{
 			"%{prj.name}/src/**.h",
 			"%{prj.name}/src/**.cpp",
-			"thirdparty/stb_image/**.h",
-			"thirdparty/stb_image/**.cpp",
 			"thirdparty/glm/glm/**.hpp",
 			"thirdparty/glm/glm/**.inl",
+			"thirdparty/stb_image/**.h",
+			"thirdparty/stb_image/**.cpp",
 			"thirdparty/tinygltf/**.h",
 			"thirdparty/tinygltf/**.cpp"
 		}
@@ -48,10 +48,10 @@ group ""
 			"%{prj.name}/src",
 			"thirdparty/glad/include",
 			"thirdparty/glfw/include",
-			"thirdparty/glm",
 			"thirdparty/imgui",
-			"thirdparty/stb_image",
+			"thirdparty/glm",
 			"thirdparty/spdlog/include",
+			"thirdparty/stb_image",
 			"thirdparty/tinygltf"
 		}
 
