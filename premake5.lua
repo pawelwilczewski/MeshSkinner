@@ -13,7 +13,7 @@ workspace "MeshSkinner"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 group "Dependencies"
-	include "thirdparty/GLFW"
+	include "thirdparty/glfw"
 	include "thirdparty/glad"
 	include "thirdparty/ImGui"
 
@@ -47,7 +47,7 @@ group ""
 		{
 			"%{prj.name}/src",
 			"thirdparty/glad/include",
-			"thirdparty/GLFW/include",
+			"thirdparty/glfw/include",
 			"thirdparty/glm",
 			"thirdparty/ImGui",
 			"thirdparty/stb_image",
@@ -57,7 +57,7 @@ group ""
 
 		links
 		{
-			"GLFW",
+			"glfw",
 			"glad",
 			"ImGui",
 			"opengl32.lib"
