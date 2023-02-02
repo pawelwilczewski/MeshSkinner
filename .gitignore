@@ -7,7 +7,6 @@
 **/bin/
 **/intermediate/
 **/imgui.ini
-# --------------
 
 # User-specific files
 *.rsuser
@@ -361,3 +360,7 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+# unignore premake directory
+!/thirdparty/bin/
+!/thirdparty/bin/premake/
