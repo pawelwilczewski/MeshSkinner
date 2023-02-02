@@ -28,7 +28,7 @@ group ""
 		targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 		objdir ("intermediate/" .. outputdir .. "/%{prj.name}")
 
-		pchheader "MeshSkinner/src/pch.h"
+		pchheader "pch.h"
 		pchsource "MeshSkinner/src/pch.cpp"
 
 		files
@@ -37,10 +37,10 @@ group ""
 			"%{prj.name}/src/**.cpp",
 			"thirdparty/glm/glm/**.hpp",
 			"thirdparty/glm/glm/**.inl",
-			"thirdparty/stb_image/**.h",
-			"thirdparty/stb_image/**.cpp",
-			"thirdparty/tinygltf/**.h",
-			"thirdparty/tinygltf/**.cpp"
+			"thirdparty/stb/**.h",
+			"thirdparty/stb/**.cpp",
+			-- "thirdparty/tinygltf/tiny_gltf.h",
+			-- "thirdparty/tinygltf/tiny_gltf.cc"
 		}
 
 		includedirs
@@ -51,8 +51,8 @@ group ""
 			"thirdparty/imgui",
 			"thirdparty/glm",
 			"thirdparty/spdlog/include",
-			"thirdparty/stb_image",
-			"thirdparty/tinygltf"
+			"thirdparty/stb",
+			-- "thirdparty/tinygltf"
 		}
 
 		links
@@ -64,15 +64,15 @@ group ""
 		}
 
 		defines {
-			"_CRT_SECURE_NO_WARNINGS"
+			"_CRT_SECURE_NO_WARNINGS",
+			"GLFW_INCLUDE_NONE"
 		}
 
 		filter "system:windows"
 			systemversion "latest"
 
 			defines {
-				"PLATFORM_WINDOWS",
-				"GLFW_INCLUDE_NONE",
+				"PLATFORM_WINDOWS"
 			}
 
 		filter "configurations:Debug"
