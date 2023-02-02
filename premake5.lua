@@ -15,7 +15,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 group "Dependencies"
 	include "thirdparty/glfw"
 	include "thirdparty/glad"
-	include "thirdparty/ImGui"
+	include "thirdparty/imgui"
 
 group ""
 	project "MeshSkinner"
@@ -49,7 +49,7 @@ group ""
 			"thirdparty/glad/include",
 			"thirdparty/glfw/include",
 			"thirdparty/glm",
-			"thirdparty/ImGui",
+			"thirdparty/imgui",
 			"thirdparty/stb_image",
 			"thirdparty/spdlog/include",
 			"thirdparty/tinygltf"
@@ -59,7 +59,7 @@ group ""
 		{
 			"glfw",
 			"glad",
-			"ImGui",
+			"imgui",
 			"opengl32.lib"
 		}
 
