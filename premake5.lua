@@ -17,7 +17,6 @@ group "Dependencies"
 	include "thirdparty/glad"
 	include "thirdparty/imgui"
 	include "thirdparty/tinygltf"
-	include "thirdparty/glm"
 
 group ""
 	project "MeshSkinner"
@@ -47,7 +46,7 @@ group ""
 			"thirdparty/imgui",
 			"thirdparty/glm",
 			"thirdparty/spdlog/include",
-			"thirdparty/tinygltf"
+			"thirdparty/tinygltf",
 		}
 
 		links
@@ -56,8 +55,7 @@ group ""
 			"glad",
 			"imgui",
 			"opengl32.lib",
-			"tinygltf",
-			"glm"
+			"tinygltf"
 		}
 
 		defines {
