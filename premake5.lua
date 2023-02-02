@@ -16,6 +16,7 @@ group "Dependencies"
 	include "thirdparty/glfw"
 	include "thirdparty/glad"
 	include "thirdparty/imgui"
+	include "thirdparty/tinygltf"
 
 group ""
 	project "MeshSkinner"
@@ -36,9 +37,7 @@ group ""
 			"%{prj.name}/src/**.h",
 			"%{prj.name}/src/**.cpp",
 			"thirdparty/glm/glm/**.hpp",
-			"thirdparty/glm/glm/**.inl",
-			"thirdparty/tinygltf/tiny_gltf.h",
-			"thirdparty/tinygltf/tiny_gltf.cc"
+			"thirdparty/glm/glm/**.inl"
 		}
 
 		includedirs
@@ -57,7 +56,8 @@ group ""
 			"glfw",
 			"glad",
 			"imgui",
-			"opengl32.lib"
+			"opengl32.lib",
+			"tinygltf"
 		}
 
 		defines {
