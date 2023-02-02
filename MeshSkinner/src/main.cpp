@@ -1,10 +1,6 @@
 #include "pch.h"
 
-#include <glfw/glfw3.h>
-#include <glad/glad.h>
-
-#include <glm/glm.hpp>
-#include <glm/mat4x4.hpp>
+// test code taken from https://www.glfw.org/docs/3.3/quick.html
 
 static const struct
 {
@@ -117,14 +113,12 @@ int main(void)
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        m = glm::mat4(1.f);
-        //glm::rotate(m, );
-        //mat4x4_rotate_Z(m, m, (float)glfwGetTime());
-        //mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
-        //mat4x4_mul(mvp, p, m);
+        m = glm::rotate(glm::mat4(1.f), glm::radians((float)glfwGetTime()) * 10.f, glm::vec3(0.f, 0.f, 1.f));
+        p = glm::ortho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+        mvp = m * p;
 
         glUseProgram(program);
-        //glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat *)mvp);
+        glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat *)glm::value_ptr(mvp));
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glfwSwapBuffers(window);
