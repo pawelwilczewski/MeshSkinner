@@ -6,8 +6,7 @@ project "glfw"
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("intermediate/" .. outputdir .. "/%{prj.name}")
 
-	files
-	{
+	files {
 		"include/glfw/glfw3.h",
 		"include/glfw/glfw3native.h",
 		"src/glfw_config.h",
@@ -31,8 +30,7 @@ project "glfw"
 
 		systemversion "latest"
 		
-		files
-		{
+		files {
 			"src/x11_init.c",
 			"src/x11_monitor.c",
 			"src/x11_window.c",
@@ -45,8 +43,7 @@ project "glfw"
 			"src/linux_joystick.c"
 		}
 
-		defines
-		{
+		defines {
 			"_GLFW_X11"
 		}
 
@@ -67,14 +64,12 @@ project "glfw"
 			"src/osmesa_context.c"
 		}
 
-		defines 
-		{ 
+		defines { 
 			"_GLFW_WIN32",
 			"_CRT_SECURE_NO_WARNINGS"
 		}
 
-		links
-		{
+		links {
 			"Dwmapi.lib"
 		}
 
