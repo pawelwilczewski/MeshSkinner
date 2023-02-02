@@ -37,10 +37,8 @@ group ""
 			"%{prj.name}/src/**.cpp",
 			"thirdparty/glm/glm/**.hpp",
 			"thirdparty/glm/glm/**.inl",
-			"thirdparty/stb/**.h",
-			"thirdparty/stb/**.cpp",
-			-- "thirdparty/tinygltf/tiny_gltf.h",
-			-- "thirdparty/tinygltf/tiny_gltf.cc"
+			"thirdparty/tinygltf/tiny_gltf.h",
+			"thirdparty/tinygltf/tiny_gltf.cc"
 		}
 
 		includedirs
@@ -51,8 +49,7 @@ group ""
 			"thirdparty/imgui",
 			"thirdparty/glm",
 			"thirdparty/spdlog/include",
-			"thirdparty/stb",
-			-- "thirdparty/tinygltf"
+			"thirdparty/tinygltf"
 		}
 
 		links

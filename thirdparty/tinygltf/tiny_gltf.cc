@@ -1,13 +1,12 @@
 #include "pch.h"
 
+#ifdef max
+	#undef max
+#endif
+
 #define TINYGLTF_IMPLEMENTATION
-
-#ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
-#endif
-
-#ifndef STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#endif
+// #define TINYGLTF_NOEXCEPTION
 
 #include "tiny_gltf.h"
