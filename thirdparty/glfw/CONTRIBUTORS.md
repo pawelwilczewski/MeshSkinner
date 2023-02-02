@@ -10,6 +10,7 @@ video tutorials.
  - Matt Arsenault
  - ashishgamedev
  - David Avedissian
+ - Luca Bacci
  - Keith Bauer
  - John Bartholomew
  - Coşku Baş
@@ -59,7 +60,7 @@ video tutorials.
  - Robin Eklind
  - Jan Ekström
  - Siavash Eliasi
- - TheExileFox
+ - Ahmad Fatoum
  - Nikita Fediuchin
  - Felipe Ferreira
  - Michael Fogleman
@@ -81,6 +82,7 @@ video tutorials.
  - Jonathan Hale
  - hdf89shfdfs
  - Sylvain Hellegouarch
+ - Björn Hempel
  - Matthew Henry
  - heromyth
  - Lucas Hinderberger
@@ -147,10 +149,12 @@ video tutorials.
  - Jon Morton
  - Pierre Moulon
  - Martins Mozeiko
+ - Pascal Muetschard
  - James Murphy
  - Julian Møller
  - ndogxj
  - F. Nedelec
+ - n3rdopolis
  - Kristian Nielsen
  - Joel Niemelä
  - Kamil Nowakowski
@@ -158,9 +162,11 @@ video tutorials.
  - Denis Ovod
  - Ozzy
  - Andri Pálsson
+ - luz paz
  - Peoro
  - Braden Pellett
  - Christopher Pelloux
+ - Michael Pennington
  - Arturo J. Pérez
  - Vladimir Perminov
  - Olivier Perret
@@ -182,7 +188,9 @@ video tutorials.
  - Philip Rideout
  - Eddie Ringle
  - Max Risuhin
+ - Joe Roback
  - Jorge Rodriguez
+ - Jari Ronkainen
  - Luca Rood
  - Ed Ropple
  - Aleksey Rybalkin
@@ -201,6 +209,7 @@ video tutorials.
  - Daniel Sieger
  - Daniel Skorupski
  - Slemmie
+ - Anthony Smith
  - Bradley Smith
  - Cliff Smolinsky
  - Patrick Snape
@@ -215,6 +224,7 @@ video tutorials.
  - Paul Sultana
  - Nathan Sweet
  - TTK-Bandit
+ - Jared Tiala
  - Sergey Tikhomirov
  - Arthur Tombs
  - TronicLabs
@@ -234,10 +244,11 @@ video tutorials.
  - Xo Wang
  - Jay Weisskopf
  - Frank Wille
+ - Andy Williams
+ - Joel Winarske
  - Richard A. Wilkes
  - Tatsuya Yatagawa
  - Ryogo Yoshimura
- - Rácz Zalán
  - Lukas Zanner
  - Andrey Zholos
  - Aihui Zhu
