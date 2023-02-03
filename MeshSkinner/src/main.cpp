@@ -46,7 +46,7 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 
 int main(void)
 {
-    auto app = new Application();
+    auto app = MakeUnique<Application>();
 
     GLFWwindow *window;
     GLuint vertex_buffer, vertex_shader, fragment_shader, program;
@@ -133,7 +133,6 @@ int main(void)
 
     glfwDestroyWindow(window);
 
-    delete app;
     glfwTerminate();
     exit(EXIT_SUCCESS);
 }

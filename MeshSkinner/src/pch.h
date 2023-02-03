@@ -30,6 +30,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Application/Core.h"
 #include "Application/Application.h"
 #include "Application/Log.h"
 
