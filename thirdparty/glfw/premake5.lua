@@ -3,9 +3,6 @@ project "glfw"
 	language "C"
 	staticruntime "on"
 
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("intermediate/" .. outputdir .. "/%{prj.name}")
-
 	files {
 		"include/glfw/glfw3.h",
 		"include/glfw/glfw3native.h",

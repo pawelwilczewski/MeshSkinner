@@ -13,6 +13,9 @@ workspace "MeshSkinner"
 
 	outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("intermediate/" .. outputdir .. "/%{prj.name}")
+
 	filter "configurations:Debug"
 			defines "DEBUG"
 			runtime "Debug"
@@ -40,9 +43,6 @@ project "MeshSkinner"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "on"
-
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("intermediate/" .. outputdir .. "/%{prj.name}")
 
 	pchheader "pch.h"
 	pchsource "MeshSkinner/src/pch.cpp"

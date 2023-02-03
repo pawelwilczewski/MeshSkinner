@@ -4,9 +4,6 @@ project "imgui"
 	cppdialect "C++17"
     staticruntime "on"
 
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("intermediate/" .. outputdir .. "/%{prj.name}")
-
 	files {
 		"imconfig.h",
 		"imgui.h",

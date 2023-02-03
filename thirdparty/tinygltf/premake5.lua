@@ -4,9 +4,6 @@ project "tinygltf"
 	cppdialect "C++11"
     staticruntime "on"
 
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("intermediate/" .. outputdir .. "/%{prj.name}")
-
 	files
 	{
 		"tiny_gltf.h",
