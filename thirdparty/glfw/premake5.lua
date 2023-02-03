@@ -6,20 +6,19 @@ project "glfw"
 	files {
 		"include/glfw/glfw3.h",
 		"include/glfw/glfw3native.h",
+
 		"src/glfw_config.h",
 		"src/context.c",
 		"src/init.c",
 		"src/input.c",
 		"src/monitor.c",
-
-		"src/null_init.c",
-		"src/null_joystick.c",
-		"src/null_monitor.c",
-		"src/null_window.c",
-
-		"src/platform.c",
 		"src/vulkan.c",
 		"src/window.c",
+		"src/platform.c",
+		"src/null_init.c",
+		"src/null_monitor.c",
+		"src/null_window.c",
+		"src/null_joystick.c"
 	}
 
 	includedirs {
@@ -27,7 +26,7 @@ project "glfw"
 	}
 
 	filter "system:linux"
-		pic "On"
+		pic "on"
 
 		files {
 			"src/x11_init.c",
@@ -39,7 +38,9 @@ project "glfw"
 			"src/glx_context.c",
 			"src/egl_context.c",
 			"src/osmesa_context.c",
-			"src/linux_joystick.c"
+			"src/linux_joystick.c",
+			"src/posix_module.c",
+			"src/posix_poll.c"
 		}
 
 		defines {
@@ -50,14 +51,14 @@ project "glfw"
 		files {
 			"src/win32_init.c",
 			"src/win32_joystick.c",
-			"src/win32_module.c",
 			"src/win32_monitor.c",
 			"src/win32_time.c",
 			"src/win32_thread.c",
 			"src/win32_window.c",
 			"src/wgl_context.c",
 			"src/egl_context.c",
-			"src/osmesa_context.c"
+			"src/osmesa_context.c",
+			"src/win32_module.c"
 		}
 
 		defines {

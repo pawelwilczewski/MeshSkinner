@@ -12,6 +12,10 @@ workspace "MeshSkinner"
 
 	startproject "MeshSkinner"
 
+	flags {
+		"MultiProcessorCompile"
+	}
+
 	systemversion "latest"
 
 	filter "configurations:Debug"
@@ -57,8 +61,8 @@ project "MeshSkinner"
 	}
 
 	links {
-		"glad",
 		"glfw",
+		"glad",
 		"imgui",
 		"tinygltf"
 	}
@@ -79,7 +83,8 @@ project "MeshSkinner"
 		}
 
 		defines {
-			"PLATFORM_LINUX"
+			"PLATFORM_LINUX",
+			"_X11"
 		}
 
 
