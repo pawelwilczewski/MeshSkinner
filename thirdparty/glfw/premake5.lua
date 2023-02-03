@@ -26,10 +26,6 @@ project "glfw"
 	}
 
 	filter "system:linux"
-		pic "On"
-
-		systemversion "latest"
-		
 		files {
 			"src/x11_init.c",
 			"src/x11_monitor.c",
@@ -48,10 +44,7 @@ project "glfw"
 		}
 
 	filter "system:windows"
-		systemversion "latest"
-
-		files
-		{
+		files {
 			"src/win32_init.c",
 			"src/win32_joystick.c",
 			"src/win32_module.c",
@@ -72,16 +65,3 @@ project "glfw"
 		links {
 			"Dwmapi.lib"
 		}
-
-	filter "configurations:Debug"
-		runtime "Debug"
-		symbols "on"
-
-	filter "configurations:Release"
-		runtime "Release"
-		optimize "on"
-
-	filter "configurations:Dist"
-		runtime "Release"
-		optimize "on"
-        symbols "off"
