@@ -51,10 +51,9 @@ group ""
 
 		links
 		{
-			"glfw",
 			"glad",
+			"glfw",
 			"imgui",
-			"opengl32.lib",
 			"tinygltf"
 		}
 
@@ -67,6 +66,17 @@ group ""
 
 			defines {
 				"PLATFORM_WINDOWS"
+			}
+
+		filter "system:linux"
+			systemversion "latest"
+
+			defines {
+				"PLATFORM_LINUX"
+			}
+
+			buildoptions {
+
 			}
 
 		filter "configurations:Debug"
