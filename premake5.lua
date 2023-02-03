@@ -75,8 +75,8 @@ group ""
 				"PLATFORM_LINUX"
 			}
 
-			buildoptions {
-
+			links {
+				"dl"
 			}
 
 		filter "configurations:Debug"
