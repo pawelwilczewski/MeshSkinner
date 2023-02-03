@@ -17,7 +17,3 @@ project "imgui"
 		"imstb_truetype.h",
 		"imgui_demo.cpp"
 	}
-
-	defines  {
-		"IMGUI_IMPL_OPENGL_LOADER_GLAD"
-	}
