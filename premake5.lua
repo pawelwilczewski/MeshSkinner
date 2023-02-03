@@ -1,12 +1,32 @@
 workspace "MeshSkinner"
 	architecture "x64"
 
-	configurations
-	{
+	configurations {
 		"Debug",
 		"Release",
 		"Dist"
 	}
+
+	filter "toolset:gcc or toolset:clang"
+		linkoptions { "-pthread" }
+		buildoptions {
+			"-march=native",
+			"-Wall",
+			"-pthread",
+			"-Werror=vla"
+		}
+
+	filter "toolset:msc-*"
+		warnings "extra"
+		buildoptions { "/utf-8" }
+		buildoptions { "/permissive-" }
+		defines { "_CRT_SECURE_NO_WARNINGS=1" }
+		defines { "_SCL_SECURE_NO_WARNINGS=1" }
+	
+	filter "*"
+
+	filter "system:linux"
+		links "dl"
 
 	startproject "MeshSkinner"
 
@@ -74,12 +94,6 @@ group ""
 			defines {
 				"PLATFORM_LINUX"
 			}
-
-			links {
-				"dl"
-			}
-
-			linkgroups "On"
 
 		filter "configurations:Debug"
 			defines "DEBUG"
