@@ -7,106 +7,79 @@ workspace "MeshSkinner"
 		"Dist"
 	}
 
-	filter "toolset:gcc or toolset:clang"
-		linkoptions { "-pthread" }
-		buildoptions {
-			"-march=native",
-			"-Wall",
-			"-pthread",
-			"-Werror=vla"
-		}
-
-	filter "toolset:msc-*"
-		warnings "extra"
-		buildoptions { "/utf-8" }
-		buildoptions { "/permissive-" }
-		defines { "_CRT_SECURE_NO_WARNINGS=1" }
-		defines { "_SCL_SECURE_NO_WARNINGS=1" }
-	
-	filter "*"
-
-	filter "system:linux"
-		links "dl"
+	systemversion "latest"
 
 	startproject "MeshSkinner"
 
-outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+	outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
-group "Dependencies"
+	filter "configurations:Debug"
+			defines "DEBUG"
+			runtime "Debug"
+			symbols "on"
+
+	filter "configurations:Release"
+		defines "RELEASE"
+		runtime "Release"
+		optimize "on"
+
+	filter "configurations:Dist"
+		defines "DIST"
+		runtime "Release"
+		optimize "on"
+		symbols "off"
+
+
+project "MeshSkinner"
+	location "MeshSkinner"
+	kind "ConsoleApp"
+	language "C++"
+	cppdialect "C++17"
+	staticruntime "on"
+
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("intermediate/" .. outputdir .. "/%{prj.name}")
+
+	pchheader "pch.h"
+	pchsource "MeshSkinner/src/pch.cpp"
+
 	include "thirdparty/glfw"
 	include "thirdparty/glad"
 	include "thirdparty/imgui"
 	include "thirdparty/tinygltf"
 
-group ""
-	project "MeshSkinner"
-		location "MeshSkinner"
-		kind "ConsoleApp"
-		language "C++"
-		cppdialect "C++17"
-		staticruntime "on"
+	files {
+		"%{prj.name}/src/**.h",
+		"%{prj.name}/src/**.cpp"
+	}
 
-		targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-		objdir ("intermediate/" .. outputdir .. "/%{prj.name}")
+	includedirs {
+		"%{prj.name}/src",
+		"thirdparty/glad/include",
+		"thirdparty/glfw/include",
+		"thirdparty/imgui",
+		"thirdparty/glm",
+		"thirdparty/spdlog/include",
+		"thirdparty/tinygltf",
+	}
 
-		pchheader "pch.h"
-		pchsource "MeshSkinner/src/pch.cpp"
+	links {
+		"glad",
+		"glfw",
+		"imgui",
+		"tinygltf"
+	}
 
-		files
-		{
-			"%{prj.name}/src/**.h",
-			"%{prj.name}/src/**.cpp"
-		}
+	defines {
+		"GLFW_INCLUDE_NONE"
+	}
 
-		includedirs
-		{
-			"%{prj.name}/src",
-			"thirdparty/glad/include",
-			"thirdparty/glfw/include",
-			"thirdparty/imgui",
-			"thirdparty/glm",
-			"thirdparty/spdlog/include",
-			"thirdparty/tinygltf",
-		}
-
-		links
-		{
-			"glad",
-			"glfw",
-			"imgui",
-			"tinygltf"
-		}
-
+	filter "system:windows"
 		defines {
-			"GLFW_INCLUDE_NONE"
+			"PLATFORM_WINDOWS"
 		}
 
-		filter "system:windows"
-			systemversion "latest"
-
-			defines {
-				"PLATFORM_WINDOWS"
-			}
-
-		filter "system:linux"
-			systemversion "latest"
-
-			defines {
-				"PLATFORM_LINUX"
-			}
-
-		filter "configurations:Debug"
-			defines "DEBUG"
-			runtime "Debug"
-			symbols "on"
-
-		filter "configurations:Release"
-			defines "RELEASE"
-			runtime "Release"
-			optimize "on"
-
-		filter "configurations:Dist"
-			defines "DIST"
-			runtime "Release"
-			optimize "on"
-			symbols "off"
+	filter "system:linux"
+		defines {
+			"PLATFORM_LINUX"
+		}
