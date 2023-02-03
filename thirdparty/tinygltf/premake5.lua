@@ -4,8 +4,7 @@ project "tinygltf"
 	cppdialect "C++11"
     staticruntime "on"
 
-	files
-	{
+	files {
 		"tiny_gltf.h",
 		"tiny_gltf.cc",
 		"stb_image.h",
