@@ -26,8 +26,6 @@ project "glfw"
 	}
 
 	filter "system:linux"
-		pic "on"
-
 		files {
 			"src/x11_init.c",
 			"src/x11_monitor.c",

@@ -34,6 +34,9 @@ workspace "MeshSkinner"
 		optimize "on"
 		symbols "off"
 
+	filter "system:linux"
+		pic "on"
+
 
 project "MeshSkinner"
 	location "MeshSkinner"
@@ -77,14 +80,15 @@ project "MeshSkinner"
 		}
 
 	filter "system:linux"
+		pic "off"
+
 		links {
 			"dl",
 			"pthread"
 		}
 
 		defines {
-			"PLATFORM_LINUX",
-			"_X11"
+			"PLATFORM_LINUX"
 		}
 
 

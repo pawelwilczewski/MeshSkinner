@@ -18,25 +18,6 @@ project "imgui"
 		"imgui_demo.cpp"
 	}
 
-	includedirs {
-		"../imgui/",
-		"../glad/include",
-		"../glfw/include/"
-	}
-
 	defines  {
 		"IMGUI_IMPL_OPENGL_LOADER_GLAD"
 	}
-
-	filter "system:linux"
-		pic "on"
-
-		defines {
-			"_IMGUI_X11"
-		}
-
-	filter "system:windows"
-		defines  { 
-			"_IMGUI_WIN32",
-			"_CRT_SECURE_NO_WARNINGS"
-		}
