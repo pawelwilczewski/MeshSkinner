@@ -22,7 +22,13 @@ project "glfw"
 		"src/window.c",
 	}
 
+	includedirs {
+		"include"
+	}
+
 	filter "system:linux"
+		pic "On"
+
 		files {
 			"src/x11_init.c",
 			"src/x11_monitor.c",
@@ -54,11 +60,7 @@ project "glfw"
 			"src/osmesa_context.c"
 		}
 
-		defines { 
+		defines {
 			"_GLFW_WIN32",
 			"_CRT_SECURE_NO_WARNINGS"
-		}
-
-		links {
-			"Dwmapi.lib"
 		}

@@ -80,6 +80,11 @@ project "MeshSkinner"
 		}
 
 	filter "system:linux"
+		links {
+			"dl",
+			"pthread"
+		}
+
 		defines {
 			"PLATFORM_LINUX"
 		}
