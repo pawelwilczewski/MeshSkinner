@@ -29,6 +29,10 @@ workspace "MeshSkinner"
 		optimize "on"
 		symbols "off"
 
+include "thirdparty/glfw"
+include "thirdparty/glad"
+include "thirdparty/imgui"
+include "thirdparty/tinygltf"
 
 project "MeshSkinner"
 	location "MeshSkinner"
@@ -42,11 +46,6 @@ project "MeshSkinner"
 
 	pchheader "pch.h"
 	pchsource "MeshSkinner/src/pch.cpp"
-
-	include "thirdparty/glfw"
-	include "thirdparty/glad"
-	include "thirdparty/imgui"
-	include "thirdparty/tinygltf"
 
 	files {
 		"%{prj.name}/src/**.h",
