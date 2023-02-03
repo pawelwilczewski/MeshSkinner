@@ -1,6 +1,6 @@
 # MeshSkinner
 
-3D mesh skinning software. COMP3931 Individual Project by Pawel Wilczewski University of Leeds.
+3D mesh skinning software. COMP3931 Individual Project by Pawel Wilczewski, University of Leeds.
 
 # Getting started
 
