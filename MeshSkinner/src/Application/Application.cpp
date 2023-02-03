@@ -41,7 +41,7 @@ static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, i
         glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
-Application::Application()
+Application::Application(uint32_t width, uint32_t height, const char *title)
 {
 	Log::Init();
 
@@ -50,7 +50,7 @@ Application::Application()
     if (!glfwInit())
         exit(EXIT_FAILURE);
 
-    m_Window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
+    m_Window = glfwCreateWindow(width, height, title, NULL, NULL);
     if (!m_Window)
     {
         glfwTerminate();
