@@ -34,7 +34,7 @@ workspace "MeshSkinner"
 		optimize "on"
 		symbols "off"
 
-	filter "system:linux"
+	filter { "system:linux", "kind:StaticLib" }
 		pic "on"
 
 
@@ -80,8 +80,6 @@ project "MeshSkinner"
 		}
 
 	filter "system:linux"
-		pic "off"
-
 		links {
 			"dl",
 			"pthread"
