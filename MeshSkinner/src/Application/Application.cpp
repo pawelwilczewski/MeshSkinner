@@ -57,12 +57,15 @@ Application::Application(uint32_t width, uint32_t height, const char *title)
         exit(EXIT_FAILURE);
     }
 
+    glfwMakeContextCurrent(m_Window);
     glfwSetKeyCallback(m_Window, KeyCallback);
 
-    glfwMakeContextCurrent(m_Window);
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        Log::Critical("Glad loader failure!");
+        exit(EXIT_FAILURE);
+    }
 
-    int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-    assert(status);
     Log::Info("OpenGL Renderer:");
     Log::Info("    Vendor: {0}", (const char *)glGetString(GL_VENDOR));
     Log::Info("    Renderer: {0}", (const char *)glGetString(GL_RENDERER));
@@ -75,10 +78,14 @@ Application::Application(uint32_t width, uint32_t height, const char *title)
 #endif
 
     glfwSwapInterval(1);
+
+    Log::Info("Application init successful...");
 }
 
 void Application::Run()
 {
+    Log::Info("Application starting...");
+
     GLuint vertex_buffer, vertex_shader, fragment_shader, program;
     GLint mvp_location, vpos_location, vcol_location;
 
