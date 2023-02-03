@@ -79,6 +79,8 @@ group ""
 				"dl"
 			}
 
+			linkgroups "On"
+
 		filter "configurations:Debug"
 			defines "DEBUG"
 			runtime "Debug"
