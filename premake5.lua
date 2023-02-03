@@ -1,20 +1,18 @@
 workspace "MeshSkinner"
 	architecture "x64"
-
 	configurations {
 		"Debug",
 		"Release",
 		"Dist"
 	}
 
-	systemversion "latest"
+	outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("intermediate/" .. outputdir .. "/%{prj.name}")
 
 	startproject "MeshSkinner"
 
-	outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("intermediate/" .. outputdir .. "/%{prj.name}")
+	systemversion "latest"
 
 	filter "configurations:Debug"
 		defines "DEBUG"
@@ -32,11 +30,13 @@ workspace "MeshSkinner"
 		optimize "on"
 		symbols "off"
 
+
 group "Dependencies"
 	include "thirdparty/glfw"
 	include "thirdparty/glad"
 	include "thirdparty/imgui"
 	include "thirdparty/tinygltf"
+
 
 project "MeshSkinner"
 	location "MeshSkinner"
