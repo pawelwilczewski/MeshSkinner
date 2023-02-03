@@ -47,7 +47,6 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 int main(void)
 {
     auto app = new Application();
-    delete app;
 
     GLFWwindow *window;
     GLuint vertex_buffer, vertex_shader, fragment_shader, program;
@@ -57,9 +56,6 @@ int main(void)
 
     if (!glfwInit())
         exit(EXIT_FAILURE);
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
     window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
     if (!window)
@@ -71,7 +67,14 @@ int main(void)
     glfwSetKeyCallback(window, key_callback);
 
     glfwMakeContextCurrent(window);
-    gladLoadGL();
+
+    int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+    Log::Info("OpenGL Renderer:");
+    Log::Info("    Vendor: {0}", (const char*)glGetString(GL_VENDOR));
+    Log::Info("    Renderer: {0}", (const char *)glGetString(GL_RENDERER));
+    Log::Info("    Version: {0}", (const char *)glGetString(GL_VERSION));
+    Application::SetupDebug();
+
     glfwSwapInterval(1);
 
     // NOTE: OpenGL error checks have been omitted for brevity
@@ -130,6 +133,7 @@ int main(void)
 
     glfwDestroyWindow(window);
 
+    delete app;
     glfwTerminate();
     exit(EXIT_SUCCESS);
 }

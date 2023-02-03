@@ -99,11 +99,13 @@ static void GLAPIENTRY errorCallback(GLenum source, GLenum type, GLuint id, GLen
 Application::Application()
 {
 	Log::Init();
+}
 
-	Log::Info("{0}Hello world", "dupa");
-//	// enable gl debug messages
-//#if defined DEBUG || defined RELEASE
-//	glEnable(GL_DEBUG_OUTPUT);
-//	glDebugMessageCallback(errorCallback, 0);
-//#endif
+void Application::SetupDebug()
+{
+	// enable gl debug messages
+#if defined DEBUG || defined RELEASE
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(errorCallback, nullptr);
+#endif
 }
