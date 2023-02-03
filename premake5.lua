@@ -31,13 +31,6 @@ workspace "MeshSkinner"
 		symbols "off"
 
 
-group "Dependencies"
-	include "thirdparty/glfw"
-	include "thirdparty/glad"
-	include "thirdparty/imgui"
-	include "thirdparty/tinygltf"
-
-
 project "MeshSkinner"
 	location "MeshSkinner"
 	kind "ConsoleApp"
@@ -88,3 +81,10 @@ project "MeshSkinner"
 		defines {
 			"PLATFORM_LINUX"
 		}
+
+
+group "Dependencies"
+	include "thirdparty/glfw"
+	include "thirdparty/glad"
+	include "thirdparty/imgui"
+	include "thirdparty/tinygltf"
