@@ -17,9 +17,9 @@ workspace "MeshSkinner"
 	objdir ("intermediate/" .. outputdir .. "/%{prj.name}")
 
 	filter "configurations:Debug"
-			defines "DEBUG"
-			runtime "Debug"
-			symbols "on"
+		defines "DEBUG"
+		runtime "Debug"
+		symbols "on"
 
 	filter "configurations:Release"
 		defines "RELEASE"
@@ -32,10 +32,11 @@ workspace "MeshSkinner"
 		optimize "on"
 		symbols "off"
 
-include "thirdparty/glfw"
-include "thirdparty/glad"
-include "thirdparty/imgui"
-include "thirdparty/tinygltf"
+group "Dependencies"
+	include "thirdparty/glfw"
+	include "thirdparty/glad"
+	include "thirdparty/imgui"
+	include "thirdparty/tinygltf"
 
 project "MeshSkinner"
 	location "MeshSkinner"
