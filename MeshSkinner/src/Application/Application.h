@@ -5,5 +5,8 @@ class Application
 public:
 	Application();
 
-	static void SetupDebug();
+	void Run();
+
+private:
+	GLFWwindow *m_Window;
 };

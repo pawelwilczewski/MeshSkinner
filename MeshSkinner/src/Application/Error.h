@@ -93,5 +93,10 @@ namespace Error
 
 		Log::Error("GL CALLBACK: src = {0}, severity = {1}, type = {2}, id = 0x{3:x}, message = {4}", src, sev, errType, id, message);
 	}
+
+	void CallbackGLFW(int error, const char *message)
+	{
+		Log::Error("GLFW CALLBACK: error = {0}, message = {1}", error, message);
+	}
 #endif
 }
