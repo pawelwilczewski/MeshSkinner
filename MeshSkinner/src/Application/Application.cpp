@@ -78,18 +78,19 @@ void Application::Init(uint32_t width, uint32_t height, const char *title)
 
     Input::Init();
     auto func = MakeCallbackRef<int>([&](int key) { if (key == KEY_F) Log::Info("{0}", key); });
-    auto funcWindow = MakeCallbackRef<glm::ivec2>([&](glm::ivec2 windowSize) { Log::Info("{0}, {1}", windowSize.x, windowSize.y); });
+    auto funcWindow = MakeCallbackRef<glm::ivec2>([&](glm::ivec2 windowSize) { Log::Info("{0}", windowSize); });
     auto funcClose = MakeCallbackRef<int>([&](int key) { if (key == KEY_ESCAPE) glfwSetWindowShouldClose(s_Window, GLFW_TRUE); });
     Input::OnKeyPressedSubscribe(func);
     Input::OnKeyPressedSubscribe(funcClose);
     Input::OnKeyReleasedSubscribe(func);
     Input::OnWindowResizedSubscribe(funcWindow);
+    Log::Trace("{0}", glm::rotate(glm::translate(glm::mat4(1.f), glm::vec3(2.f, 3.f, -1.f)), glm::radians(50.f), glm::vec3(0.f, 1.f, 0.f)));
 }
 
 void Application::Run()
 {
     Log::Info("Application starting...");
-
+    Log::Trace("Mousepos: {0}", Input::GetMousePosition());
     GLuint vertex_buffer, vertex_shader, fragment_shader, program;
     GLint mvp_location, vpos_location, vcol_location;
 
