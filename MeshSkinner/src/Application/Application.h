@@ -16,7 +16,7 @@ private:
 
 public:
 	static GLFWwindow *GetWindow() { return s_Window; }
-	static glm::ivec2 GetFrameBufferSize();
+	static glm::ivec2 GetFramebufferSize();
 
 private:
 	static GLFWwindow *s_Window;

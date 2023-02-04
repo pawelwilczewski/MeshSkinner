@@ -1,6 +1,6 @@
 #pragma once
 
-class ImGuiUtils
+class UserInterface
 {
 public:
 	static void Init();

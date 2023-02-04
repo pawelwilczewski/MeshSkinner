@@ -1,11 +1,16 @@
 #include "pch.h"
-#include "ImGuiUtils.h"
+#include "UserInterface.h"
+
+#define IMGUI_IMPL_OPENGL_LOADER_GLAD
+
+#include "../ImGui/backends/imgui_impl_opengl3.cpp"
+#include "../ImGui/backends/imgui_impl_glfw.cpp"
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
-void ImGuiUtils::Init()
+void UserInterface::Init()
 {
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -31,27 +36,29 @@ void ImGuiUtils::Init()
     ImGui_ImplOpenGL3_Init("#version 430");
 }
 
-void ImGuiUtils::FrameBegin()
+void UserInterface::FrameBegin()
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 }
 
-void ImGuiUtils::FrameEnd()
+void UserInterface::FrameEnd()
 {
     ImGuiIO &io = ImGui::GetIO();
-    auto bufferSize = Application::GetFrameBufferSize();
+    auto bufferSize = Application::GetFramebufferSize();
     io.DisplaySize = { (float)bufferSize.x, (float)bufferSize.y };
 
-    // Disable and store SRGB state.
+    // disable and store SRGB state
     const bool srgbEnabled = glIsEnabled(GL_FRAMEBUFFER_SRGB);
     glDisable(GL_FRAMEBUFFER_SRGB);
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    if (srgbEnabled) glEnable(GL_FRAMEBUFFER_SRGB);
+    // reenable srgb if necessary
+    if (srgbEnabled)
+        glEnable(GL_FRAMEBUFFER_SRGB);
 
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
@@ -62,7 +69,7 @@ void ImGuiUtils::FrameEnd()
     }
 }
 
-void ImGuiUtils::Terminate()
+void UserInterface::Terminate()
 {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
