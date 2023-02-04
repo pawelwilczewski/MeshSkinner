@@ -36,6 +36,7 @@
 #include "Application/Application.h"
 #include "Application/Log.h"
 #include "Application/Input.h"
+#include "Application/Time.h"
 
 #ifdef PLATFORM_WINDOWS
 #include <Windows.h>
