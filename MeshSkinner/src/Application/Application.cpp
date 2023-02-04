@@ -88,10 +88,10 @@ void Application::Init(uint32_t width, uint32_t height, const char *title)
     Log::Info("Application init successful...");
 
     Input::Init();
-    auto func = MakeCallbackRef<int>([&](int key) { Log::Info("{0}", key); });
+    auto func = MakeCallbackRef<int>([&](int key) { if (key == KEY_F) Log::Info("{0}", key); });
     auto funcWindow = MakeCallbackRef<glm::ivec2>([&](glm::ivec2 windowSize) { Log::Info("{0}, {1}", windowSize.x, windowSize.y); });
     Input::OnKeyPressedSubscribe(func);
-    //Input::OnKeyPressedUnsubscribe(func);
+    Input::OnKeyReleasedSubscribe(func);
     Input::OnWindowResizedSubscribe(funcWindow);
 }
 

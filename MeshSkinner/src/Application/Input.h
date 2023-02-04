@@ -2,6 +2,7 @@
 
 #include "Core.h"
 #include "Event.h"
+#include "InputCodes.h"
 
 class Input
 {
