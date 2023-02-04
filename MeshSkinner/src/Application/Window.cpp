@@ -90,6 +90,7 @@ void Window::FrameEnd()
     // swap buffers poll events
     glfwSwapBuffers(Window::GetNativeWindow());
     glfwPollEvents();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Window::Terminate()

@@ -66,8 +66,8 @@ void Application::Run()
         UpdateUI();
         LateUpdate();
 
-        UserInterface::FrameEnd();
         Window::FrameEnd();
+        UserInterface::FrameEnd();
     }
 
     Terminate();
@@ -187,5 +187,5 @@ void Application::UpdateUI()
 
 void Application::LateUpdate()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
 }
