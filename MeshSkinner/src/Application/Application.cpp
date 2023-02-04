@@ -2,6 +2,8 @@
 #include "Application.h"
 #include "Error.h"
 
+GLFWwindow *Application::s_Window;
+
 // test code taken from https://www.glfw.org/docs/3.3/quick.html
 
 static const struct
@@ -41,7 +43,11 @@ static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, i
         glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
-Application::Application(uint32_t width, uint32_t height, const char *title)
+void a(int x)
+{
+    Log::Info("{0}", x);
+}
+void Application::Init(uint32_t width, uint32_t height, const char *title)
 {
 	Log::Init();
 
@@ -50,15 +56,15 @@ Application::Application(uint32_t width, uint32_t height, const char *title)
     if (!glfwInit())
         exit(EXIT_FAILURE);
 
-    m_Window = glfwCreateWindow(width, height, title, NULL, NULL);
-    if (!m_Window)
+    s_Window = glfwCreateWindow(width, height, title, NULL, NULL);
+    if (!s_Window)
     {
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
 
-    glfwMakeContextCurrent(m_Window);
-    glfwSetKeyCallback(m_Window, KeyCallback);
+    glfwMakeContextCurrent(s_Window);
+    glfwSetKeyCallback(s_Window, KeyCallback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -80,6 +86,13 @@ Application::Application(uint32_t width, uint32_t height, const char *title)
     glfwSwapInterval(1);
 
     Log::Info("Application init successful...");
+
+    Input::Init();
+    auto func = MakeCallbackRef<int>([&](int key) { Log::Info("{0}", key); });
+    auto funcWindow = MakeCallbackRef<glm::ivec2>([&](glm::ivec2 windowSize) { Log::Info("{0}, {1}", windowSize.x, windowSize.y); });
+    Input::OnKeyPressedSubscribe(func);
+    //Input::OnKeyPressedUnsubscribe(func);
+    Input::OnWindowResizedSubscribe(funcWindow);
 }
 
 void Application::Run()
@@ -117,13 +130,13 @@ void Application::Run()
     glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE,
         sizeof(vertices[0]), (void *)(sizeof(float) * 2));
 
-    while (!glfwWindowShouldClose(m_Window))
+    while (!glfwWindowShouldClose(s_Window))
     {
         float ratio;
         int width, height;
         glm::mat4 m, p, mvp;
 
-        glfwGetFramebufferSize(m_Window, &width, &height);
+        glfwGetFramebufferSize(s_Window, &width, &height);
         ratio = width / (float)height;
 
         glViewport(0, 0, width, height);
@@ -137,11 +150,11 @@ void Application::Run()
         glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat *)glm::value_ptr(mvp));
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        glfwSwapBuffers(m_Window);
+        glfwSwapBuffers(s_Window);
         glfwPollEvents();
     }
 
-    glfwDestroyWindow(m_Window);
+    glfwDestroyWindow(s_Window);
 
     glfwTerminate();
     exit(EXIT_SUCCESS);

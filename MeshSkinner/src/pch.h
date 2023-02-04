@@ -12,9 +12,11 @@
 #include <sstream>
 #include <array>
 #include <vector>
+#include <set>
 #include <unordered_map>
 #include <unordered_set>
 #include <filesystem>
+#include <functional>
 
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -33,6 +35,7 @@
 #include "Application/Core.h"
 #include "Application/Application.h"
 #include "Application/Log.h"
+#include "Application/Input.h"
 
 #ifdef PLATFORM_WINDOWS
 #include <Windows.h>

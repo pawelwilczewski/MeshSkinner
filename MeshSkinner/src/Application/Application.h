@@ -3,10 +3,12 @@
 class Application
 {
 public:
-	Application(uint32_t width, uint32_t height, const char *title);
+	static void Init(uint32_t width, uint32_t height, const char *title);
 
-	void Run();
+	static void Run();
+
+	static GLFWwindow *GetWindow() { return s_Window; }
 
 private:
-	GLFWwindow *m_Window;
+	static GLFWwindow *s_Window;
 };

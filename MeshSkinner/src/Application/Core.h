@@ -1,5 +1,11 @@
 #pragma once
 
+#include <glm/glm.hpp>
+#include <functional>
+#include <vector>
+#include <set>
+#include <unordered_set>
+
 #include <memory>
 
 template<typename T>
