@@ -20,6 +20,7 @@
 
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
+#include "imgui.h"
 
 #include <glm/glm.hpp>
 #include <glm/mat4x4.hpp>

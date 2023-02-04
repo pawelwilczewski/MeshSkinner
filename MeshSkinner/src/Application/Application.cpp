@@ -1,10 +1,7 @@
 #include "pch.h"
 #include "Application.h"
 #include "Error.h"
-
-#include "imgui.h"
-#include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_opengl3.h"
+#include "ImGuiUtils.h"
 
 GLFWwindow *Application::s_Window;
 
@@ -40,6 +37,9 @@ static const char *fragment_shader_text =
 "{\n"
 "    gl_FragColor = vec4(color, 1.0);\n"
 "}\n";
+
+static GLuint vertex_buffer, vertex_shader, fragment_shader, program;
+static GLint mvp_location, vpos_location, vcol_location;
 
 void Application::Init(uint32_t width, uint32_t height, const char *title)
 {
@@ -78,57 +78,16 @@ void Application::Init(uint32_t width, uint32_t height, const char *title)
 
     glfwSwapInterval(1);
 
-    Log::Info("Application init successful...");
+    Log::Trace("Application initialized...");
 
+    Time::Init();
     Input::Init();
-    auto func = MakeCallbackRef<int>([&](int key) { if (key == KEY_F) Log::Info("{0}", key); });
-    auto funcWindow = MakeCallbackRef<glm::ivec2>([&](glm::ivec2 windowSize) { Log::Info("{0}", windowSize); });
-    auto funcClose = MakeCallbackRef<int>([&](int key) { if (key == KEY_ESCAPE) glfwSetWindowShouldClose(s_Window, GLFW_TRUE); });
-    Input::OnKeyPressedSubscribe(func);
-    Input::OnKeyPressedSubscribe(funcClose);
-    Input::OnKeyReleasedSubscribe(func);
-    Input::OnWindowResizedSubscribe(funcWindow);
-    Log::Trace("{0}", glm::rotate(glm::translate(glm::mat4(1.f), glm::vec3(2.f, 3.f, -1.f)), glm::radians(50.f), glm::vec3(0.f, 1.f, 0.f)));
-
-    InitImGui();
-}
-
-void Application::InitImGui()
-{
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
-
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-
-    // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-    ImGuiStyle &style = ImGui::GetStyle();
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        style.WindowRounding = 0.0f;
-        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-    }
-
-    // Setup Platform/Renderer bindings
-    ImGui_ImplGlfw_InitForOpenGL(Application::GetWindow(), true);
-    ImGui_ImplOpenGL3_Init("#version 430");
-}
-
-glm::ivec2 Application::GetFrameBufferSize()
-{
-    int width, height;
-    glfwGetFramebufferSize(s_Window, &width, &height);
-    return { width, height };
+    ImGuiUtils::Init();
 }
 
 void Application::Run()
 {
-    Log::Info("Application starting...");    
+    Log::Trace("Application starting...");    
 
     Start();
 
@@ -139,54 +98,32 @@ void Application::Run()
         glViewport(0, 0, bufferSize.x, bufferSize.y);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // imgui new frame-----
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-        // --------------------
-
+        // perform all the necessary updates
+        ImGuiUtils::FrameBegin();
+        EarlyUpdate();
         Update();
-        UpdateImGui();
+        UpdateUI();
+        LateUpdate();
+        ImGuiUtils::FrameEnd();
 
-        // imgui end frame ---------
-        ImGuiIO &io = ImGui::GetIO();
-        io.DisplaySize = { (float)bufferSize.x, (float)bufferSize.y };
-
-        // Disable and store SRGB state.
-        const bool srgbEnabled = glIsEnabled(GL_FRAMEBUFFER_SRGB);
-        glDisable(GL_FRAMEBUFFER_SRGB);
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        if (srgbEnabled) glEnable(GL_FRAMEBUFFER_SRGB);
-
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
-            GLFWwindow *backup_current_context = glfwGetCurrentContext();
-            ImGui::UpdatePlatformWindows();
-            ImGui::RenderPlatformWindowsDefault();
-            glfwMakeContextCurrent(backup_current_context);
-        }
-        // -------------------------
-
+        // render the frame
         glfwSwapBuffers(s_Window);
         glfwPollEvents();
     }
 
-    // imgui terminate
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
+    Terminate();
+}
+
+void Application::Terminate()
+{
+    ImGuiUtils::Terminate();
 
     // glfw terminate
     glfwDestroyWindow(s_Window);
     glfwTerminate();
+
     exit(EXIT_SUCCESS);
 }
-
-static GLuint vertex_buffer, vertex_shader, fragment_shader, program;
-static GLint mvp_location, vpos_location, vcol_location;
 
 void Application::Start()
 {
@@ -219,6 +156,11 @@ void Application::Start()
         sizeof(vertices[0]), (void *)(sizeof(float) * 2));
 }
 
+void Application::EarlyUpdate()
+{
+
+}
+
 void Application::Update()
 {
     auto bufferSize = GetFrameBufferSize();
@@ -233,18 +175,32 @@ void Application::Update()
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-void Application::UpdateImGui()
+void Application::UpdateUI()
 {
-    static float updates = 0.f;
+    static int updates = 0;
     static float frameTimes = 0.f;
-    updates += 1.f;
-    frameTimes += Time::GetDeltaSeconds() * 1000.f;
+    static float fps = 0.f;
+    updates++;
+    frameTimes += Time::GetDeltaSeconds();
+    fps += Time::GetFPS();
 
     ImGui::Begin("Debug info");
     ImGui::Text("Scene info:");
     ImGui::Text("FPS:            %f", Time::GetFPS());
     ImGui::Text("Frame time:     %f ms", Time::GetDeltaSeconds() * 1000.f);
-    ImGui::Text("Avg FPS:        %f", updates / Time::GetTimeSeconds());
-    ImGui::Text("Avg frame time: %f ms", frameTimes / updates);
+    ImGui::Text("Avg FPS:        %f", fps / updates);
+    ImGui::Text("Avg frame time: %f ms", frameTimes / updates * 1000.f);
     ImGui::End();
+}
+
+void Application::LateUpdate()
+{
+    
+}
+
+glm::ivec2 Application::GetFrameBufferSize()
+{
+    int width, height;
+    glfwGetFramebufferSize(s_Window, &width, &height);
+    return { width, height };
 }
