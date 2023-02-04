@@ -8,7 +8,7 @@ class Time
 
 private:
 	static void Init();
-	static void FrameStart();
+	static void FrameBegin();
 
 public:
 	static float GetTimeSeconds();

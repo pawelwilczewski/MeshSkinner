@@ -32,7 +32,7 @@ void UserInterface::Init()
     }
 
     // Setup Platform/Renderer bindings
-    ImGui_ImplGlfw_InitForOpenGL(Application::GetWindow(), true);
+    ImGui_ImplGlfw_InitForOpenGL(Window::GetNativeWindow(), true);
     ImGui_ImplOpenGL3_Init("#version 430");
 }
 
@@ -46,7 +46,7 @@ void UserInterface::FrameBegin()
 void UserInterface::FrameEnd()
 {
     ImGuiIO &io = ImGui::GetIO();
-    auto bufferSize = Application::GetFramebufferSize();
+    auto bufferSize = Window::GetFramebufferSize();
     io.DisplaySize = { (float)bufferSize.x, (float)bufferSize.y };
 
     // disable and store SRGB state

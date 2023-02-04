@@ -2,7 +2,9 @@
 
 class UserInterface
 {
-public:
+	friend class Application;
+
+private:
 	static void Init();
 	static void FrameBegin();
 	static void FrameEnd();

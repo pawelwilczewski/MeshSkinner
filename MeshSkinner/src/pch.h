@@ -38,6 +38,8 @@
 #include "Application/Log.h"
 #include "Application/Input.h"
 #include "Application/Time.h"
+#include "Application/Window.h"
+#include "Application/UserInterface.h"
 
 #ifdef PLATFORM_WINDOWS
 #include <Windows.h>

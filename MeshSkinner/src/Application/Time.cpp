@@ -12,7 +12,7 @@ void Time::Init()
 	s_CurrentFrameTime = s_StartTime;
 }
 
-void Time::FrameStart()
+void Time::FrameBegin()
 {
 	s_LastFrameTime = s_CurrentFrameTime;
 	s_CurrentFrameTime = std::chrono::high_resolution_clock::now();

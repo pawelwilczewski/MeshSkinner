@@ -13,11 +13,4 @@ private:
 	static void Update();
 	static void UpdateUI();
 	static void LateUpdate();
-
-public:
-	static GLFWwindow *GetWindow() { return s_Window; }
-	static glm::ivec2 GetFramebufferSize();
-
-private:
-	static GLFWwindow *s_Window;
 };

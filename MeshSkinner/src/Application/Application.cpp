@@ -1,9 +1,6 @@
 #include "pch.h"
 #include "Application.h"
-#include "Error.h"
 #include "UserInterface.h"
-
-GLFWwindow *Application::s_Window;
 
 // test code taken from https://www.glfw.org/docs/3.3/quick.html
 
@@ -44,73 +41,33 @@ static GLint mvp_location, vpos_location, vcol_location;
 void Application::Init(uint32_t width, uint32_t height, const char *title)
 {
     Log::Init();
-
-    glfwSetErrorCallback(Error::CallbackGLFW);
-
-    if (!glfwInit())
-        exit(EXIT_FAILURE);
-
-    s_Window = glfwCreateWindow(width, height, title, NULL, NULL);
-    if (!s_Window)
-    {
-        glfwTerminate();
-        exit(EXIT_FAILURE);
-    }
-
-    glfwMakeContextCurrent(s_Window);
-
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        Log::Critical("Glad loader failure!");
-        exit(EXIT_FAILURE);
-    }
-
-    Log::Info("OpenGL Renderer:");
-    Log::Info("    Vendor: {0}", (const char *)glGetString(GL_VENDOR));
-    Log::Info("    Renderer: {0}", (const char *)glGetString(GL_RENDERER));
-    Log::Info("    Version: {0}", (const char *)glGetString(GL_VERSION));
-
-    // enable gl debug messages
-#if defined DEBUG || defined RELEASE
-    glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageCallback(Error::CallbackGL, nullptr);
-#endif
-
-    glfwSwapInterval(1);
-
-    Log::Trace("Application initialized...");
-
     Time::Init();
+    Window::Init(1600, 900, "Mesh Skinner", 1);
     Input::Init();
     UserInterface::Init();
+
+    Log::Trace("Application initialized...");
 }
 
-static GLuint fbo, rbo, texture;
 void Application::Run()
 {
     Log::Trace("Application starting...");    
 
     Start();
 
-    while (!glfwWindowShouldClose(s_Window))
+    while (!glfwWindowShouldClose(Window::GetNativeWindow()))
     {
-        // update the frame buffer
-        auto bufferSize = GetFramebufferSize();
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        glViewport(0, 0, bufferSize.x, bufferSize.y);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        // perform all the necessary updates
+        Time::FrameBegin();
+        Window::FrameBegin();
         UserInterface::FrameBegin();
+
         EarlyUpdate();
         Update();
         UpdateUI();
         LateUpdate();
-        UserInterface::FrameEnd();
 
-        // render the frame
-        glfwSwapBuffers(s_Window);
-        glfwPollEvents();
+        UserInterface::FrameEnd();
+        Window::FrameEnd();
     }
 
     Terminate();
@@ -119,45 +76,13 @@ void Application::Run()
 void Application::Terminate()
 {
     UserInterface::Terminate();
-
-    // glfw terminate
-    glfwDestroyWindow(s_Window);
-    glfwTerminate();
+    Window::Terminate();
 
     exit(EXIT_SUCCESS);
 }
 
 void Application::Start()
 {
-    // create the FBO
-    glGenFramebuffers(1, &fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-    // create the texture
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    auto bufferSize = Application::GetFramebufferSize();
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, bufferSize.x, bufferSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-
-    // create the RBO
-    glGenRenderbuffers(1, &rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, bufferSize.x, bufferSize.y);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-
-    // check if the FBO is complete
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        Log::Error("Framebuffer is not complete!");
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-
-
-
     glGenBuffers(1, &vertex_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -189,15 +114,12 @@ void Application::Start()
 
 void Application::EarlyUpdate()
 {
-    // setup rendering to the FBO
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
 }
 
 void Application::Update()
 {
-    auto bufferSize = GetFramebufferSize();
+    auto bufferSize = Window::GetFramebufferSize();
     auto ratio = bufferSize.x/ (float)bufferSize.y;
     glm::mat4 m, p, mvp;
     m = glm::rotate(glm::mat4(1.f), glm::radians((float)glfwGetTime()) * 10.f, glm::vec3(0.f, 0.f, 1.f));
@@ -258,19 +180,12 @@ void Application::UpdateUI()
     ImGui::End();
 
     ImGui::Begin("Viewport");
-    auto bufferSize = GetFramebufferSize();
-    ImGui::Image((void *)(intptr_t)texture, { (float)bufferSize.x, (float)bufferSize.y });
+    auto bufferSize = Window::GetFramebufferSize();
+    ImGui::Image((void *)(intptr_t)Window::GetFramebufferTexture(), {(float)bufferSize.x, (float)bufferSize.y});
     ImGui::End();
 }
 
 void Application::LateUpdate()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-glm::ivec2 Application::GetFramebufferSize()
-{
-    int width, height;
-    glfwGetFramebufferSize(s_Window, &width, &height);
-    return { width, height };
 }

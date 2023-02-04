@@ -11,28 +11,28 @@ Event<glm::ivec2> Input::s_OnWindowResized;
 
 void Input::Init()
 {
-	glfwSetKeyCallback(Application::GetWindow(), &HandleKeyCallback);
-	glfwSetCursorPosCallback(Application::GetWindow(), &HandleMouseMovedCallback);
-	glfwSetMouseButtonCallback(Application::GetWindow(), &HandleMouseButtonCallback);
-	glfwSetScrollCallback(Application::GetWindow(), &HandleMouseScrolledCallback);
-	glfwSetWindowSizeCallback(Application::GetWindow(), &HandleWindowResizedCallback);
+	glfwSetKeyCallback(Window::GetNativeWindow(), &HandleKeyCallback);
+	glfwSetCursorPosCallback(Window::GetNativeWindow(), &HandleMouseMovedCallback);
+	glfwSetMouseButtonCallback(Window::GetNativeWindow(), &HandleMouseButtonCallback);
+	glfwSetScrollCallback(Window::GetNativeWindow(), &HandleMouseScrolledCallback);
+	glfwSetWindowSizeCallback(Window::GetNativeWindow(), &HandleWindowResizedCallback);
 }
 
 bool Input::IsKeyPressed(int key)
 {
-	auto state = glfwGetKey(Application::GetWindow(), key);
+	auto state = glfwGetKey(Window::GetNativeWindow(), key);
 	return state == GLFW_PRESS || state == GLFW_REPEAT;
 }
 
 bool Input::IsMouseButtonPressed(int button)
 {
-	return glfwGetMouseButton(Application::GetWindow(), button) == GLFW_PRESS;
+	return glfwGetMouseButton(Window::GetNativeWindow(), button) == GLFW_PRESS;
 }
 
 glm::vec2 Input::GetMousePosition()
 {
 	double x, y;
-	glfwGetCursorPos(Application::GetWindow(), &x, &y);
+	glfwGetCursorPos(Window::GetNativeWindow(), &x, &y);
 	return { (float)x, (float)y };
 }
 
