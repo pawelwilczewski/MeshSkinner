@@ -177,6 +177,7 @@ void Application::Update()
 
 void Application::UpdateUI()
 {
+    // debug fps info
     static int updates = 0;
     static float frameTimes = 0.f;
     static float fps = 0.f;
@@ -184,12 +185,42 @@ void Application::UpdateUI()
     frameTimes += Time::GetDeltaSeconds();
     fps += Time::GetFPS();
 
+    // setup dockspace window
+    ImGuiViewport *viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->WorkPos);
+    ImGui::SetNextWindowSize(viewport->WorkSize);
+    ImGui::SetNextWindowViewport(viewport->ID);
+
+    // setup dockspace style
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+    // setup window flags
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+    windowFlags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+    windowFlags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+    // create the dockspace
+    ImGui::Begin("Dockspace", NULL, windowFlags);
+    ImGui::PopStyleVar();
+    ImGui::DockSpace(ImGui::GetID("Main Dockspace"), ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+    ImGui::End();
+    ImGui::PopStyleVar(2);
+
+    // debug panel
     ImGui::Begin("Debug info");
     ImGui::Text("Scene info:");
     ImGui::Text("FPS:            %f", Time::GetFPS());
     ImGui::Text("Frame time:     %f ms", Time::GetDeltaSeconds() * 1000.f);
     ImGui::Text("Avg FPS:        %f", fps / updates);
     ImGui::Text("Avg frame time: %f ms", frameTimes / updates * 1000.f);
+    ImGui::End();
+
+    // debug panel 2
+    ImGui::Begin("Hello info");
+    ImGui::Text("Scene info 2:");
+    ImGui::Text("FPS:            %f", Time::GetFPS());
     ImGui::End();
 }
 
