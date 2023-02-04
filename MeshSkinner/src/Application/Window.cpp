@@ -94,14 +94,6 @@ void Window::FrameEnd()
 
 void Window::Terminate()
 {
-    // glfw terminate
     glfwDestroyWindow(s_Window);
     glfwTerminate();
-}
-
-glm::ivec2 Window::GetFramebufferSize()
-{
-    int width, height;
-    glfwGetFramebufferSize(s_Window, &width, &height);
-    return { width, height };
 }

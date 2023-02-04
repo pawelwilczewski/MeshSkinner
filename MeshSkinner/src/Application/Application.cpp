@@ -55,7 +55,7 @@ void Application::Run()
 
     Start();
 
-    while (!glfwWindowShouldClose(Window::GetNativeWindow()))
+    while (!Window::IsPendingClose())
     {
         Time::FrameBegin();
         Window::FrameBegin();

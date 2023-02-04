@@ -12,8 +12,9 @@ private:
 
 public:
 	static GLFWwindow *GetNativeWindow() { return s_Window; }
-	static glm::ivec2 GetFramebufferSize();
+	static glm::ivec2 GetFramebufferSize() { int width, height; glfwGetFramebufferSize(s_Window, &width, &height); return { width, height }; }
 	static GLuint GetFramebufferTexture() { return s_FramebufferTexture; }
+	static bool IsPendingClose() { return glfwWindowShouldClose(s_Window); }
 
 private:
 	static GLFWwindow *s_Window;
