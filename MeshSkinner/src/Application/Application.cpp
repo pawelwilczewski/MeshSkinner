@@ -37,19 +37,9 @@ static const char *fragment_shader_text =
 "    gl_FragColor = vec4(color, 1.0);\n"
 "}\n";
 
-static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
-{
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
-}
-
-void a(int x)
-{
-    Log::Info("{0}", x);
-}
 void Application::Init(uint32_t width, uint32_t height, const char *title)
 {
-	Log::Init();
+    Log::Init();
 
     glfwSetErrorCallback(Error::CallbackGLFW);
 
@@ -64,7 +54,6 @@ void Application::Init(uint32_t width, uint32_t height, const char *title)
     }
 
     glfwMakeContextCurrent(s_Window);
-    glfwSetKeyCallback(s_Window, KeyCallback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -76,7 +65,7 @@ void Application::Init(uint32_t width, uint32_t height, const char *title)
     Log::Info("    Vendor: {0}", (const char *)glGetString(GL_VENDOR));
     Log::Info("    Renderer: {0}", (const char *)glGetString(GL_RENDERER));
     Log::Info("    Version: {0}", (const char *)glGetString(GL_VERSION));
-    
+
     // enable gl debug messages
 #if defined DEBUG || defined RELEASE
     glEnable(GL_DEBUG_OUTPUT);
@@ -90,7 +79,9 @@ void Application::Init(uint32_t width, uint32_t height, const char *title)
     Input::Init();
     auto func = MakeCallbackRef<int>([&](int key) { if (key == KEY_F) Log::Info("{0}", key); });
     auto funcWindow = MakeCallbackRef<glm::ivec2>([&](glm::ivec2 windowSize) { Log::Info("{0}, {1}", windowSize.x, windowSize.y); });
+    auto funcClose = MakeCallbackRef<int>([&](int key) { if (key == KEY_ESCAPE) glfwSetWindowShouldClose(s_Window, GLFW_TRUE); });
     Input::OnKeyPressedSubscribe(func);
+    Input::OnKeyPressedSubscribe(funcClose);
     Input::OnKeyReleasedSubscribe(func);
     Input::OnWindowResizedSubscribe(funcWindow);
 }
