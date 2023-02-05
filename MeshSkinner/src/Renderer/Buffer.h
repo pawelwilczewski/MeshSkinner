@@ -4,16 +4,14 @@
 
 class Buffer
 {
-public:
-	Buffer() = default;
-	virtual ~Buffer() = default;
+protected:
+	Buffer(GLenum type, GLenum usage = GL_STATIC_DRAW);
+	virtual ~Buffer();
 
 public:
-	virtual void Bind() const = 0;
-	virtual void Unbind() const = 0;
-
-	virtual void SetData(const void *data, GLuint size, GLuint offsetBytes = 0) = 0;
-	virtual void Resize(GLuint newSize) = 0;
+	void Bind() const;
+	void Unbind() const;
+	void SetData(const void *data, GLuint size, GLuint offsetBytes = 0);
 
 public:
 	GLuint GetId() const { return id; }
@@ -22,4 +20,6 @@ public:
 protected:
 	GLuint id;
 	GLuint size;
+	GLenum type;
+	GLenum usage;
 };
