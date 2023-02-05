@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Application.h"
 
-Unique<Scene> Application::s_Scene;
+Unique<Scene> Application::scene;
 
 void Application::Init(uint32_t width, uint32_t height, const char *title)
 {
@@ -48,25 +48,25 @@ void Application::Terminate()
 
 void Application::Start()
 {
-    s_Scene->Start();
+    scene->Start();
 }
 
 void Application::EarlyUpdate()
 {
-    s_Scene->EarlyUpdate();
+    scene->EarlyUpdate();
 }
 
 void Application::Update()
 {
-    s_Scene->Update();
+    scene->Update();
 }
 
 void Application::UpdateUI()
 {
-    s_Scene->UpdateUI();
+    scene->UpdateUI();
 }
 
 void Application::LateUpdate()
 {
-    s_Scene->LateUpdate();
+    scene->LateUpdate();
 }

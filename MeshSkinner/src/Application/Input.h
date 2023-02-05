@@ -16,21 +16,21 @@ public:
 	static bool IsMouseButtonPressed(int button);
 	static glm::vec2 GetMousePosition();
 
-	static void OnKeyPressedSubscribe(CallbackRef<int> callback) { s_OnKeyPressed.Subscribe(callback); }
-	static void OnKeyReleasedSubscribe(CallbackRef<int> callback) { s_OnKeyReleased.Subscribe(callback); }
-	static void OnMouseButtonPressedSubscribe(CallbackRef<int> callback) { s_OnMouseButtonPressed.Subscribe(callback); }
-	static void OnMouseButtonReleasedSubscribe(CallbackRef<int> callback) { s_OnMouseButtonReleased.Subscribe(callback); }
-	static void OnMouseMovedSubscribe(CallbackRef<glm::vec2> callback) { s_OnMouseMoved.Subscribe(callback); }
-	static void OnMouseScrolledSubscribe(CallbackRef<glm::vec2> callback) { s_OnMouseScrolled.Subscribe(callback); }
-	static void OnWindowResizedSubscribe(CallbackRef<glm::ivec2> callback) { s_OnWindowResized.Subscribe(callback); }
+	static void OnKeyPressedSubscribe(CallbackRef<int> callback) { onKeyPressed.Subscribe(callback); }
+	static void OnKeyReleasedSubscribe(CallbackRef<int> callback) { onKeyReleased.Subscribe(callback); }
+	static void OnMouseButtonPressedSubscribe(CallbackRef<int> callback) { onMouseButtonPressed.Subscribe(callback); }
+	static void OnMouseButtonReleasedSubscribe(CallbackRef<int> callback) { onMouseButtonReleased.Subscribe(callback); }
+	static void OnMouseMovedSubscribe(CallbackRef<glm::vec2> callback) { onMouseMoved.Subscribe(callback); }
+	static void OnMouseScrolledSubscribe(CallbackRef<glm::vec2> callback) { onMouseScrolled.Subscribe(callback); }
+	static void OnWindowResizedSubscribe(CallbackRef<glm::ivec2> callback) { onWindowResized.Subscribe(callback); }
 
-	static void OnKeyPressedUnsubscribe(CallbackRef<int> callback) { s_OnKeyPressed.Unsubscribe(callback); }
-	static void OnKeyReleasedUnsubscribe(CallbackRef<int> callback) { s_OnKeyReleased.Unsubscribe(callback); }
-	static void OnMouseButtonPressedUnsubscribe(CallbackRef<int> callback) { s_OnMouseButtonPressed.Unsubscribe(callback); }
-	static void OnMouseButtonReleasedUnsubscribe(CallbackRef<int> callback) { s_OnMouseButtonReleased.Unsubscribe(callback); }
-	static void OnMouseMovedUnsubscribe(CallbackRef<glm::vec2> callback) { s_OnMouseMoved.Unsubscribe(callback); }
-	static void OnMouseScrolledUnsubscribe(CallbackRef<glm::vec2> callback) { s_OnMouseScrolled.Unsubscribe(callback); }
-	static void OnWindowResizedUnsubscribe(CallbackRef<glm::ivec2> callback) { s_OnWindowResized.Unsubscribe(callback); }
+	static void OnKeyPressedUnsubscribe(CallbackRef<int> callback) { onKeyPressed.Unsubscribe(callback); }
+	static void OnKeyReleasedUnsubscribe(CallbackRef<int> callback) { onKeyReleased.Unsubscribe(callback); }
+	static void OnMouseButtonPressedUnsubscribe(CallbackRef<int> callback) { onMouseButtonPressed.Unsubscribe(callback); }
+	static void OnMouseButtonReleasedUnsubscribe(CallbackRef<int> callback) { onMouseButtonReleased.Unsubscribe(callback); }
+	static void OnMouseMovedUnsubscribe(CallbackRef<glm::vec2> callback) { onMouseMoved.Unsubscribe(callback); }
+	static void OnMouseScrolledUnsubscribe(CallbackRef<glm::vec2> callback) { onMouseScrolled.Unsubscribe(callback); }
+	static void OnWindowResizedUnsubscribe(CallbackRef<glm::ivec2> callback) { onWindowResized.Unsubscribe(callback); }
 
 private:
 	static void HandleKeyCallback(GLFWwindow *window, int key, int, int action, int);
@@ -40,11 +40,11 @@ private:
 	static void HandleWindowResizedCallback(GLFWwindow *window, int width, int height);
 
 private:
-	static Event<int> s_OnKeyPressed;
-	static Event<int> s_OnKeyReleased;
-	static Event<int> s_OnMouseButtonPressed;
-	static Event<int> s_OnMouseButtonReleased;
-	static Event<glm::vec2> s_OnMouseMoved;
-	static Event<glm::vec2> s_OnMouseScrolled;
-	static Event<glm::ivec2> s_OnWindowResized;
+	static Event<int> onKeyPressed;
+	static Event<int> onKeyReleased;
+	static Event<int> onMouseButtonPressed;
+	static Event<int> onMouseButtonReleased;
+	static Event<glm::vec2> onMouseMoved;
+	static Event<glm::vec2> onMouseScrolled;
+	static Event<glm::ivec2> onWindowResized;
 };

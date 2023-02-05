@@ -28,20 +28,20 @@ public:
 public:
 	void Subscribe(Ref<Callback<T>> callback)
 	{
-		m_Subscribers.insert(callback);
+		subscribers.insert(callback);
 	}
 
 	void Unsubscribe(Ref<Callback<T>> callback)
 	{
-		m_Subscribers.erase(callback);
+		subscribers.erase(callback);
 	}
 
 	void Invoke(const T &argument) const
 	{
-		for (const auto &callback : m_Subscribers)
+		for (const auto &callback : subscribers)
 			(*callback.get())(argument);
 	}
 
 private:
-	std::unordered_set<Ref<Callback<T>>> m_Subscribers;
+	std::unordered_set<Ref<Callback<T>>> subscribers;
 };

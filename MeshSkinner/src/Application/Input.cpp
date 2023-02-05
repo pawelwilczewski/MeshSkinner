@@ -1,13 +1,13 @@
 #include "pch.h"
 #include "Input.h"
 
-Event<int> Input::s_OnKeyPressed;
-Event<int> Input::s_OnKeyReleased;
-Event<int> Input::s_OnMouseButtonPressed;
-Event<int> Input::s_OnMouseButtonReleased;
-Event<glm::vec2> Input::s_OnMouseMoved;
-Event<glm::vec2> Input::s_OnMouseScrolled;
-Event<glm::ivec2> Input::s_OnWindowResized;
+Event<int> Input::onKeyPressed;
+Event<int> Input::onKeyReleased;
+Event<int> Input::onMouseButtonPressed;
+Event<int> Input::onMouseButtonReleased;
+Event<glm::vec2> Input::onMouseMoved;
+Event<glm::vec2> Input::onMouseScrolled;
+Event<glm::ivec2> Input::onWindowResized;
 
 void Input::Init()
 {
@@ -38,27 +38,27 @@ glm::vec2 Input::GetMousePosition()
 
 void Input::HandleKeyCallback(GLFWwindow *window, int key, int, int action, int)
 {
-	if (action == GLFW_PRESS) s_OnKeyPressed.Invoke(key);
-	else if (action == GLFW_RELEASE) s_OnKeyReleased.Invoke(key);
+	if (action == GLFW_PRESS) onKeyPressed.Invoke(key);
+	else if (action == GLFW_RELEASE) onKeyReleased.Invoke(key);
 }
 
 void Input::HandleMouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
-	if (action == GLFW_PRESS) s_OnMouseButtonPressed.Invoke(button);
-	else if (action == GLFW_RELEASE) s_OnMouseButtonReleased.Invoke(button);
+	if (action == GLFW_PRESS) onMouseButtonPressed.Invoke(button);
+	else if (action == GLFW_RELEASE) onMouseButtonReleased.Invoke(button);
 }
 
 void Input::HandleMouseMovedCallback(GLFWwindow *window, double x, double y)
 {
-	s_OnMouseMoved.Invoke({ (float)x, (float)y });
+	onMouseMoved.Invoke({ (float)x, (float)y });
 }
 
 void Input::HandleMouseScrolledCallback(GLFWwindow *window, double offsetX, double offsetY)
 {
-	s_OnMouseScrolled.Invoke({ (float)offsetX, (float)offsetY });
+	onMouseScrolled.Invoke({ (float)offsetX, (float)offsetY });
 }
 
 void Input::HandleWindowResizedCallback(GLFWwindow *window, int width, int height)
 {
-	s_OnWindowResized.Invoke({ width, height });
+	onWindowResized.Invoke({ width, height });
 }

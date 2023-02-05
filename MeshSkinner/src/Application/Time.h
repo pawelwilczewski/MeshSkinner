@@ -16,7 +16,7 @@ public:
 	static float GetDeltaSeconds();
 
 private:
-	static std::chrono::high_resolution_clock::time_point s_StartTime;
-	static std::chrono::high_resolution_clock::time_point s_LastFrameTime;
-	static std::chrono::high_resolution_clock::time_point s_CurrentFrameTime;
+	static std::chrono::high_resolution_clock::time_point startTime;
+	static std::chrono::high_resolution_clock::time_point lastFrameTime;
+	static std::chrono::high_resolution_clock::time_point currentFrameTime;
 };

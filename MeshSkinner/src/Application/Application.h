@@ -17,5 +17,5 @@ private:
 	static void LateUpdate();
 
 public:
-	static Unique<class Scene> s_Scene;
+	static Unique<class Scene> scene;
 };

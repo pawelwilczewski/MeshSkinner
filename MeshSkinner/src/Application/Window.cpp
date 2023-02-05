@@ -2,8 +2,8 @@
 #include "Window.h"
 #include "Error.h"
 
-GLFWwindow *Window::s_Window;
-GLuint Window::s_FramebufferTexture;
+GLFWwindow *Window::window;
+GLuint Window::framebufferTexture;
 
 static GLuint fbo, rbo;
 
@@ -14,14 +14,14 @@ void Window::Init(int width, int height, const char *title, int vsync)
     if (!glfwInit())
         exit(EXIT_FAILURE);
 
-    s_Window = glfwCreateWindow(width, height, title, NULL, NULL);
-    if (!s_Window)
+    window = glfwCreateWindow(width, height, title, NULL, NULL);
+    if (!window)
     {
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
 
-    glfwMakeContextCurrent(s_Window);
+    glfwMakeContextCurrent(window);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -50,13 +50,13 @@ void Window::Init(int width, int height, const char *title, int vsync)
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     // create the render target texture
-    glGenTextures(1, &s_FramebufferTexture);
-    glBindTexture(GL_TEXTURE_2D, s_FramebufferTexture);
+    glGenTextures(1, &framebufferTexture);
+    glBindTexture(GL_TEXTURE_2D, framebufferTexture);
     auto bufferSize = Window::GetFramebufferSize();
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, bufferSize.x, bufferSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, s_FramebufferTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
 
     // create the RBO
     glGenRenderbuffers(1, &rbo);
@@ -95,6 +95,6 @@ void Window::FrameEnd()
 
 void Window::Terminate()
 {
-    glfwDestroyWindow(s_Window);
+    glfwDestroyWindow(window);
     glfwTerminate();
 }
