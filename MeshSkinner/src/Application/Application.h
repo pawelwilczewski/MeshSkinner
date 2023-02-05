@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core.h"
+
 class Application
 {
 public:
@@ -13,4 +15,7 @@ private:
 	static void Update();
 	static void UpdateUI();
 	static void LateUpdate();
+
+public:
+	static Unique<class Scene> s_Scene;
 };

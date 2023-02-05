@@ -33,13 +33,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Application/Core.h"
 #include "Application/Application.h"
+#include "Application/Core.h"
 #include "Application/Log.h"
 #include "Application/Input.h"
 #include "Application/Time.h"
 #include "Application/Window.h"
 #include "Application/UserInterface.h"
+#include "Application/Scene.h"
 
 #ifdef PLATFORM_WINDOWS
 #include <Windows.h>
