@@ -11,3 +11,4 @@ Clone this repository, run `GenerateProjectsWindows.bat` and build the project u
 ## Linux
 
 Clone this repository, run `GenerateProjectsLinux.sh` and build the project using `make`.
+Quickstart commands on Linux: `chmod +x GenerateProjectsLinux.sh && ./GenerateProjectsLinux.sh && make && ./bin/Debug-linux-x86_64/MeshSkinner/MeshSkinner`
