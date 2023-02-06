@@ -98,3 +98,13 @@ void Window::Terminate()
     glfwDestroyWindow(window);
     glfwTerminate();
 }
+
+GLFWwindow *Window::GetNativeWindow() { return window; }
+glm::ivec2 Window::GetFramebufferSize()
+{
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    return { width, height };
+}
+GLuint Window::GetFramebufferTexture() { return framebufferTexture; }
+bool Window::IsPendingClose() { return glfwWindowShouldClose(window); }

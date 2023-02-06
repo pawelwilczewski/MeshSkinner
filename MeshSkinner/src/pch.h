@@ -29,7 +29,7 @@
 #include <glm/vec4.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec2.hpp>
-#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 

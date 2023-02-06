@@ -16,9 +16,11 @@ public:
 public:
 	GLuint GetId() const { return id; }
 	GLuint GetSize() const { return size; }
+	GLuint GetCapacity() const { return capacity; }
 
 protected:
 	GLuint id;
+	GLuint capacity;
 	GLuint size;
 	GLenum type;
 	GLenum usage;

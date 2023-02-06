@@ -11,10 +11,10 @@ private:
 	static void Terminate();
 
 public:
-	static GLFWwindow *GetNativeWindow() { return window; }
-	static glm::ivec2 GetFramebufferSize() { int width, height; glfwGetFramebufferSize(window, &width, &height); return { width, height }; }
-	static GLuint GetFramebufferTexture() { return framebufferTexture; }
-	static bool IsPendingClose() { return glfwWindowShouldClose(window); }
+	static GLFWwindow *GetNativeWindow();
+	static glm::ivec2 GetFramebufferSize();
+	static GLuint GetFramebufferTexture();
+	static bool IsPendingClose();
 
 private:
 	static GLFWwindow *window;

@@ -28,7 +28,7 @@ void Buffer::SetData(const void *data, GLuint size, GLuint offsetBytes)
 	// automatically resize to twice the size if exceeded limit - like in the vector class etc.
 	// don't do that if size is 0 - only just initialized
 	auto fullSize = offsetBytes + size;
-	if (this->size > 0 && fullSize > this->size)
+	if (this->size > 0 && fullSize > capacity)
 	{
 		// cache the buffer's data so we don't lose the data currently stored
 		GLuint copiedBuffer;
@@ -36,12 +36,12 @@ void Buffer::SetData(const void *data, GLuint size, GLuint offsetBytes)
 		glCopyBufferSubData(id, copiedBuffer, 0, 0, size);
 
 		// perform the resizing
-		auto newSize = fullSize * 2;
-		glBufferData(type, newSize, nullptr, usage);
+		capacity = fullSize * 2;
+		glBufferData(type, capacity, nullptr, usage);
 
 		// restore the initial data
 		glCopyBufferSubData(copiedBuffer, id, 0, 0, this->size);
-		this->size = newSize;
+		this->size = fullSize;
 
 		// delete the temp buffer
 		glDeleteBuffers(1, &copiedBuffer);
