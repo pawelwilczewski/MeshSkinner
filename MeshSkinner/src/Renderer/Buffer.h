@@ -47,6 +47,7 @@ public:
 			// perform the resizing
 			this->capacity = fullLength * 2;
 			glBindBuffer(type, id);
+			// TODO: should first delete the buffer before calling glBufferData?
 			glBufferData(type, this->capacity * sizeof T, nullptr, usage);
 
 			// restore the initial data

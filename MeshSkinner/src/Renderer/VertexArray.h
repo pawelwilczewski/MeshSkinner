@@ -53,21 +53,21 @@ public:
 
 	void SetVertexBuffer(Ref<VertexBuffer<V>> vertexBuffer)
 	{
-		glBindVertexArray(vao);
+		glBindVertexArray(id);
 		vertexBuffer->Bind();
 
-		assert(vertexBuffer->GetLayout().GetElements().size() > 0);
+		assert(vertexBuffer->layout.GetElements().size() > 0);
 
 		uint32_t index = 0;
-		for (const auto &element : vertexBuffer->GetBufferLayout())
+		for (const auto &element : vertexBuffer->layout)
 		{
 			glEnableVertexAttribArray(index);
 			glVertexAttribPointer(
 				index,
 				element.GetComponentCount(),
-				ShaderDataTypeToBaseType(element.type),
+				ShaderTypeToGL(element.type),
 				element.normalized ? GL_TRUE : GL_FALSE,
-				vertexBuffer->GetBufferLayout().GetStride(),
+				vertexBuffer->layout.GetStride(),
 				(const void *)element.offset
 			);
 			index++;
@@ -78,7 +78,7 @@ public:
 
 	void SetIndexBuffer(Ref<IndexBuffer<I>> indexBuffer)
 	{
-		glVertexArrayElementBuffer(id, indexBuffer->GetID())
+		glVertexArrayElementBuffer(id, indexBuffer->GetID());
 		this->indexBuffer = indexBuffer;
 	}
 

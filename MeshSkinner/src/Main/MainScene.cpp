@@ -78,13 +78,26 @@ void MainScene::Start()
     glEnableVertexAttribArray(vcol_location);
     glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (void *)(sizeof(float) * 2));
 
-    std::vector<Transform> transforms;
-    transforms.push_back(Transform());
-    transforms.push_back(Transform(glm::vec3(2.f)));
+    std::vector<StaticVertex> vertices;
+    vertices.push_back(StaticVertex(glm::vec3(0.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
+    vertices.push_back(StaticVertex(glm::vec3(1.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
+    vertices.push_back(StaticVertex(glm::vec3(1.f, 0.f, 2.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
 
-    auto buffer = Buffer<Transform>(GL_ARRAY_BUFFER);
-    buffer.SetData(transforms.data(), transforms.size());
-    buffer.SetData(transforms.data(), transforms.size(), 3);
+    auto vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
+    vbo->SetData(vertices.data(), vertices.size());
+    vbo->SetData(vertices.data(), vertices.size(), 3);
+
+    std::vector<uint32_t> indices;
+    indices.push_back(0);
+    indices.push_back(1);
+    indices.push_back(2);
+
+    auto ibo = MakeRef<IndexBuffer<uint32_t>>();
+    ibo->SetData(indices.data(), indices.size());
+
+    auto vao = MakeRef<VertexArray<StaticVertex, uint32_t>>();
+    vao->SetVertexBuffer(vbo);
+    vao->SetIndexBuffer(ibo);
 }
 
 void MainScene::EarlyUpdate()
