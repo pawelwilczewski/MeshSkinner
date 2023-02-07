@@ -18,6 +18,7 @@ static Ref<VertexArray<StaticVertex, uint32_t>> vao;
 static Ref<VertexBuffer<StaticVertex>> vbo;
 static Ref<IndexBuffer<uint32_t>> ibo;
 static Ref<Shader> shader;
+static std::vector<uint32_t> indices;
 
 void MainScene::Start()
 {
@@ -30,7 +31,6 @@ void MainScene::Start()
     vbo->SetData(vertices.data(), vertices.size());
     vbo->SetData(vertices.data(), vertices.size(), 3);
 
-    std::vector<uint32_t> indices;
     indices.push_back(0);
     indices.push_back(1);
     indices.push_back(2);
@@ -64,7 +64,8 @@ void MainScene::Update()
     vao->Bind();
     shader->Bind();
     shader->UploadUniformMat4("u_ViewProjection", mvp);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    //glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, indices.data());
 }
 
 void MainScene::UpdateUI()
