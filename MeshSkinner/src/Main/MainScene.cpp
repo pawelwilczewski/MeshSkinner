@@ -18,22 +18,25 @@ static Ref<VertexArray<StaticVertex, uint32_t>> vao;
 static Ref<VertexBuffer<StaticVertex>> vbo;
 static Ref<IndexBuffer<uint32_t>> ibo;
 static Ref<Shader> shader;
+static std::vector<StaticVertex> vertices;
 static std::vector<uint32_t> indices;
 
 void MainScene::Start()
 {
-    std::vector<StaticVertex> vertices;
-    vertices.push_back(StaticVertex(glm::vec3(-0.6f, -0.4f, 1.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
-    vertices.push_back(StaticVertex(glm::vec3(0.6f, -0.4f, 1.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
-    vertices.push_back(StaticVertex(glm::vec3(0.f, 0.6f, 1.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
-
-    vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
-    vbo->SetData(vertices.data(), vertices.size());
-    vbo->SetData(vertices.data(), vertices.size(), 3);
+    vertices.push_back(StaticVertex(glm::vec3(-0.6f, -0.4f, 0.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
+    vertices.push_back(StaticVertex(glm::vec3(0.6f, -0.4f, 0.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
+    vertices.push_back(StaticVertex(glm::vec3(0.f, 0.6f, 0.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
 
     indices.push_back(0);
     indices.push_back(1);
     indices.push_back(2);
+    indices.push_back(3);
+    indices.push_back(4);
+    indices.push_back(5);
+
+    vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
+    vbo->SetData(vertices.data(), vertices.size());
+    vbo->SetData(vertices.data(), vertices.size(), 3);
 
     ibo = MakeRef<IndexBuffer<uint32_t>>();
     ibo->SetData(indices.data(), indices.size());
@@ -41,7 +44,6 @@ void MainScene::Start()
     vao = MakeRef<VertexArray<StaticVertex, uint32_t>>();
     vao->SetVertexBuffer(vbo);
     vao->SetIndexBuffer(ibo);
-
 
     shader = MakeRef<Shader>("UnlitDebug", "assets/shaders/UnlitDebug.vert", "assets/shaders/UnlitDebug.frag");
 }
@@ -56,7 +58,7 @@ void MainScene::Update()
     auto bufferSize = UserInterface::GetViewportSize();
     auto ratio = bufferSize.x / (float)bufferSize.y;
     glm::mat4 m, p, mvp;
-    m = glm::rotate(glm::mat4(1.f), glm::radians((float)glfwGetTime()) * 10.f, glm::vec3(0.f, 0.f, 1.f));
+    m = glm::mat4(1.f);// glm::rotate(glm::mat4(1.f), glm::radians((float)glfwGetTime()) * 10.f, glm::vec3(0.f, 0.f, 1.f));
     p = glm::ortho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
     mvp = m * p;
 
@@ -65,9 +67,9 @@ void MainScene::Update()
 
     vbo->Bind();
     ibo->Bind();
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    //vao->Bind();
-    //glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, indices.data());
+    //glDrawArrays(GL_TRIANGLES, 0, 3);
+    vao->Bind();
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, indices.data());
 }
 
 void MainScene::UpdateUI()
