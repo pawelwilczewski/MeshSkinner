@@ -54,7 +54,7 @@ public:
 	void SetVertexBuffer(Ref<VertexBuffer<V>> vertexBuffer)
 	{
 		glBindVertexArray(id);
-		vertexBuffer->Bind();
+		//vertexBuffer->Bind();
 
 		assert(vertexBuffer->layout.GetElements().size() > 0);
 
@@ -78,6 +78,7 @@ public:
 
 	void SetIndexBuffer(Ref<IndexBuffer<I>> indexBuffer)
 	{
+		//indexBuffer->Bind();
 		glVertexArrayElementBuffer(id, indexBuffer->GetID());
 		this->indexBuffer = indexBuffer;
 	}

@@ -10,6 +10,12 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
+glm::ivec2 UserInterface::GetViewportSize()
+{
+    // TODO: fix/implement this (we'll need dynamic target buffer)
+    return glm::ivec2(500, 500);
+}
+
 void UserInterface::Init()
 {
     // Setup Dear ImGui context

@@ -4,6 +4,9 @@ class UserInterface
 {
 	friend class Application;
 
+public:
+	static glm::ivec2 GetViewportSize();
+
 private:
 	static void Init();
 	static void FrameBegin();

@@ -44,7 +44,6 @@ void MainScene::Start()
 
 
     shader = MakeRef<Shader>("UnlitDebug", "assets/shaders/UnlitDebug.vert", "assets/shaders/UnlitDebug.frag");
-    shader->Bind();
 }
 
 void MainScene::EarlyUpdate()
@@ -54,18 +53,21 @@ void MainScene::EarlyUpdate()
 
 void MainScene::Update()
 {
-    auto bufferSize = Window::GetFramebufferSize();
+    auto bufferSize = UserInterface::GetViewportSize();
     auto ratio = bufferSize.x / (float)bufferSize.y;
     glm::mat4 m, p, mvp;
     m = glm::rotate(glm::mat4(1.f), glm::radians((float)glfwGetTime()) * 10.f, glm::vec3(0.f, 0.f, 1.f));
     p = glm::ortho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
     mvp = m * p;
 
-    vao->Bind();
     shader->Bind();
     shader->UploadUniformMat4("u_ViewProjection", mvp);
-    //glDrawArrays(GL_TRIANGLES, 0, 3);
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, indices.data());
+
+    vbo->Bind();
+    ibo->Bind();
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    //vao->Bind();
+    //glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, indices.data());
 }
 
 void MainScene::UpdateUI()
@@ -117,7 +119,7 @@ void MainScene::UpdateUI()
     ImGui::End();
 
     ImGui::Begin("Viewport");
-    auto bufferSize = Window::GetFramebufferSize();
+    auto bufferSize = UserInterface::GetViewportSize();
     ImGui::Image((void *)(intptr_t)Window::GetFramebufferTexture(), { (float)bufferSize.x, (float)bufferSize.y });
     ImGui::End();
 }

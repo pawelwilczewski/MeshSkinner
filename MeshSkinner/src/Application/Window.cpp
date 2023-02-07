@@ -52,7 +52,7 @@ void Window::Init(int width, int height, const char *title, int vsync)
     // create the render target texture
     glGenTextures(1, &framebufferTexture);
     glBindTexture(GL_TEXTURE_2D, framebufferTexture);
-    auto bufferSize = Window::GetFramebufferSize();
+    auto bufferSize = UserInterface::GetViewportSize();// Window::GetFramebufferSize();
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, bufferSize.x, bufferSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -74,7 +74,7 @@ void Window::Init(int width, int height, const char *title, int vsync)
 void Window::FrameBegin()
 {
     // clear the frame buffer
-    auto bufferSize = Window::GetFramebufferSize();
+    auto bufferSize = UserInterface::GetViewportSize();//Window::GetFramebufferSize();
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glViewport(0, 0, bufferSize.x, bufferSize.y);
     glClear(GL_COLOR_BUFFER_BIT);
