@@ -5,7 +5,7 @@
 class Transform
 {
 public:
-	Transform();
+	Transform(const glm::vec3 &position = glm::vec3(0.f), const glm::vec3 &rotation = glm::vec3(0.f), const glm::vec3 &scale = glm::vec3(1.f));
 	virtual ~Transform() = default;
 
 public:

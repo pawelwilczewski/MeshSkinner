@@ -24,7 +24,7 @@ static uint32_t GetShaderDataTypeSize(ShaderDataType type)
 	}
 }
 
-BufferElement::BufferElement(const std::string &name, ShaderDataType type) : name(name), type(type), size(GetShaderDataTypeSize(type)), offset(0)
+BufferElement::BufferElement(const std::string &name, ShaderDataType type, bool normalized) : name(name), type(type), normalized(normalized), size(GetShaderDataTypeSize(type)), offset(0)
 {
 
 }

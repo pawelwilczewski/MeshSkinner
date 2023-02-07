@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "MainScene.h"
 
+#include "Renderer/Renderer.h"
+#include "Renderer/Buffer.h"
+
 // test code taken from https://www.glfw.org/docs/3.3/quick.html
 
 static const struct
@@ -74,6 +77,14 @@ void MainScene::Start()
     glVertexAttribPointer(vpos_location, 2, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (void *)0);
     glEnableVertexAttribArray(vcol_location);
     glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (void *)(sizeof(float) * 2));
+
+    std::vector<Transform> transforms;
+    transforms.push_back(Transform());
+    transforms.push_back(Transform(glm::vec3(2.f)));
+
+    auto buffer = Buffer<Transform>(GL_ARRAY_BUFFER);
+    buffer.SetData(transforms.data(), transforms.size());
+    buffer.SetData(transforms.data(), transforms.size(), 3);
 }
 
 void MainScene::EarlyUpdate()

@@ -8,12 +8,12 @@ void Renderer::Init()
 
 }
 
-void Renderer::Submit(const Mesh &mesh)
+void Renderer::Submit(const Transform &transform, const Mesh &mesh)
 {
 	
 }
 
-void Renderer::Submit(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, Ref<Material> material)
+void Renderer::Submit(const Transform &transform, const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, Ref<Material> material)
 {
 
 }

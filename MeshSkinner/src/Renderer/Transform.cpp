@@ -1,10 +1,7 @@
 #include "pch.h"
 #include "Transform.h"
 
-Transform::Transform() :
-	position(glm::vec3(0.f)),
-	rotation(glm::vec3(0.f)),
-	scale(glm::vec3(1.f))
+Transform::Transform(const glm::vec3 &position, const glm::vec3 &rotation, const glm::vec3 &scale) : position(position), rotation(rotation), scale(scale)
 {
 	RecalculateMatrix();
 }

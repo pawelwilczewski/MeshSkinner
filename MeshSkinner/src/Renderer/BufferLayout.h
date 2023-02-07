@@ -10,7 +10,7 @@ enum class ShaderDataType
 class BufferElement
 {
 public:
-	BufferElement(const std::string &name, ShaderDataType type);
+	BufferElement(const std::string &name, ShaderDataType type, bool normalized);
 	virtual ~BufferElement() = default;
 
 public:
@@ -19,6 +19,7 @@ public:
 public:
 	std::string name;
 	ShaderDataType type;
+	bool normalized;
 	uint32_t size;
 	uint32_t offset;
 };

@@ -5,7 +5,7 @@
 class Application
 {
 public:
-	static void Init(uint32_t width, uint32_t height, const char *title);
+	static void Init(uint32_t width, uint32_t height, const char *title, int vsync);
 	static void Run();
 	static void Terminate();
 

@@ -3,11 +3,11 @@
 
 Unique<Scene> Application::scene;
 
-void Application::Init(uint32_t width, uint32_t height, const char *title)
+void Application::Init(uint32_t width, uint32_t height, const char *title, int vsync)
 {
     Log::Init();
     Time::Init();
-    Window::Init(1600, 900, "Mesh Skinner", 1);
+    Window::Init(width, height, title, vsync);
     Input::Init();
     UserInterface::Init();
 
