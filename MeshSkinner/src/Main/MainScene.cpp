@@ -49,7 +49,9 @@ MainScene::~MainScene()
 {
 
 }
-
+static Ref<VertexArray<StaticVertex, uint32_t>> vao;
+static Ref<VertexBuffer<StaticVertex>> vbo;
+static Ref<IndexBuffer<uint32_t>> ibo;
 void MainScene::Start()
 {
     glGenBuffers(1, &vertex_buffer);
@@ -79,11 +81,11 @@ void MainScene::Start()
     glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (void *)(sizeof(float) * 2));
 
     std::vector<StaticVertex> vertices;
-    vertices.push_back(StaticVertex(glm::vec3(0.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
-    vertices.push_back(StaticVertex(glm::vec3(1.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
-    vertices.push_back(StaticVertex(glm::vec3(1.f, 0.f, 2.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
+    vertices.push_back(StaticVertex(glm::vec3(-0.6f, -0.4f, 1.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
+    vertices.push_back(StaticVertex(glm::vec3(0.6f, -0.4f, 0.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
+    vertices.push_back(StaticVertex(glm::vec3(0.f, 0.6f, 0.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
 
-    auto vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
+    vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
     vbo->SetData(vertices.data(), vertices.size());
     vbo->SetData(vertices.data(), vertices.size(), 3);
 
@@ -92,10 +94,10 @@ void MainScene::Start()
     indices.push_back(1);
     indices.push_back(2);
 
-    auto ibo = MakeRef<IndexBuffer<uint32_t>>();
+    ibo = MakeRef<IndexBuffer<uint32_t>>();
     ibo->SetData(indices.data(), indices.size());
 
-    auto vao = MakeRef<VertexArray<StaticVertex, uint32_t>>();
+    vao = MakeRef<VertexArray<StaticVertex, uint32_t>>();
     vao->SetVertexBuffer(vbo);
     vao->SetIndexBuffer(ibo);
 }
@@ -116,6 +118,11 @@ void MainScene::Update()
 
     glUseProgram(program);
     glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat *)glm::value_ptr(mvp));
+    //glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    vao->Bind();
+    vbo->Bind();
+    ibo->Bind();
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
