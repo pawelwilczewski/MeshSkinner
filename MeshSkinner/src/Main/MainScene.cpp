@@ -3,17 +3,9 @@
 
 #include "Renderer/Renderer.h"
 #include "Renderer/Buffer.h"
+#include "Renderer/Camera.h"
 
-MainScene::MainScene() : Scene()
-{
-
-}
-
-MainScene::~MainScene()
-{
-
-}
-
+static Ref<Camera> camera;
 static Ref<VertexArray<StaticVertex, uint32_t>> vao;
 static Ref<VertexBuffer<StaticVertex>> vbo;
 static Ref<IndexBuffer<uint32_t>> ibo;
@@ -21,8 +13,19 @@ static Ref<Shader> shader;
 static std::vector<StaticVertex> vertices;
 static std::vector<uint32_t> indices;
 
+MainScene::MainScene() : Scene()
+{
+    camera = MakeRef<Camera>();
+}
+
+MainScene::~MainScene()
+{
+    
+}
+
 void MainScene::Start()
 {
+
     vertices.push_back(StaticVertex(glm::vec3(-0.6f, -0.4f, 0.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
     vertices.push_back(StaticVertex(glm::vec3(0.6f, -0.4f, 0.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
     vertices.push_back(StaticVertex(glm::vec3(0.f, 0.6f, 0.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
@@ -46,19 +49,24 @@ void MainScene::Start()
     vao->SetIndexBuffer(ibo);
 
     shader = MakeRef<Shader>("UnlitDebug", "assets/shaders/UnlitDebug.vert", "assets/shaders/UnlitDebug.frag");
+
+    
 }
 
 void MainScene::EarlyUpdate()
 {
 
+
+
 }
 
 void MainScene::Update()
 {
+
     auto bufferSize = UserInterface::GetViewportSize();
     auto ratio = bufferSize.x / (float)bufferSize.y;
     glm::mat4 m, p, mvp;
-    m = glm::mat4(1.f);// glm::rotate(glm::mat4(1.f), glm::radians((float)glfwGetTime()) * 10.f, glm::vec3(0.f, 0.f, 1.f));
+    m = glm::rotate(glm::mat4(1.f), glm::radians((float)glfwGetTime()) * 10.f, glm::vec3(0.f, 0.f, 1.f));
     p = glm::ortho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
     mvp = m * p;
 
@@ -69,11 +77,12 @@ void MainScene::Update()
     ibo->Bind();
     //glDrawArrays(GL_TRIANGLES, 0, 3);
     vao->Bind();
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, indices.data());
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 }
 
 void MainScene::UpdateUI()
 {
+
     // debug fps info
     static int updates = 0;
     static float frameTimes = 0.f;
@@ -129,9 +138,11 @@ void MainScene::UpdateUI()
 void MainScene::LateUpdate()
 {
 
+
 }
 
 void MainScene::End()
 {
+    
 
 }

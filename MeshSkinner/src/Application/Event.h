@@ -2,22 +2,20 @@
 
 #include "Core.h"
 
-template<typename T>
-size_t StdFunctionAddress(std::function<void(T &)> f) {
-	typedef void (fnType)(T &);
-	fnType **fnPointer = f.template target<fnType *>();
-	return (size_t)*fnPointer;
-}
+// single arugment callback helpers
+template<typename T> using Callback = std::function<void(const T &)>;
+template<typename T> using CallbackRef = Ref<Callback<T>>;
+template<typename T> constexpr CallbackRef<T> MakeCallbackRef(Callback<T> arg) { return MakeRef<Callback<T>>(arg); }
 
-template<typename T>
-using Callback = std::function<void(const T &)>;
+// no argument callback helpers
+using CallbackNoArg = std::function<void()>;
+using CallbackNoArgRef = Ref<CallbackNoArg>;
+CallbackNoArgRef MakeCallbackNoArgRef(CallbackNoArg arg);
 
-template<typename T>
-using CallbackRef = Ref<Callback<T>>;
-
-template<typename T>
-constexpr CallbackRef<T> MakeCallbackRef(Callback<T> arg) { return MakeRef<Callback<T>>(arg); }
-
+/// <summary>
+/// Events with a single argument.
+/// </summary>
+/// <typeparam name="T">Type of the argument passed to the callback.</typeparam>
 template <typename T>
 class Event
 {
@@ -26,12 +24,12 @@ public:
 	virtual ~Event() = default;
 
 public:
-	void Subscribe(Ref<Callback<T>> callback)
+	void Subscribe(CallbackRef<T> callback)
 	{
 		subscribers.insert(callback);
 	}
 
-	void Unsubscribe(Ref<Callback<T>> callback)
+	void Unsubscribe(CallbackRef<T> callback)
 	{
 		subscribers.erase(callback);
 	}
@@ -43,5 +41,38 @@ public:
 	}
 
 private:
-	std::unordered_set<Ref<Callback<T>>> subscribers;
+	std::unordered_set<CallbackRef<T>> subscribers;
 };
+
+/// <summary>
+/// Events with no arguments should be initialized as Event<void> OR (see below) EventNoArg
+/// </summary>
+template <>
+class Event<void>
+{
+public:
+	Event() = default;
+	virtual ~Event() = default;
+
+public:
+	void Subscribe(CallbackNoArgRef callback)
+	{
+		subscribers.insert(callback);
+	}
+
+	void Unsubscribe(CallbackNoArgRef callback)
+	{
+		subscribers.erase(callback);
+	}
+
+	void Invoke() const
+	{
+		for (const auto &callback : subscribers)
+			(*callback.get())();
+	}
+
+private:
+	std::unordered_set<CallbackNoArgRef> subscribers;
+};
+
+using EventNoArg = Event<void>;
