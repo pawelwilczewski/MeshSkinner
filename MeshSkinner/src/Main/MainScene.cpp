@@ -23,9 +23,8 @@ MainScene::~MainScene()
     
 }
 
-void MainScene::Start()
+void MainScene::OnStart()
 {
-
     vertices.push_back(StaticVertex(glm::vec3(-0.6f, -0.4f, 0.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
     vertices.push_back(StaticVertex(glm::vec3(0.6f, -0.4f, 0.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
     vertices.push_back(StaticVertex(glm::vec3(0.f, 0.6f, 0.f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
@@ -49,20 +48,15 @@ void MainScene::Start()
     vao->SetIndexBuffer(ibo);
 
     shader = MakeRef<Shader>("UnlitDebug", "assets/shaders/UnlitDebug.vert", "assets/shaders/UnlitDebug.frag");
-
-    
 }
 
-void MainScene::EarlyUpdate()
+void MainScene::OnEarlyUpdate()
 {
-
-
 
 }
 
-void MainScene::Update()
+void MainScene::OnUpdate()
 {
-
     auto bufferSize = UserInterface::GetViewportSize();
     auto ratio = bufferSize.x / (float)bufferSize.y;
     glm::mat4 m, p, mvp;
@@ -80,7 +74,7 @@ void MainScene::Update()
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 }
 
-void MainScene::UpdateUI()
+void MainScene::OnUpdateUI()
 {
 
     // debug fps info
@@ -135,14 +129,12 @@ void MainScene::UpdateUI()
     ImGui::End();
 }
 
-void MainScene::LateUpdate()
+void MainScene::OnLateUpdate()
 {
-
 
 }
 
-void MainScene::End()
+void MainScene::OnEnd()
 {
-    
 
 }

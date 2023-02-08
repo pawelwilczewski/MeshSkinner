@@ -6,7 +6,7 @@
 class Application
 {
 public:
-	static void Init(uint32_t width, uint32_t height, const char *title, int vsync);
+	static void Init(const glm::ivec2 &windowSize, const char *title, int vsync);
 	static void Run();
 	static void Terminate();
 
@@ -32,15 +32,4 @@ public:
 	static void OnUpdateUIUnsubscribe(CallbackNoArgRef callback);
 	static void OnLateUpdateUnsubscribe(CallbackNoArgRef callback);
 	static void OnEndUnsubscribe(CallbackNoArgRef callback);
-
-public:
-	static Unique<class Scene> scene;
-
-private:
-	static EventNoArg onStart;
-	static EventNoArg onEarlyUpdate;
-	static EventNoArg onUpdate;
-	static EventNoArg onUpdateUI;
-	static EventNoArg onLateUpdate;
-	static EventNoArg onEnd;
 };

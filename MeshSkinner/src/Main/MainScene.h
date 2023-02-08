@@ -10,10 +10,10 @@ public:
 	virtual ~MainScene();
 
 protected:
-	virtual void Start() override;
-	virtual void EarlyUpdate() override;
-	virtual void Update() override;
-	virtual void UpdateUI() override;
-	virtual void LateUpdate() override;
-	virtual void End() override;
+	virtual void OnStart() override;
+	virtual void OnEarlyUpdate() override;
+	virtual void OnUpdate() override;
+	virtual void OnUpdateUI() override;
+	virtual void OnLateUpdate() override;
+	virtual void OnEnd() override;
 };

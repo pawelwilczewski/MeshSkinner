@@ -1,19 +1,18 @@
 #include "pch.h"
 #include "Application.h"
 
-Unique<Scene> Application::scene;
-EventNoArg Application::onStart;
-EventNoArg Application::onEarlyUpdate;
-EventNoArg Application::onUpdate;
-EventNoArg Application::onUpdateUI;
-EventNoArg Application::onLateUpdate;
-EventNoArg Application::onEnd;
+static EventNoArg onStart;
+static EventNoArg onEarlyUpdate;
+static EventNoArg onUpdate;
+static EventNoArg onUpdateUI;
+static EventNoArg onLateUpdate;
+static EventNoArg onEnd;
 
-void Application::Init(uint32_t width, uint32_t height, const char *title, int vsync)
+void Application::Init(const glm::ivec2 &windowSize, const char *title, int vsync)
 {
     Log::Init();
     Time::Init();
-    Window::Init(width, height, title, vsync);
+    Window::Init(windowSize, title, vsync);
     Input::Init();
     UserInterface::Init();
 
@@ -53,41 +52,12 @@ void Application::Terminate()
     exit(EXIT_SUCCESS);
 }
 
-void Application::Start()
-{
-    scene->Start();
-    onStart.Invoke();
-}
-
-void Application::EarlyUpdate()
-{
-    scene->EarlyUpdate();
-    onEarlyUpdate.Invoke();
-}
-
-void Application::Update()
-{
-    scene->Update();
-    onUpdate.Invoke();
-}
-
-void Application::UpdateUI()
-{
-    scene->UpdateUI();
-    onUpdateUI.Invoke();
-}
-
-void Application::LateUpdate()
-{
-    scene->LateUpdate();
-    onLateUpdate.Invoke();
-}
-
-void Application::End()
-{    
-    scene->End();
-    onEnd.Invoke();
-}
+void Application::Start() { onStart.Invoke(); }
+void Application::EarlyUpdate() { onEarlyUpdate.Invoke(); }
+void Application::Update() { onUpdate.Invoke(); }
+void Application::UpdateUI() { onUpdateUI.Invoke(); }
+void Application::LateUpdate() { onLateUpdate.Invoke(); }
+void Application::End() { onEnd.Invoke(); }
 
 void Application::OnStartSubscribe(CallbackNoArgRef callback) { onStart.Subscribe(callback); }
 void Application::OnEarlyUpdateSubscribe(CallbackNoArgRef callback) { onEarlyUpdate.Subscribe(callback); }

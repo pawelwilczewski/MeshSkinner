@@ -7,14 +7,14 @@ GLuint Window::framebufferTexture;
 
 static GLuint fbo, rbo;
 
-void Window::Init(int width, int height, const char *title, int vsync)
+void Window::Init(const glm::ivec2 &windowSize, const char *title, int vsync)
 {
     glfwSetErrorCallback(Error::CallbackGLFW);
 
     if (!glfwInit())
         exit(EXIT_FAILURE);
 
-    window = glfwCreateWindow(width, height, title, NULL, NULL);
+    window = glfwCreateWindow(windowSize.x, windowSize.y, title, NULL, NULL);
     if (!window)
     {
         glfwTerminate();

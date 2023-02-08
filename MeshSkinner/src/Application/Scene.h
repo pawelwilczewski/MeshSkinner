@@ -2,17 +2,15 @@
 
 class Scene
 {
-	friend class Application;
-
 public:
-	Scene() = default;
-	virtual ~Scene() = default;
+	Scene();
+	virtual ~Scene();
 
 protected:
-	virtual void Start() = 0;
-	virtual void EarlyUpdate() = 0;
-	virtual void Update() = 0;
-	virtual void UpdateUI() = 0;
-	virtual void LateUpdate() = 0;
-	virtual void End() = 0;
+	virtual void OnStart() = 0;
+	virtual void OnEarlyUpdate() = 0;
+	virtual void OnUpdate() = 0;
+	virtual void OnUpdateUI() = 0;
+	virtual void OnLateUpdate() = 0;
+	virtual void OnEnd() = 0;
 };
