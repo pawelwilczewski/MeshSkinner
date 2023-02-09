@@ -7,7 +7,6 @@ class Vertex
 {
 public:
 	Vertex(const glm::vec3 &position);
-	virtual ~Vertex() = default;
 
 public:
 	glm::vec3 position = glm::vec3(0.f);
@@ -19,7 +18,6 @@ class StaticVertex : public Vertex
 {
 public:
 	StaticVertex(const glm::vec3 &position, const glm::vec2 &texCoord, const glm::vec3 &normal, const glm::vec3 &color);
-	virtual ~StaticVertex() = default;
 
 public:
 	glm::vec2 texCoord = glm::vec2(0.f);
@@ -33,7 +31,6 @@ class SkeletalVertex : public StaticVertex
 {
 public:
 	SkeletalVertex(const glm::vec3 &position, const glm::vec2 &texCoord, const glm::vec3 &normal, const glm::vec3 &color, const glm::vec<4, uint16_t> &bones, const glm::vec4 &weights);
-	virtual ~SkeletalVertex() = default;
 
 public:
 	glm::vec<4, uint16_t> bones;

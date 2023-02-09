@@ -50,7 +50,7 @@ void Camera::RecalculateViewProjection()
 			break;
 	}
 	auto view = glm::lookAt(transform.GetPosition(), transform.GetPosition() + -transform.GetRightVector(), transform.GetUpVector());
-	//view = glm::lookAt(glm::vec3(2.f, 0.f, 2.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+
 	viewProjectionMatrix = projection * view;
 	isViewProjectionUpdated = true;
 }
