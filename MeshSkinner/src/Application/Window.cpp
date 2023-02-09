@@ -108,3 +108,8 @@ glm::ivec2 Window::GetFramebufferSize()
 }
 GLuint Window::GetFramebufferTexture() { return framebufferTexture; }
 bool Window::IsPendingClose() { return glfwWindowShouldClose(window); }
+
+void Window::SetCursorVisibility(bool visible)
+{
+    glfwSetInputMode(window, GLFW_CURSOR, visible ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+}

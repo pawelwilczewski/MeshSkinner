@@ -4,8 +4,10 @@
 #include "Renderer/Renderer.h"
 #include "Renderer/Buffer.h"
 #include "Renderer/Camera.h"
+#include "Renderer/CameraController.h"
 
 static Ref<Camera> camera;
+static Ref<CameraController> cameraController;
 static Ref<VertexArray<StaticVertex, uint32_t>> vao;
 static Ref<VertexBuffer<StaticVertex>> vbo;
 static Ref<IndexBuffer<uint32_t>> ibo;
@@ -16,6 +18,7 @@ static std::vector<uint32_t> indices;
 MainScene::MainScene() : Scene()
 {
     camera = MakeRef<Camera>();
+    cameraController = MakeRef<CameraController>(camera);
 }
 
 MainScene::~MainScene()
@@ -65,7 +68,8 @@ void MainScene::OnUpdate()
     mvp = m * p;
 
     shader->Bind();
-    shader->UploadUniformMat4("u_ViewProjection", mvp);
+    Log::Info("{}", camera->GetViewProjectionMatrix());
+    shader->UploadUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
 
     vbo->Bind();
     ibo->Bind();

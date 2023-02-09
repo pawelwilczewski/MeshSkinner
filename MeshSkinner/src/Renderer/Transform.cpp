@@ -1,7 +1,11 @@
 #include "pch.h"
 #include "Transform.h"
 
-Transform::Transform(const glm::vec3 &position, const glm::vec3 &rotation, const glm::vec3 &scale) : position(position), rotation(rotation), scale(scale)
+const glm::vec3 Transform::vectorForward = { 1.f, 0.f, 0.f };
+const glm::vec3 Transform::vectorRight = { 0.f, 0.f, 1.f };
+const glm::vec3 Transform::vectorUp = { 0.f, 1.f, 0.f };
+
+Transform::Transform(const glm::vec3 &position, const glm::vec3 &rotation, const glm::vec3 &scale) : position(position), rotation(rotation), scale(scale), isMatrixUpdated(false)
 {
 	RecalculateMatrix();
 }
@@ -13,24 +17,33 @@ const glm::vec3 &Transform::GetScale() const { return scale; }
 void Transform::SetPosition(const glm::vec3 &position)
 {
 	this->position = position;
-	isMatrixValid = false;
+	isMatrixUpdated = false;
 }
 
 void Transform::SetRotation(const glm::vec3 &rotation)
 {
 	this->rotation = rotation;
-	isMatrixValid = false;
+	isMatrixUpdated = false;
 }
 
 void Transform::SetScale(const glm::vec3 &scale)
 {
 	this->scale = scale;
-	isMatrixValid = false;
+	isMatrixUpdated = false;
 }
 
-glm::mat4 Transform::GetMatrix()
+const glm::vec3 Transform::GetForwardVector() const { return glm::quat(glm::radians(rotation)) * vectorForward; }
+const glm::vec3 Transform::GetRightVector() const { return glm::quat(glm::radians(rotation)) * vectorRight; }
+const glm::vec3 Transform::GetUpVector() const { return glm::quat(glm::radians(rotation)) * vectorUp; }
+
+bool Transform::IsMatrixUpdated() const
 {
-	if (!isMatrixValid)
+	return isMatrixUpdated;
+}
+
+const glm::mat4 &Transform::GetMatrix()
+{
+	if (!isMatrixUpdated)
 		RecalculateMatrix();
 
 	return matrix;
@@ -42,5 +55,5 @@ void Transform::RecalculateMatrix()
 	matrix *= glm::toMat4(glm::quat(glm::radians(rotation)));
 	matrix = glm::scale(matrix, scale);
 
-	isMatrixValid = true;
+	isMatrixUpdated = true;
 }

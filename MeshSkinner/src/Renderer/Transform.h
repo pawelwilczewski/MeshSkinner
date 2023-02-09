@@ -17,16 +17,28 @@ public:
 	void SetRotation(const glm::vec3 &rotation);
 	void SetScale(const glm::vec3 &scale);
 
-	glm::mat4 GetMatrix();
+public:
+	const glm::vec3 GetForwardVector() const;
+	const glm::vec3 GetRightVector() const;
+	const glm::vec3 GetUpVector() const;
+
+public:
+	const glm::mat4 &GetMatrix();
+	bool IsMatrixUpdated() const;
 
 protected:
 	virtual void RecalculateMatrix();
+
+public:
+	static const glm::vec3 vectorForward;
+	static const glm::vec3 vectorRight;
+	static const glm::vec3 vectorUp;
 
 private:
 	glm::vec3 position;
 	glm::vec3 rotation;
 	glm::vec3 scale;
 
-	bool isMatrixValid = false;
+	bool isMatrixUpdated = false;
 	glm::mat4 matrix;
 };

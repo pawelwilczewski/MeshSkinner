@@ -16,6 +16,9 @@ public:
 	static GLuint GetFramebufferTexture();
 	static bool IsPendingClose();
 
+public:
+	static void SetCursorVisibility(bool visible);
+
 private:
 	static GLFWwindow *window;
 	static GLuint framebufferTexture;
