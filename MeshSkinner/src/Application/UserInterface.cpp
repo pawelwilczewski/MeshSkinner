@@ -10,7 +10,7 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
-glm::ivec2 UserInterface::viewportSize = glm::ivec2(1024, 768);
+glm::ivec2 UserInterface::viewportSize = glm::ivec2(1);
 
 glm::ivec2 UserInterface::GetViewportSize() { return viewportSize; }
 void UserInterface::UpdateViewportSize(const glm::ivec2 &newSize) { viewportSize = newSize; }
@@ -41,14 +41,7 @@ void UserInterface::Init()
     ImGui_ImplOpenGL3_Init("#version 430");
 }
 
-void UserInterface::FrameBegin()
-{
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-}
-
-void UserInterface::UpdateUI()
+static void SetupDockspaceViewport()
 {
     // setup dockspace window
     ImGuiViewport *viewport = ImGui::GetMainViewport();
@@ -78,6 +71,15 @@ void UserInterface::UpdateUI()
     UserInterface::UpdateViewportSize(glm::ivec2(glm::max(0, (int)availableSize.x), glm::max(0, (int)availableSize.y)));
     ImGui::Image((void *)(intptr_t)Window::GetFramebufferTexture(), availableSize);
     ImGui::End();
+}
+
+void UserInterface::FrameBegin()
+{
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    SetupDockspaceViewport();
 }
 
 void UserInterface::FrameEnd()

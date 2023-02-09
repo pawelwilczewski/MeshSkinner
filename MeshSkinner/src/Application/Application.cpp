@@ -33,7 +33,6 @@ void Application::Run()
 
         EarlyUpdate();
         Update();
-        UserInterface::UpdateUI();
         UpdateUI();
         LateUpdate();
 

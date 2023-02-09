@@ -49,12 +49,11 @@ void Window::Init(const glm::ivec2 &windowSize, const char *title, int vsync)
     // create the framebuffer and framebuffer texture
     glGenFramebuffers(1, &fbo);
     glGenTextures(1, &framebufferTexture);
-    RegenFramebuffer(UserInterface::GetViewportSize());
 }
 
 void Window::FrameBegin()
 {
-    auto bufferSize = UserInterface::GetViewportSize();//Window::GetFramebufferSize();
+    auto bufferSize = UserInterface::GetViewportSize();
 
     // regen buffer if window resized
     if (bufferSize != previousBufferSize)
@@ -73,6 +72,8 @@ void Window::FrameEnd()
     // swap buffers poll events
     glfwSwapBuffers(Window::GetNativeWindow());
     glfwPollEvents();
+    
+    // TODO: abstraction for all the viewport and framebuffer logic
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -84,7 +85,7 @@ void Window::Terminate()
 
 void Window::RegenFramebuffer(const glm::ivec2 bufferSize)
 {
-    Log::Trace("Regen frambefbuffer");
+    Log::Trace("Regen framebuffer {}", bufferSize);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     // create the render target texture

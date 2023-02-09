@@ -11,7 +11,6 @@ public:
 private:
 	static void Init();
 	static void FrameBegin();
-	static void UpdateUI();
 	static void FrameEnd();
 	static void Terminate();
 
