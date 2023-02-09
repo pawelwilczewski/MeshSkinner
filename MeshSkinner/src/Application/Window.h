@@ -11,6 +11,9 @@ private:
 	static void Terminate();
 
 public:
+	static void RegenFramebuffer(const glm::ivec2 bufferSize);
+
+public:
 	static GLFWwindow *GetNativeWindow();
 	static glm::ivec2 GetFramebufferSize();
 	static GLuint GetFramebufferTexture();
