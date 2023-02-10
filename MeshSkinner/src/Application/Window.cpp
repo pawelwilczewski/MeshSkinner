@@ -43,8 +43,8 @@ void Window::Init(const glm::ivec2 &windowSize, const char *title, int vsync)
 
     glfwSwapInterval(vsync);
 
-    // --------------------------
-    // setup rendering to texture
+    // gl setup - TODO: better move elsewhere
+    glEnable(GL_DEPTH_TEST);
 
     // create the framebuffer and framebuffer texture
     glGenFramebuffers(1, &fbo);

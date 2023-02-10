@@ -5,6 +5,8 @@
 class Material
 {
 public:
+
+public:
 	Ref<Shader> shader;
 };
 

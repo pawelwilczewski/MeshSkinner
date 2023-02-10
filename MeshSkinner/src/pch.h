@@ -41,6 +41,7 @@
 #include "Application/Window.h"
 #include "Application/UserInterface.h"
 #include "Application/Scene.h"
+#include "Renderer/Renderer.h"
 #include "Utils/FileUtils.h"
 
 #ifdef PLATFORM_WINDOWS

@@ -15,6 +15,7 @@ void Application::Init(const glm::ivec2 &windowSize, const char *title, int vsyn
     Window::Init(windowSize, title, vsync);
     Input::Init();
     UserInterface::Init();
+    Renderer::Init();
 
     Log::Trace("Application initialized...");
 }
@@ -30,6 +31,7 @@ void Application::Run()
         Time::FrameBegin();
         Window::FrameBegin();
         UserInterface::FrameBegin();
+        Renderer::FrameBegin();
 
         EarlyUpdate();
         Update();
@@ -38,6 +40,7 @@ void Application::Run()
 
         Window::FrameEnd();
         UserInterface::FrameEnd();
+        Renderer::FrameEnd();
     }
 
     End();

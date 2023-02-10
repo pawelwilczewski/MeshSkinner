@@ -4,18 +4,24 @@
 #include "Mesh.h"
 #include "VertexArray.h"
 #include "Transform.h"
+#include "Entity/Entity.h"
 
 class Renderer
 {
 public:
 	static void Init();
 
-	static void Submit(const Transform &transform, const Mesh &mesh);
-	static void Submit(const Transform &transform, const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, Ref<Material> material);
+	static void Submit(Ref<Entity> entity);
 
-	static void Reset();
-	static void Render();
+	static void FrameBegin();
+	static void FrameEnd();
 
 private:
-	//static std::unordered_map<Shader, VertexArray> drawCalls;
+	static std::unordered_set<Ref<Entity>> entities;
+
+	//static std::unordered_map<Ref<Shader>, Ref<VertexArray<StaticVertex, uint32_t>>> staticMeshStaticDrawCalls;
+	//static std::unordered_map<Ref<Shader>, Ref<VertexArray<SkeletalVertex, uint32_t>>> skeletalMeshStaticDrawCalls;
+
+	//static std::unordered_map<Ref<Shader>, Ref<VertexArray<StaticVertex, uint32_t>>> staticMeshDynamicDrawCalls;
+	//static std::unordered_map<Ref<Shader>, Ref<VertexArray<SkeletalVertex, uint32_t>>> skeletalMeshDynamicDrawCalls;
 };

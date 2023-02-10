@@ -13,6 +13,10 @@ static Ref<VertexBuffer<StaticVertex>> vbo;
 static Ref<IndexBuffer<uint32_t>> ibo;
 static Ref<Shader> shader;
 
+static Ref<Entity> noneEntity;
+static Ref<Entity> staticEntity;
+static Ref<Entity> skeletalEntity;
+static Ref<Entity> staticSkeletalEntity;
 
 MainScene::MainScene() : Scene()
 {
@@ -27,35 +31,60 @@ MainScene::~MainScene()
 
 void MainScene::OnStart()
 {
-    std::vector<StaticVertex> vertices;
+    std::vector<StaticVertex> staticVertices;
+    staticVertices.push_back(StaticVertex(glm::vec3(-0.6f, -0.4f, -0.1f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.f, 0.5f, 1.f)));
+    staticVertices.push_back(StaticVertex(glm::vec3(0.6f, -0.4f, 0.3f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f, 0.3f, 0.f)));
+    staticVertices.push_back(StaticVertex(glm::vec3(0.f, 0.6f, 0.5f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.8f)));
+    staticVertices.push_back(StaticVertex(glm::vec3(0.4f, -0.6f, -0.4f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.f, 0.3f, 1.f)));
 
-    vertices.push_back(StaticVertex(glm::vec3(-0.6f, -0.4f, -0.1f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.f, 0.5f, 1.f)));
-    vertices.push_back(StaticVertex(glm::vec3(0.6f, -0.4f, 0.3f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f, 0.3f, 0.f)));
-    vertices.push_back(StaticVertex(glm::vec3(0.f, 0.6f, 0.5f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.8f)));
-    vertices.push_back(StaticVertex(glm::vec3(0.4f, -0.6f, -0.4f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.f, 0.3f, 1.f)));
-
-    vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
-    vbo->SetData(vertices.data(), vertices.size());
-    //vbo->SetData(vertices.data(), vertices.size(), 4);
+    std::vector<SkeletalVertex> skeletalVertices;
+    staticVertices.push_back(SkeletalVertex(glm::vec3(-2.8f, -0.5f, -1.1f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.6f, 0.5f, 0.f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
+    staticVertices.push_back(SkeletalVertex(glm::vec3(-1.6f, -0.7f, -2.1f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.f, 0.5f, 0.2f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
+    staticVertices.push_back(SkeletalVertex(glm::vec3(-0.6f, 3.4f, -1.1f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.3f, 0.5f, 1.f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
+    staticVertices.push_back(SkeletalVertex(glm::vec3(-1.2f, 0.4f, -4.1f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.5f, 0.5f, 0.f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
 
     std::vector<uint32_t> indices;
-
     indices.push_back(0);
     indices.push_back(1);
     indices.push_back(2);
-
     indices.push_back(2);
-    indices.push_back(0);
     indices.push_back(3);
+    indices.push_back(0);
 
-    ibo = MakeRef<IndexBuffer<uint32_t>>();
-    ibo->SetData(indices.data(), indices.size());
+    //vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
+    //vbo->SetData(staticVertices.data(), staticVertices.size());
 
-    vao = MakeRef<VertexArray<StaticVertex, uint32_t>>();
-    vao->SetVertexBuffer(vbo);
-    vao->SetIndexBuffer(ibo);
+    //ibo = MakeRef<IndexBuffer<uint32_t>>();
+    //ibo->SetData(indices.data(), indices.size());
 
-    shader = MakeRef<Shader>("UnlitDebug", "assets/shaders/UnlitDebug.vert", "assets/shaders/UnlitDebug.frag");
+    //vao = MakeRef<VertexArray<StaticVertex, uint32_t>>();
+    //vao->SetVertexBuffer(vbo);
+    //vao->SetIndexBuffer(ibo);
+
+    //shader = MakeRef<Shader>("UnlitDebug", "assets/shaders/UnlitDebug.vert", "assets/shaders/UnlitDebug.frag");
+    auto staticMaterial = MakeRef<Material>();
+    staticMaterial->shader = MakeRef<Shader>("UnlitDebug", "assets/shaders/UnlitDebug.vert", "assets/shaders/UnlitDebug.frag");
+    auto skeletalMaterial = MakeRef<Material>();
+    skeletalMaterial->shader = MakeRef<Shader>("UnlitDebug", "assets/shaders/UnlitDebug.vert", "assets/shaders/UnlitDebug.frag");
+    auto staticMesh = MakeRef<StaticMesh>(staticVertices, indices, staticMaterial, true);
+    auto skeletalMesh = MakeRef<SkeletalMesh>(skeletalVertices, indices, skeletalMaterial, true);
+
+    noneEntity = MakeRef<Entity>();
+
+    staticEntity = MakeRef<Entity>();
+    staticEntity->AddComponent(staticMesh);
+
+    skeletalEntity = MakeRef<Entity>();
+    skeletalEntity->AddComponent(skeletalMesh);
+
+    staticSkeletalEntity = MakeRef<Entity>();
+    staticSkeletalEntity->AddComponent(staticMesh);
+    staticSkeletalEntity->AddComponent(skeletalMesh);
+
+    Renderer::Submit(noneEntity);
+    Renderer::Submit(staticEntity);
+    Renderer::Submit(skeletalEntity);
+    Renderer::Submit(staticSkeletalEntity);
 }
 
 void MainScene::OnEarlyUpdate()
@@ -65,11 +94,11 @@ void MainScene::OnEarlyUpdate()
 
 void MainScene::OnUpdate()
 {
-    vao->Bind();
-    shader->Bind();
-    shader->UploadUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
+    //vao->Bind();
+    //shader->Bind();
+    //shader->UploadUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
     
-    glDrawElements(GL_TRIANGLES, vao->GetElementCount(), GL_UNSIGNED_INT, nullptr);
+    //glDrawElements(GL_TRIANGLES, vao->GetElementCount(), GL_UNSIGNED_INT, nullptr);
 }
 
 void MainScene::OnUpdateUI()
