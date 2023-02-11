@@ -5,19 +5,19 @@ Ref<Camera> Renderer::activeCamera;
 
 std::unordered_map<const Mesh *, const uint32_t> Renderer::meshes;
 
-std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>> Renderer::staticMeshStaticDrawCalls;
-std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>> Renderer::skeletalMeshStaticDrawCalls;
+DrawCalls Renderer::staticMeshStaticDrawCalls;
+DrawCalls Renderer::skeletalMeshStaticDrawCalls;
 
-std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>> Renderer::staticMeshDynamicDrawCalls;
-std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>> Renderer::skeletalMeshDynamicDrawCalls;
+DrawCalls Renderer::staticMeshDynamicDrawCalls;
+DrawCalls Renderer::skeletalMeshDynamicDrawCalls;
 
 void Renderer::Init()
 {
-	staticMeshStaticDrawCalls = std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>>();
-	staticMeshStaticDrawCalls = std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>>();
+	staticMeshStaticDrawCalls = DrawCalls();
+	staticMeshStaticDrawCalls = DrawCalls();
 
-	skeletalMeshDynamicDrawCalls = std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>>();
-	skeletalMeshDynamicDrawCalls = std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>>();
+	skeletalMeshDynamicDrawCalls = DrawCalls();
+	skeletalMeshDynamicDrawCalls = DrawCalls();
 }
 
 void Renderer::Submit(Ref<Entity> entity)
@@ -31,25 +31,23 @@ void Renderer::FrameBegin()
 
 }
 
+static void RenderDrawCalls(const Ref<Camera> &camera, const DrawCalls &drawCalls)
+{
+	for (const auto &[shader, vao] : drawCalls)
+	{
+		shader->Bind();
+		shader->UploadUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
+
+		vao->Bind();
+		glDrawElements(GL_TRIANGLES, vao->GetIndexBuffer()->GetLength(), GL_UNSIGNED_INT, nullptr);
+	}
+}
+
 void Renderer::FrameEnd()
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	for (const auto &[shader, vao] : staticMeshStaticDrawCalls)
-	{
-		shader->Bind();
-		shader->UploadUniformMat4("u_ViewProjection", activeCamera->GetViewProjectionMatrix());
-
-		vao->Bind();
-		glDrawElements(GL_TRIANGLES, vao->GetIndexBuffer()->GetLength(), GL_UNSIGNED_INT, nullptr);
-	}
-	for (const auto &[shader, vao] : skeletalMeshStaticDrawCalls)
-	{
-		shader->Bind();
-		shader->UploadUniformMat4("u_ViewProjection", activeCamera->GetViewProjectionMatrix());
-
-		vao->Bind();
-		glDrawElements(GL_TRIANGLES, vao->GetIndexBuffer()->GetLength(), GL_UNSIGNED_INT, nullptr);
-	}
+	RenderDrawCalls(activeCamera, staticMeshStaticDrawCalls);
+	RenderDrawCalls(activeCamera, skeletalMeshStaticDrawCalls);
 }

@@ -7,6 +7,8 @@
 #include "Entity/Entity.h"
 #include "Camera.h"
 
+using DrawCalls = std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>>;
+
 class Renderer
 {
 public:
@@ -20,7 +22,7 @@ public:
 
 private:
 	template <typename M, typename V>
-	static void SubmitStatic(const std::unordered_set<M *> &submitMeshes, std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>> &drawCalls, const BufferLayout &vertexLayout)
+	static void SubmitStatic(const std::unordered_set<M *> &submitMeshes, DrawCalls &drawCalls, const BufferLayout &vertexLayout)
 	{
 		for (const auto &mesh : submitMeshes)
 		{
@@ -78,9 +80,9 @@ private:
 	// key: rendred mesh pointer, value: index offset to use
 	static std::unordered_map<const Mesh *, const uint32_t> meshes;
 
-	static std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>> staticMeshStaticDrawCalls;
-	static std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>> skeletalMeshStaticDrawCalls;
+	static DrawCalls staticMeshStaticDrawCalls;
+	static DrawCalls skeletalMeshStaticDrawCalls;
 
-	static std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>> staticMeshDynamicDrawCalls;
-	static std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>> skeletalMeshDynamicDrawCalls;
+	static DrawCalls staticMeshDynamicDrawCalls;
+	static DrawCalls skeletalMeshDynamicDrawCalls;
 };
