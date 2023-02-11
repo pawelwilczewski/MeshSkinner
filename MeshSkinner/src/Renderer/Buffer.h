@@ -17,16 +17,6 @@ public:
 	}
 
 public:
-	void Bind() const
-	{
-		glBindBuffer(type, id);
-	}
-
-	void Unbind() const
-	{
-		glBindBuffer(type, 0);
-	}
-
 	void SetData(const T *data, GLuint length, GLuint lengthOffset = 0)
 	{
 		// automatically resize to twice the size if exceeded limit - like in the vector class etc.

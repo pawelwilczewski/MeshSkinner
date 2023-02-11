@@ -44,13 +44,13 @@ void Renderer::Submit(Ref<Entity> entity)
 				auto ibo = MakeRef<IndexBuffer<uint32_t>>();
 				auto vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
 				auto vao = MakeRef<VertexArray<StaticVertex, uint32_t>>();
-				vao->SetVertexBuffer(vbo);
+				vao->SetVertexBuffer(vbo, 0);
 				vao->SetIndexBuffer(ibo);
 				staticMeshStaticDrawCalls.insert({ mesh->material->shader, vao });
 			}
 
 			// append the data to the vbo and ibo of the vao for the current shader
-			auto &vbo = staticMeshStaticDrawCalls[mesh->material->shader]->GetVertexBuffer();
+			auto &vbo = staticMeshStaticDrawCalls[mesh->material->shader]->GetVertexBuffer(0);
 
 			// cache the current vbo length for ibo offset
 			indexOffset = vbo->GetLength();

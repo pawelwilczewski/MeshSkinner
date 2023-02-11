@@ -51,32 +51,26 @@ public:
 		glBindVertexArray(0);
 	}
 
-	void SetVertexBuffer(Ref<VertexBuffer<V>> vertexBuffer)
+	void SetVertexBuffer(Ref<VertexBuffer<V>> vertexBuffer, uint16_t bindingIndex)
 	{
-		Bind();
-		vertexBuffer->Bind();
+		glVertexArrayVertexBuffer(id, bindingIndex, vertexBuffer->GetID(), 0, vertexBuffer->layout.GetStride());
+
+		// add to the vertex buffers map
+		if (vertexBuffers.find(bindingIndex) == vertexBuffers.end())
+			vertexBuffers.insert({ bindingIndex, vertexBuffer });
+		else
+			vertexBuffers[bindingIndex] = vertexBuffer;
 
 		assert(vertexBuffer->layout.GetElements().size() > 0);
 
 		uint32_t index = 0;
 		for (const auto &element : vertexBuffer->layout)
 		{
-			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(
-				index,
-				element.GetComponentCount(),
-				ShaderTypeToGL(element.type),
-				element.normalized ? GL_TRUE : GL_FALSE,
-				vertexBuffer->layout.GetStride(),
-				(const void *)element.offset
-			);
+			glEnableVertexArrayAttrib(id, index);
+			glVertexArrayAttribFormat(id, index, element.GetComponentCount(), ShaderTypeToGL(element.type), element.normalized ? GL_TRUE : GL_FALSE, element.offset);
+			glVertexArrayAttribBinding(id, index, bindingIndex);
 			index++;
 		}
-
-		this->vertexBuffer = vertexBuffer;
-
-		Unbind();
-		vertexBuffer->Unbind();
 	}
 
 	void SetIndexBuffer(Ref<IndexBuffer<I>> indexBuffer)
@@ -86,12 +80,13 @@ public:
 		this->indexBuffer = indexBuffer;
 	}
 
-	const Ref<VertexBuffer<V>> &GetVertexBuffer() const { return vertexBuffer; }
+	// TODO: VertexBuffer shouldn't be templated because we might want to add different type vertex buffers to this vao
+	const Ref<VertexBuffer<V>> &GetVertexBuffer(uint16_t bindingIndex) const { return vertexBuffers.at(bindingIndex); }
 	const Ref<IndexBuffer<I>> &GetIndexBuffer() const { return indexBuffer; }
 
 private:
 	GLuint id;
 
-	Ref<VertexBuffer<V>> vertexBuffer;
+	std::unordered_map<uint16_t, Ref<VertexBuffer<V>>> vertexBuffers;
 	Ref<IndexBuffer<I>> indexBuffer;
 };
