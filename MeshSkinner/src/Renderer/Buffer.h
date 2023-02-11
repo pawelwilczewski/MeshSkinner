@@ -34,10 +34,10 @@ public:
 public:
 	virtual void SetData(const T *data, GLuint length, GLuint lengthOffset = 0)
 	{
-		GenericBuffer::SetData(data, length * sizeof T, lengthOffset * sizeof T);
+		GenericBuffer::SetData(data, length * sizeof(T), lengthOffset * sizeof(T));
 	}
 
 public:
-	GLuint GetLength() const { return sizeBytes / sizeof T; }
-	GLuint GetCapacity() const { return capacityBytes / sizeof T; }
+	GLuint GetLength() const { return sizeBytes / sizeof(T); }
+	GLuint GetCapacity() const { return capacityBytes / sizeof(T); }
 };
