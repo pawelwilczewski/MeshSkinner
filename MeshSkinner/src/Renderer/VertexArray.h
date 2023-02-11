@@ -64,21 +64,22 @@ public:
 
 		assert(vertexBuffer->layout.GetElements().size() > 0);
 
-		uint32_t index = 0;
 		for (const auto &element : vertexBuffer->layout)
 		{
-			glEnableVertexArrayAttrib(id, index);
-			glVertexArrayAttribFormat(id, index, element.GetComponentCount(), ShaderTypeToGL(element.type), element.normalized ? GL_TRUE : GL_FALSE, element.offset);
-			glVertexArrayAttribBinding(id, index, bindingIndex);
-			index++;
+			glEnableVertexArrayAttrib(id, attributeIndex);
+			glVertexArrayAttribFormat(id, attributeIndex, element.GetComponentCount(), ShaderTypeToGL(element.type), element.normalized ? GL_TRUE : GL_FALSE, element.offset);
+			glVertexArrayAttribBinding(id, attributeIndex, bindingIndex);
+			attributeIndex++;
 		}
+
+		vboBindingIndex = bindingIndex + 1;
 	}
 
-	// TODO: implement
-	//uint16_t AddVertexBuffer(Ref<GenericVertexBuffer> vertexBuffer)
-	//{
-	//	return bindingIndex;
-	//}
+	uint16_t AddVertexBuffer(Ref<GenericVertexBuffer> vertexBuffer)
+	{
+		SetVertexBuffer(vertexBuffer, vboBindingIndex);
+		return vboBindingIndex++;
+	}
 
 	void SetIndexBuffer(Ref<IndexBuffer<I>> indexBuffer)
 	{
@@ -93,7 +94,8 @@ public:
 
 private:
 	GLuint id;
-	uint16_t bindingIndex = -1;
+	uint16_t vboBindingIndex = 0;
+	uint16_t attributeIndex = 0;
 	std::unordered_map<uint16_t, Ref<GenericVertexBuffer>> vertexBuffers;
 	Ref<IndexBuffer<I>> indexBuffer;
 };
