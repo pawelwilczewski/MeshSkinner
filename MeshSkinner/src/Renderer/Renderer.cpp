@@ -44,4 +44,12 @@ void Renderer::FrameEnd()
 		vao->Bind();
 		glDrawElements(GL_TRIANGLES, vao->GetIndexBuffer()->GetLength(), GL_UNSIGNED_INT, nullptr);
 	}
+	for (const auto &[shader, vao] : skeletalMeshStaticDrawCalls)
+	{
+		shader->Bind();
+		shader->UploadUniformMat4("u_ViewProjection", activeCamera->GetViewProjectionMatrix());
+
+		vao->Bind();
+		glDrawElements(GL_TRIANGLES, vao->GetIndexBuffer()->GetLength(), GL_UNSIGNED_INT, nullptr);
+	}
 }
