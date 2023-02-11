@@ -27,7 +27,7 @@ static GLenum ShaderTypeToGL(const ShaderDataType &type)
 	}
 }
 
-template<typename V, typename I>
+template<typename I>
 class VertexArray
 {
 public:
@@ -35,6 +35,7 @@ public:
 	{
 		glCreateVertexArrays(1, &id);
 	}
+
 	virtual ~VertexArray()
 	{
 		glDeleteVertexArrays(1, &id);
@@ -51,7 +52,7 @@ public:
 		glBindVertexArray(0);
 	}
 
-	void SetVertexBuffer(Ref<VertexBuffer<V>> vertexBuffer, uint16_t bindingIndex)
+	void SetVertexBuffer(Ref<GenericVertexBuffer> vertexBuffer, uint16_t bindingIndex)
 	{
 		glVertexArrayVertexBuffer(id, bindingIndex, vertexBuffer->GetID(), 0, vertexBuffer->layout.GetStride());
 
@@ -73,6 +74,12 @@ public:
 		}
 	}
 
+	// TODO: implement
+	//uint16_t AddVertexBuffer(Ref<GenericVertexBuffer> vertexBuffer)
+	//{
+	//	return bindingIndex;
+	//}
+
 	void SetIndexBuffer(Ref<IndexBuffer<I>> indexBuffer)
 	{
 		glVertexArrayElementBuffer(id, indexBuffer->GetID());
@@ -81,12 +88,12 @@ public:
 	}
 
 	// TODO: VertexBuffer shouldn't be templated because we might want to add different type vertex buffers to this vao
-	const Ref<VertexBuffer<V>> &GetVertexBuffer(uint16_t bindingIndex) const { return vertexBuffers.at(bindingIndex); }
+	const Ref<GenericVertexBuffer> &GetVertexBuffer(uint16_t bindingIndex) const { return vertexBuffers.at(bindingIndex); }
 	const Ref<IndexBuffer<I>> &GetIndexBuffer() const { return indexBuffer; }
 
 private:
 	GLuint id;
-
-	std::unordered_map<uint16_t, Ref<VertexBuffer<V>>> vertexBuffers;
+	uint16_t bindingIndex = -1;
+	std::unordered_map<uint16_t, Ref<GenericVertexBuffer>> vertexBuffers;
 	Ref<IndexBuffer<I>> indexBuffer;
 };

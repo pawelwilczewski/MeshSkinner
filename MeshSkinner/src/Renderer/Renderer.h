@@ -25,9 +25,9 @@ private:
 	// key: rendred mesh pointer, value: index offset to use
 	static std::unordered_map<const Mesh *, const uint32_t> meshes;
 
-	static std::unordered_map<Ref<Shader>, Ref<VertexArray<StaticVertex, uint32_t>>> staticMeshStaticDrawCalls;
-	static std::unordered_map<Ref<Shader>, Ref<VertexArray<SkeletalVertex, uint32_t>>> skeletalMeshStaticDrawCalls;
+	static std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>> staticMeshStaticDrawCalls;
+	static std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>> skeletalMeshStaticDrawCalls;
 
-	static std::unordered_map<Ref<Shader>, Ref<VertexArray<StaticVertex, uint32_t>>> staticMeshDynamicDrawCalls;
-	static std::unordered_map<Ref<Shader>, Ref<VertexArray<SkeletalVertex, uint32_t>>> skeletalMeshDynamicDrawCalls;
+	static std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>> staticMeshDynamicDrawCalls;
+	static std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>> skeletalMeshDynamicDrawCalls;
 };

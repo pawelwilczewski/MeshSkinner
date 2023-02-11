@@ -6,6 +6,6 @@ template<typename T>
 class IndexBuffer : public Buffer<T>
 {
 public:
-	IndexBuffer(GLenum usage = GL_DYNAMIC_DRAW) : Buffer<T>(GL_ELEMENT_ARRAY_BUFFER, usage) {}
+	IndexBuffer(GLenum usage = GL_STATIC_DRAW) : Buffer<T>(usage) {}
 	virtual ~IndexBuffer() = default;
 };

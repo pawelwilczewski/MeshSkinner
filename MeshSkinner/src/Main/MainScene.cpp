@@ -8,7 +8,7 @@
 
 static Ref<Camera> camera;
 static Ref<CameraController> cameraController;
-static Ref<VertexArray<StaticVertex, uint32_t>> vao;
+static Ref<VertexArray<uint32_t>> vao;
 static Ref<VertexBuffer<StaticVertex>> vbo;
 static Ref<IndexBuffer<uint32_t>> ibo;
 static Ref<Shader> shader;

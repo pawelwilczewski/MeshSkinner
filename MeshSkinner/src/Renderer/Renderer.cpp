@@ -5,19 +5,19 @@ Ref<Camera> Renderer::activeCamera;
 
 std::unordered_map<const Mesh *, const uint32_t> Renderer::meshes;
 
-std::unordered_map<Ref<Shader>, Ref<VertexArray<StaticVertex, uint32_t>>> Renderer::staticMeshStaticDrawCalls;
-std::unordered_map<Ref<Shader>, Ref<VertexArray<SkeletalVertex, uint32_t>>> Renderer::skeletalMeshStaticDrawCalls;
+std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>> Renderer::staticMeshStaticDrawCalls;
+std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>> Renderer::skeletalMeshStaticDrawCalls;
 
-std::unordered_map<Ref<Shader>, Ref<VertexArray<StaticVertex, uint32_t>>> Renderer::staticMeshDynamicDrawCalls;
-std::unordered_map<Ref<Shader>, Ref<VertexArray<SkeletalVertex, uint32_t>>> Renderer::skeletalMeshDynamicDrawCalls;
+std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>> Renderer::staticMeshDynamicDrawCalls;
+std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>> Renderer::skeletalMeshDynamicDrawCalls;
 
 void Renderer::Init()
 {
-	staticMeshStaticDrawCalls = std::unordered_map<Ref<Shader>, Ref<VertexArray<StaticVertex, uint32_t>>>();
-	staticMeshStaticDrawCalls = std::unordered_map<Ref<Shader>, Ref<VertexArray<StaticVertex, uint32_t>>>();
+	staticMeshStaticDrawCalls = std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>>();
+	staticMeshStaticDrawCalls = std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>>();
 
-	skeletalMeshDynamicDrawCalls = std::unordered_map<Ref<Shader>, Ref<VertexArray<SkeletalVertex, uint32_t>>>();
-	skeletalMeshDynamicDrawCalls = std::unordered_map<Ref<Shader>, Ref<VertexArray<SkeletalVertex, uint32_t>>>();
+	skeletalMeshDynamicDrawCalls = std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>>();
+	skeletalMeshDynamicDrawCalls = std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>>();
 }
 
 void Renderer::Submit(Ref<Entity> entity)
@@ -43,14 +43,14 @@ void Renderer::Submit(Ref<Entity> entity)
 			{
 				auto ibo = MakeRef<IndexBuffer<uint32_t>>();
 				auto vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
-				auto vao = MakeRef<VertexArray<StaticVertex, uint32_t>>();
+				auto vao = MakeRef<VertexArray<uint32_t>>();
 				vao->SetVertexBuffer(vbo, 0);
 				vao->SetIndexBuffer(ibo);
 				staticMeshStaticDrawCalls.insert({ mesh->material->shader, vao });
 			}
 
 			// append the data to the vbo and ibo of the vao for the current shader
-			auto &vbo = staticMeshStaticDrawCalls[mesh->material->shader]->GetVertexBuffer(0);
+			auto vbo = static_cast<VertexBuffer<StaticVertex>*>(staticMeshStaticDrawCalls[mesh->material->shader]->GetVertexBuffer(0).get());
 
 			// cache the current vbo length for ibo offset
 			indexOffset = vbo->GetLength();
@@ -72,6 +72,7 @@ void Renderer::Submit(Ref<Entity> entity)
 
 		ibo->SetData(indicesOffset.data(), indicesOffset.size(), ibo->GetLength());
 	}
+
 	// add the static skeletal meshes
 	//auto skeletalMeshes = entity->GetComponents<SkeletalMesh>();
 }

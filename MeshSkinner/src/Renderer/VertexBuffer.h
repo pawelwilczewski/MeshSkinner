@@ -4,13 +4,28 @@
 #include "BufferLayout.h"
 
 template<typename T>
-class VertexBuffer : public Buffer<T>
+class VertexBuffer;
+
+class GenericVertexBuffer
 {
 public:
-	// TODO: URGENT: SHOULD layout be a part of VertexArray instead???
-	VertexBuffer(const BufferLayout &layout, GLenum usage = GL_DYNAMIC_DRAW) : Buffer<T>(GL_ARRAY_BUFFER, usage), layout(layout) {}
-	virtual ~VertexBuffer() = default;
+	GenericVertexBuffer(const BufferLayout &layout);
+	virtual ~GenericVertexBuffer() = default;
+
+public:
+	virtual GLuint GetID() const = 0;
 
 public:
 	const BufferLayout layout;
+};
+
+template<typename T>
+class VertexBuffer : public Buffer<T>, public GenericVertexBuffer
+{
+public:
+	VertexBuffer(const BufferLayout &layout, GLenum usage = GL_STATIC_DRAW) : Buffer<T>(usage), GenericVertexBuffer(layout) {}
+	virtual ~VertexBuffer() = default;
+
+public:
+	virtual GLuint GetID() const override { return GenericBuffer::GetID(); }
 };
