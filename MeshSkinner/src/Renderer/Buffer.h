@@ -6,9 +6,9 @@ template<typename T>
 class Buffer
 {
 public:
-	Buffer(GLenum type, GLenum usage = GL_STATIC_DRAW) : type(type), usage(usage)
+	Buffer(GLenum type, GLenum usage = GL_DYNAMIC_DRAW) : type(type), usage(usage)
 	{
-		glGenBuffers(1, &id);
+		glCreateBuffers(1, &id);
 	}
 
 	virtual ~Buffer()
@@ -36,45 +36,39 @@ public:
 		if (this->length == 0)
 		{
 			this->capacity = fullLength;
-			glBindBuffer(type, id);
-			glBufferData(type, this->capacity * sizeof T, nullptr, usage);
+			glNamedBufferData(id, this->capacity * sizeof T, nullptr, usage);
 		}
 		else if (fullLength > this->capacity)
 		{
 			// cache the buffer's data so we don't lose the data currently stored
-			auto copiedBuffer = CopyBuffer(id, this->length * sizeof T);
+			GLuint copiedBuffer;
+			glCreateBuffers(1, &copiedBuffer);
+			glNamedBufferData(copiedBuffer, this->length * sizeof T, nullptr, GL_STATIC_COPY);
+			glCopyNamedBufferSubData(id, copiedBuffer, 0, 0, this->length * sizeof T);
 
 			// perform the resizing
 			this->capacity = fullLength * 2;
-			glBindBuffer(type, id);
-			// TODO: should first delete the buffer before calling glBufferData?
-			glBufferData(type, this->capacity * sizeof T, nullptr, usage);
+			glNamedBufferData(id, this->capacity * sizeof T, nullptr, usage);
 
 			// restore the initial data
-			glBindBuffer(GL_COPY_READ_BUFFER, copiedBuffer);
-			glBindBuffer(GL_COPY_WRITE_BUFFER, id);
-			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, this->length * sizeof T);			
+			glCopyNamedBufferSubData(copiedBuffer, id, 0, 0, this->length * sizeof T);
 
 			// delete the temp buffer
 			glDeleteBuffers(1, &copiedBuffer);
 		}
 
 		// append the data at the end - sufficient length ensured
-		glBufferSubData(type, lengthOffset * sizeof T, length * sizeof T, data);
+		glNamedBufferSubData(id, lengthOffset * sizeof T, length * sizeof T, data);
 
-		this->length = fullLength;
+		// update length if just extended
+		if (fullLength > this->length)
+			this->length = fullLength;
 	}
 
-private:
-	GLuint CopyBuffer(GLuint srcBuffer, GLsizei size)
+	void Clear()
 	{
-		GLuint copyDest;
-		glGenBuffers(1, &copyDest);
-		glBindBuffer(GL_COPY_READ_BUFFER, srcBuffer);
-		glBindBuffer(GL_COPY_WRITE_BUFFER, copyDest);
-		glBufferData(GL_COPY_WRITE_BUFFER, size, nullptr, usage);
-		glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, size);
-		return copyDest;
+		// no need to do unnecessary gl calls, just change the length
+		this->length = 0;
 	}
 
 public:

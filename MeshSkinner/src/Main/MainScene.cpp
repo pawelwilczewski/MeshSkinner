@@ -22,6 +22,8 @@ MainScene::MainScene() : Scene()
 {
     camera = MakeRef<Camera>();
     cameraController = MakeRef<CameraController>(camera);
+
+    Renderer::activeCamera = camera;
 }
 
 MainScene::~MainScene()
@@ -38,10 +40,10 @@ void MainScene::OnStart()
     staticVertices.push_back(StaticVertex(glm::vec3(0.4f, -0.6f, -0.4f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.f, 0.3f, 1.f)));
 
     std::vector<SkeletalVertex> skeletalVertices;
-    staticVertices.push_back(SkeletalVertex(glm::vec3(-2.8f, -0.5f, -1.1f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.6f, 0.5f, 0.f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
-    staticVertices.push_back(SkeletalVertex(glm::vec3(-1.6f, -0.7f, -2.1f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.f, 0.5f, 0.2f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
-    staticVertices.push_back(SkeletalVertex(glm::vec3(-0.6f, 3.4f, -1.1f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.3f, 0.5f, 1.f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
-    staticVertices.push_back(SkeletalVertex(glm::vec3(-1.2f, 0.4f, -4.1f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.5f, 0.5f, 0.f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
+    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-2.8f, -0.5f, -1.1f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.6f, 0.5f, 0.f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
+    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-1.6f, -0.7f, -2.1f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.f, 0.5f, 0.2f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
+    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-0.6f, 3.4f, -1.1f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.3f, 0.5f, 1.f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
+    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-1.2f, 0.4f, -4.1f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.5f, 0.5f, 0.f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
 
     std::vector<uint32_t> indices;
     indices.push_back(0);
@@ -51,17 +53,6 @@ void MainScene::OnStart()
     indices.push_back(3);
     indices.push_back(0);
 
-    //vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
-    //vbo->SetData(staticVertices.data(), staticVertices.size());
-
-    //ibo = MakeRef<IndexBuffer<uint32_t>>();
-    //ibo->SetData(indices.data(), indices.size());
-
-    //vao = MakeRef<VertexArray<StaticVertex, uint32_t>>();
-    //vao->SetVertexBuffer(vbo);
-    //vao->SetIndexBuffer(ibo);
-
-    //shader = MakeRef<Shader>("UnlitDebug", "assets/shaders/UnlitDebug.vert", "assets/shaders/UnlitDebug.frag");
     auto staticMaterial = MakeRef<Material>();
     staticMaterial->shader = MakeRef<Shader>("UnlitDebug", "assets/shaders/UnlitDebug.vert", "assets/shaders/UnlitDebug.frag");
     auto skeletalMaterial = MakeRef<Material>();
@@ -85,6 +76,21 @@ void MainScene::OnStart()
     Renderer::Submit(staticEntity);
     Renderer::Submit(skeletalEntity);
     Renderer::Submit(staticSkeletalEntity);
+
+
+
+
+    //vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
+    //vbo->SetData(staticVertices.data(), staticVertices.size());
+
+    //ibo = MakeRef<IndexBuffer<uint32_t>>();
+    //ibo->SetData(indices.data(), indices.size());
+
+    //vao = MakeRef<VertexArray<StaticVertex, uint32_t>>();
+    //vao->SetVertexBuffer(vbo);
+    //vao->SetIndexBuffer(ibo);
+
+    //shader = MakeRef<Shader>("UnlitDebug", "assets/shaders/UnlitDebug.vert", "assets/shaders/UnlitDebug.frag");
 }
 
 void MainScene::OnEarlyUpdate()
@@ -97,8 +103,8 @@ void MainScene::OnUpdate()
     //vao->Bind();
     //shader->Bind();
     //shader->UploadUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
-    
-    //glDrawElements(GL_TRIANGLES, vao->GetElementCount(), GL_UNSIGNED_INT, nullptr);
+    //
+    //glDrawElements(GL_TRIANGLES, vao->GetIndexBuffer()->GetLength(), GL_UNSIGNED_INT, nullptr);
 }
 
 void MainScene::OnUpdateUI()

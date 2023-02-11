@@ -33,7 +33,7 @@ class VertexArray
 public:
 	VertexArray()
 	{
-		glGenVertexArrays(1, &id);
+		glCreateVertexArrays(1, &id);
 	}
 	virtual ~VertexArray()
 	{
@@ -53,7 +53,8 @@ public:
 
 	void SetVertexBuffer(Ref<VertexBuffer<V>> vertexBuffer)
 	{
-		glBindVertexArray(id);
+		Bind();
+		vertexBuffer->Bind();
 
 		assert(vertexBuffer->layout.GetElements().size() > 0);
 
@@ -71,17 +72,26 @@ public:
 			);
 			index++;
 		}
+
+		this->vertexBuffer = vertexBuffer;
+
+		Unbind();
+		vertexBuffer->Unbind();
 	}
 
 	void SetIndexBuffer(Ref<IndexBuffer<I>> indexBuffer)
 	{
 		glVertexArrayElementBuffer(id, indexBuffer->GetID());
-		elementCount = indexBuffer->GetLength();
+
+		this->indexBuffer = indexBuffer;
 	}
 
-	GLuint GetElementCount() const { return elementCount; }
+	const Ref<VertexBuffer<V>> &GetVertexBuffer() const { return vertexBuffer; }
+	const Ref<IndexBuffer<I>> &GetIndexBuffer() const { return indexBuffer; }
 
 private:
 	GLuint id;
-	GLuint elementCount = 0;
+
+	Ref<VertexBuffer<V>> vertexBuffer;
+	Ref<IndexBuffer<I>> indexBuffer;
 };

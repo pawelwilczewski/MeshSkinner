@@ -47,8 +47,9 @@ void Window::Init(const glm::ivec2 &windowSize, const char *title, int vsync)
     glEnable(GL_DEPTH_TEST);
 
     // create the framebuffer and framebuffer texture
-    glGenFramebuffers(1, &fbo);
-    glGenTextures(1, &framebufferTexture);
+    glCreateFramebuffers(1, &fbo);
+    glCreateTextures(GL_TEXTURE_2D, 1, &framebufferTexture);
+    glCreateRenderbuffers(1, &rbo);
 }
 
 void Window::FrameBegin()
@@ -60,11 +61,9 @@ void Window::FrameBegin()
         RegenFramebuffer(bufferSize);
     previousBufferSize = bufferSize;
 
-    // bind framebuffer nad vlear viewport
+    // bind framebuffer and clear viewport
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glViewport(0, 0, bufferSize.x, bufferSize.y);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Window::FrameEnd()
@@ -96,7 +95,6 @@ void Window::RegenFramebuffer(const glm::ivec2 bufferSize)
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
 
     // create the RBO
-    glGenRenderbuffers(1, &rbo);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, bufferSize.x, bufferSize.y);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);

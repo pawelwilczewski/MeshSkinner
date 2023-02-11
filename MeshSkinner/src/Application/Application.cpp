@@ -38,9 +38,9 @@ void Application::Run()
         UpdateUI();
         LateUpdate();
 
+        Renderer::FrameEnd();
         Window::FrameEnd();
         UserInterface::FrameEnd();
-        Renderer::FrameEnd();
     }
 
     End();
