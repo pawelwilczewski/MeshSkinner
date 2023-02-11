@@ -50,7 +50,7 @@ void Renderer::Submit(Ref<Entity> entity)
 			}
 
 			// append the data to the vbo and ibo of the vao for the current shader
-			auto vbo = static_cast<VertexBuffer<StaticVertex>*>(staticMeshStaticDrawCalls[mesh->material->shader]->GetVertexBuffer(0).get());
+			auto vbo = TypedVB<StaticVertex>(staticMeshStaticDrawCalls[mesh->material->shader]->GetVertexBuffer(0).get());
 
 			// cache the current vbo length for ibo offset
 			indexOffset = vbo->GetLength();

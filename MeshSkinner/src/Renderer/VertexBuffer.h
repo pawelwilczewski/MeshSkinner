@@ -3,9 +3,6 @@
 #include "Buffer.h"
 #include "BufferLayout.h"
 
-template<typename T>
-class VertexBuffer;
-
 class GenericVertexBuffer
 {
 public:
@@ -29,3 +26,9 @@ public:
 public:
 	virtual GLuint GetID() const override { return GenericBuffer::GetID(); }
 };
+
+template<typename T>
+constexpr VertexBuffer<T> *TypedVB(GenericVertexBuffer *buffer)
+{
+	return static_cast<VertexBuffer<T> *>(buffer);
+}
