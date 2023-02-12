@@ -21,11 +21,16 @@ public:
 
 private:
 	void Compile(const std::unordered_map<GLenum, std::string> &source);
-	std::unordered_map<GLenum, std::string> ExtractShadersSource(const std::string &filePath, const std::string &fileSource);
 	GLint GetUniformLocation(const std::string &name);
+
+public:
+	virtual bool operator==(const Shader &other);
+	virtual bool operator==(const std::string &other);
 
 protected:
 	std::string displayedName;
+	std::string vertexPath;
+	std::string fragmentPath;
 
 private:
 	GLuint id;

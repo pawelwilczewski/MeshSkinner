@@ -101,6 +101,9 @@ Shader::Shader(const std::string &displayedName, const std::string &vertexSource
 	data[GL_VERTEX_SHADER] = ResolveIncludes(vertexSourcePath, FileUtils::ReadFile(vertexSourcePath));
 	data[GL_FRAGMENT_SHADER] = ResolveIncludes(fragmentSourcePath, FileUtils::ReadFile(fragmentSourcePath));
 	Compile(data);
+
+	this->vertexPath = vertexSourcePath;
+	this->fragmentPath = fragmentSourcePath;
 }
 
 Shader::~Shader()
@@ -195,6 +198,16 @@ GLint Shader::GetUniformLocation(const std::string &name)
 	GLint result = glGetUniformLocation(id, name.c_str());
 	uniformLocations[name] = result;
 	return result;
+}
+
+bool Shader::operator==(const Shader &other)
+{
+	return displayedName == other.displayedName || vertexPath == other.vertexPath && fragmentPath == other.fragmentPath;
+}
+
+bool Shader::operator==(const std::string &other)
+{
+	return displayedName == other;
 }
 
 void Shader::Bind() const

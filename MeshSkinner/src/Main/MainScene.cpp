@@ -24,6 +24,8 @@ MainScene::MainScene() : Scene()
     cameraController = MakeRef<CameraController>(camera);
 
     Renderer::activeCamera = camera;
+
+    ShaderLibrary::Load("UnlitDebug", "assets/shaders/UnlitDebug.vert", "assets/shaders/UnlitDebug.frag");
 }
 
 MainScene::~MainScene()
@@ -54,9 +56,9 @@ void MainScene::OnStart()
     indices.push_back(0);
 
     auto staticMaterial = MakeRef<Material>();
-    staticMaterial->shader = MakeRef<Shader>("UnlitDebug", "assets/shaders/UnlitDebug.vert", "assets/shaders/UnlitDebug.frag");
+    staticMaterial->shader = ShaderLibrary::Get("UnlitDebug");
     auto skeletalMaterial = MakeRef<Material>();
-    skeletalMaterial->shader = MakeRef<Shader>("UnlitDebug", "assets/shaders/UnlitDebug.vert", "assets/shaders/UnlitDebug.frag");
+    skeletalMaterial->shader = ShaderLibrary::Get("UnlitDebug");
     auto staticMesh = MakeRef<StaticMesh>(staticVertices, indices, staticMaterial, true);
     auto skeletalMesh = MakeRef<SkeletalMesh>(skeletalVertices, indices, skeletalMaterial, true);
 

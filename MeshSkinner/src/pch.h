@@ -43,6 +43,7 @@
 #include "Application/Scene.h"
 #include "Renderer/Renderer.h"
 #include "Utils/FileUtils.h"
+#include "Renderer/ShaderLibrary.h"
 
 #ifdef PLATFORM_WINDOWS
 #include <Windows.h>
