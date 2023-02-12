@@ -20,10 +20,98 @@ void Renderer::Init()
 	skeletalMeshDynamicDrawCalls = DrawCalls();
 }
 
+void Renderer::SubmitMeshStatic(Mesh *mesh, DrawCalls &drawCalls, std::function<void(const Ref<VertexArray<uint32_t>> &)> vaoInitFunction, std::function<uint32_t(const Ref<VertexArray<uint32_t>> &)> fillVertexBufferFunction)
+{
+	if (!mesh->isStatic) return;
+
+	uint32_t indexOffset;
+	// the mesh is already rendered - reuse its data
+	if (meshes.find(mesh) != meshes.end())
+	{
+		// reuse the cached index offset
+		indexOffset = meshes[mesh];
+	}
+	// new mesh
+	else
+	{
+		// new shader - create an appropriate vao
+		if (drawCalls.find(mesh->material->shader) == drawCalls.end())
+		{
+			auto vao = MakeRef<VertexArray<uint32_t>>();
+			vaoInitFunction(vao);
+
+			drawCalls.insert({ mesh->material->shader, vao });
+		}
+
+		indexOffset = fillVertexBufferFunction(drawCalls[mesh->material->shader]);
+
+		// add the meshes to the map for reuse later
+		meshes.insert({ mesh, indexOffset });
+	}
+
+	// add indices (appropriately offset)
+	std::vector<uint32_t> indicesOffset = mesh->indices;
+	if (indexOffset > 0)
+		for (auto &index : indicesOffset)
+			index += indexOffset;
+
+	auto &ibo = drawCalls[mesh->material->shader]->GetIndexBuffer();
+	ibo->SetData(indicesOffset.data(), indicesOffset.size(), ibo->GetLength());
+}
+
 void Renderer::Submit(Ref<Entity> entity)
 {
-	SubmitStatic<StaticMesh, StaticVertex>(entity->GetComponents<StaticMesh>(), staticMeshStaticDrawCalls, StaticVertex::layout);
-	SubmitStatic<SkeletalMesh, SkeletalVertex>(entity->GetComponents<SkeletalMesh>(), skeletalMeshStaticDrawCalls, SkeletalVertex::layout);
+	auto staticMeshes = entity->GetComponents<StaticMesh>();
+	for (auto mesh : staticMeshes)
+	{
+		SubmitMeshStatic(mesh, staticMeshStaticDrawCalls,
+			[&](const Ref<VertexArray<uint32_t>> &vao)
+			{
+				auto ibo = MakeRef<IndexBuffer<uint32_t>>();
+				auto vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
+				vao->SetVertexBuffer(vbo, 0);
+				vao->SetIndexBuffer(ibo);
+			},
+			[&](const Ref<VertexArray<uint32_t>> &vao) -> uint32_t
+			{
+				// append the data to the vbo
+				auto vbo = TypedVB<StaticVertex>(vao->GetVertexBuffer(0).get());
+
+				// cache the current vbo length for ibo offset
+				auto indexOffset = vbo->GetLength();
+
+				// vbo - add vertices
+				vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
+
+				return indexOffset;
+			});
+	}
+	
+	auto skeletalMeshes = entity->GetComponents<SkeletalMesh>();
+	for (auto mesh : skeletalMeshes)
+	{
+		SubmitMeshStatic(mesh, skeletalMeshStaticDrawCalls,
+			[&](const Ref<VertexArray<uint32_t>> &vao)
+			{
+				auto ibo = MakeRef<IndexBuffer<uint32_t>>();
+				auto vbo = MakeRef<VertexBuffer<SkeletalVertex>>(SkeletalVertex::layout);
+				vao->SetVertexBuffer(vbo, 0);
+				vao->SetIndexBuffer(ibo);
+			},
+			[&](const Ref<VertexArray<uint32_t>> &vao) -> uint32_t
+			{
+				// append the data to the vbo
+				auto vbo = TypedVB<SkeletalVertex>(vao->GetVertexBuffer(0).get());
+
+			// cache the current vbo length for ibo offset
+			auto indexOffset = vbo->GetLength();
+
+			// vbo - add vertices
+			vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
+
+			return indexOffset;
+			});
+	}
 }
 
 void Renderer::FrameBegin()
