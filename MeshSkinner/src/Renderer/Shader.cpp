@@ -148,9 +148,8 @@ void Shader::Compile(const std::unordered_map<GLenum, std::string> &data)
 			// We don't need the Shader anymore.
 			glDeleteShader(shader);
 
-			printf("Error during shader compilation: %s\n", infoLog.data());
-			printf("Shader source:\n%s", AddLineNumbers(s_).c_str());
-			assert(false);//, "Vertex shader compilation error!");
+			Log::Critical("Error during shader compilation: {}\n", infoLog.data());
+			Log::Critical("Shader source:\n{}", AddLineNumbers(s_));
 			return;
 		}
 
@@ -180,8 +179,7 @@ void Shader::Compile(const std::unordered_map<GLenum, std::string> &data)
 		for (const auto &shader : shaders)
 			glDeleteShader(shader);
 
-		printf("Error during shader linking: %s\n", infoLog.data());
-		assert(false);//, "Shader linking error!");
+		Log::Critical("Error during shader linking: {}\n", infoLog.data());
 		return;
 	}
 

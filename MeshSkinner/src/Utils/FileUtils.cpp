@@ -6,9 +6,10 @@ std::string FileUtils::ReadFile(const std::string &filepath)
     std::ifstream file(filepath, std::ios::in | std::ios::binary);
     if (!file)
     {
-        printf("Trying to read from non-existent file: %s\n", filepath.c_str());
+        Log::Critical("Trying to read from non-existent file: {}\n", filepath);
         return "";
     }
+
     std::string result;
     file.seekg(0, std::ios::end);
     result.resize(file.tellg());
