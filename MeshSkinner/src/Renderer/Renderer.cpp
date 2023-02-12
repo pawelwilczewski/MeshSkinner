@@ -67,6 +67,7 @@ void Renderer::Submit(Ref<Entity> entity)
 		SubmitMeshStatic(mesh, staticMeshStaticDrawCalls,
 			[&](const Ref<VertexArray<uint32_t>> &vao)
 			{
+				// initialize the ibo and vbo
 				auto ibo = MakeRef<IndexBuffer<uint32_t>>();
 				auto vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
 				vao->SetVertexBuffer(vbo, 0);
@@ -74,15 +75,10 @@ void Renderer::Submit(Ref<Entity> entity)
 			},
 			[&](const Ref<VertexArray<uint32_t>> &vao) -> uint32_t
 			{
-				// append the data to the vbo
+				// append the vertices to the vbo
 				auto vbo = TypedVB<StaticVertex>(vao->GetVertexBuffer(0).get());
-
-				// cache the current vbo length for ibo offset
 				auto indexOffset = vbo->GetLength();
-
-				// vbo - add vertices
 				vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
-
 				return indexOffset;
 			});
 	}
@@ -90,9 +86,12 @@ void Renderer::Submit(Ref<Entity> entity)
 	auto skeletalMeshes = entity->GetComponents<SkeletalMesh>();
 	for (auto mesh : skeletalMeshes)
 	{
-		SubmitMeshStatic(mesh, skeletalMeshStaticDrawCalls,
+		SubmitMeshStatic(
+			mesh,
+			skeletalMeshStaticDrawCalls,
 			[&](const Ref<VertexArray<uint32_t>> &vao)
 			{
+				// initialize the ibo and vbo
 				auto ibo = MakeRef<IndexBuffer<uint32_t>>();
 				auto vbo = MakeRef<VertexBuffer<SkeletalVertex>>(SkeletalVertex::layout);
 				vao->SetVertexBuffer(vbo, 0);
@@ -100,18 +99,16 @@ void Renderer::Submit(Ref<Entity> entity)
 			},
 			[&](const Ref<VertexArray<uint32_t>> &vao) -> uint32_t
 			{
-				// append the data to the vbo
+				// append the vertices to the vbo
 				auto vbo = TypedVB<SkeletalVertex>(vao->GetVertexBuffer(0).get());
-
-			// cache the current vbo length for ibo offset
-			auto indexOffset = vbo->GetLength();
-
-			// vbo - add vertices
-			vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
-
-			return indexOffset;
-			});
+				auto indexOffset = vbo->GetLength();
+				vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
+				return indexOffset;
+			}
+		);
 	}
+	
+	// TODO: dynamic meshes
 }
 
 void Renderer::FrameBegin()

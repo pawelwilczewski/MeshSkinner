@@ -27,7 +27,7 @@ public:
 	static Ref<Camera> activeCamera;
 
 private:
-	// key: rendred mesh pointer, value: index offset to use
+	// key: rendered mesh pointer, value: index offset to use if mesh is reused
 	static std::unordered_map<const Mesh *, const uint32_t> meshes;
 
 	static DrawCalls staticMeshStaticDrawCalls;
