@@ -17,7 +17,7 @@ public:
 	virtual void UploadUniformMat4(const std::string &name, const glm::mat4 &val);
 	virtual void UploadUniformIntArray(const std::string &name, const int *val, uint32_t count);
 
-	virtual void SetupStorageBuffer(const std::string &name, int slot, uint32_t ssbo);
+	virtual void SetupStorageBuffer(const std::string &name, uint32_t ssbo);
 
 private:
 	void Compile(const std::unordered_map<GLenum, std::string> &source);
@@ -35,4 +35,5 @@ protected:
 private:
 	GLuint id;
 	std::unordered_map<std::string, GLint> uniformLocations;
+	std::unordered_map<std::string, GLint> ssboLocations;
 };

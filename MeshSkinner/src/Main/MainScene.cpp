@@ -71,13 +71,14 @@ void MainScene::OnStart()
     skeletalEntity->AddComponent(skeletalMesh);
 
     staticSkeletalEntity = MakeRef<Entity>();
+    staticSkeletalEntity->transform.SetPosition({ -2.f, 2.f, 0.f });
     staticSkeletalEntity->AddComponent(staticMesh);
     staticSkeletalEntity->AddComponent(skeletalMesh);
 
-    //Renderer::Submit(noneEntity);
+    Renderer::Submit(noneEntity);
     Renderer::Submit(staticEntity);
     Renderer::Submit(skeletalEntity);
-    //Renderer::Submit(staticSkeletalEntity);
+    Renderer::Submit(staticSkeletalEntity);
 }
 
 void MainScene::OnEarlyUpdate()

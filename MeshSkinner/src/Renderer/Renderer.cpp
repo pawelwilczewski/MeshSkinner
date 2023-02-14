@@ -183,9 +183,9 @@ void Renderer::RenderDrawCalls(const Ref<Camera> &camera, const DrawCalls &drawC
 		shader->Bind();
 		shader->UploadUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
 		// TODO: probably id shouldn't be necessary (similar to uploading uniforms)
-		shader->SetupStorageBuffer("ss_VertexInfo", 0, info->vertexInfo->GetID());
-		shader->SetupStorageBuffer("ss_Transforms", 1, info->transforms->GetID());
-		//shader->SetupStorageBuffer("ss_Materials", 2, materialsStatic->GetID());
+		shader->SetupStorageBuffer("ss_VertexInfo", info->vertexInfo->GetID());
+		shader->SetupStorageBuffer("ss_Transforms", info->transforms->GetID());
+		//shader->SetupStorageBuffer("ss_Materials", info->materials->GetID());
 
 		info->vao->Bind();
 		glDrawElements(GL_TRIANGLES, info->vao->GetIndexBuffer()->GetLength(), GL_UNSIGNED_INT, nullptr);

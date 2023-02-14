@@ -253,9 +253,20 @@ void Shader::UploadUniformIntArray(const std::string &name, const int *val, uint
 	glUniform1iv(GetUniformLocation(name), count, val);
 }
 
-void Shader::SetupStorageBuffer(const std::string &name, int slot, uint32_t ssbo)
+void Shader::SetupStorageBuffer(const std::string &name, uint32_t ssbo)
 {
-	GLuint block = glGetProgramResourceIndex(id, GL_SHADER_STORAGE_BLOCK, name.c_str());
-	glShaderStorageBlockBinding(id, block, slot);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, slot, ssbo);
+	GLuint index = glGetProgramResourceIndex(id, GL_SHADER_STORAGE_BLOCK, name.c_str());
+
+	// set the binding index if not yet done
+	if (ssboLocations.find(name) == ssboLocations.end())
+	{
+		GLint binding;
+		GLenum prop = GL_BUFFER_BINDING;
+		glGetProgramResourceiv(id, GL_SHADER_STORAGE_BLOCK, index, 1, &prop, 1, nullptr, &binding);
+		ssboLocations.insert({ name, binding });
+	}
+	// bind the ssbo
+	auto binding = ssboLocations[name];
+	glShaderStorageBlockBinding(id, index, binding);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, binding, ssbo);
 }
