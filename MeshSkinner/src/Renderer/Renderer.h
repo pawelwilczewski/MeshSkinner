@@ -6,8 +6,31 @@
 #include "Transform.h"
 #include "Entity/Entity.h"
 #include "Camera.h"
+#include "StorageBuffer.h"
 
-using DrawCalls = std::unordered_map<Ref<Shader>, Ref<VertexArray<uint32_t>>>;
+struct VertexInfo
+{
+	VertexInfo() = default;
+
+	uint32_t transformID;
+	uint32_t materialID;
+};
+
+struct DrawCallInfo
+{
+	DrawCallInfo();
+
+	Unique<VertexArray<uint32_t>> vao;
+	// TODO: should these be references?
+	std::vector<Entity &> entities;
+	// key: rendered mesh pointer, value: index offset to use if mesh is reused
+	std::unordered_map<const Mesh &, const uint32_t> meshes;
+	Unique<StorageBuffer<glm::mat4>> transforms;
+	Unique<StorageBuffer<MaterialGPU>> materials;
+	Unique<StorageBuffer<VertexInfo>> vertexInfo;
+};
+
+using DrawCalls = std::unordered_map<Ref<Shader>, Ref<DrawCallInfo>>;
 
 class Renderer
 {
@@ -21,18 +44,17 @@ public:
 	static void FrameEnd();
 
 private:
-	static void SubmitMeshStatic(Mesh *mesh, DrawCalls &drawCalls, std::function<void(const Ref<VertexArray<uint32_t>> &)> vaoInitFunction, std::function<uint32_t(const Ref<VertexArray<uint32_t>> &)> fillVertexBufferFunction);
+	static void SubmitMeshStatic(Entity &entity, const Mesh &mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<uint32_t(VertexArray<uint32_t> &)> fillVertexBufferFunction);
+
+	static void RenderDrawCalls(const Ref<Camera> &camera, const DrawCalls &drawCalls);
 
 public:
 	static Ref<Camera> activeCamera;
 
 private:
-	// key: rendered mesh pointer, value: index offset to use if mesh is reused
-	static std::unordered_map<const Mesh *, const uint32_t> meshes;
+	static DrawCalls staticMeshDrawCallsStatic;
+	static DrawCalls skeletalMeshDrawCallsStatic;
 
-	static DrawCalls staticMeshStaticDrawCalls;
-	static DrawCalls skeletalMeshStaticDrawCalls;
-
-	static DrawCalls staticMeshDynamicDrawCalls;
-	static DrawCalls skeletalMeshDynamicDrawCalls;
+	static DrawCalls staticMeshDrawCallsDynamic;
+	static DrawCalls skeletalMeshDrawCallsDynamic;
 };

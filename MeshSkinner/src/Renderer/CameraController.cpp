@@ -53,7 +53,7 @@ void CameraController::OnUpdate()
 	}
 	auto delta = pos - lastMousePos;
 	lastMousePos = pos;
-
+	Log::Trace("{}", delta);
 	camera->transform.SetRotation(camera->transform.GetRotation() + glm::vec3(delta.y, -delta.x, 0.f) * 0.05f);
 }
 

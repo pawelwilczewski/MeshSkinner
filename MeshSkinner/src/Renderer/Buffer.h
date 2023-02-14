@@ -37,6 +37,11 @@ public:
 		GenericBuffer::SetData(data, length * sizeof(T), lengthOffset * sizeof(T));
 	}
 
+	virtual void AppendData(const T *data, GLuint length)
+	{
+		GenericBuffer::SetData(data, length * sizeof(T), GetLength() * sizeof(T));
+	}
+
 public:
 	GLuint GetLength() const { return sizeBytes / sizeof(T); }
 	GLuint GetCapacity() const { return capacityBytes / sizeof(T); }

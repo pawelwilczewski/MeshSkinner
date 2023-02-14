@@ -78,21 +78,6 @@ void MainScene::OnStart()
     Renderer::Submit(staticEntity);
     Renderer::Submit(skeletalEntity);
     //Renderer::Submit(staticSkeletalEntity);
-
-
-
-
-    //vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
-    //vbo->SetData(staticVertices.data(), staticVertices.size());
-
-    //ibo = MakeRef<IndexBuffer<uint32_t>>();
-    //ibo->SetData(indices.data(), indices.size());
-
-    //vao = MakeRef<VertexArray<StaticVertex, uint32_t>>();
-    //vao->SetVertexBuffer(vbo);
-    //vao->SetIndexBuffer(ibo);
-
-    //shader = MakeRef<Shader>("UnlitDebug", "assets/shaders/UnlitDebug.vert", "assets/shaders/UnlitDebug.frag");
 }
 
 void MainScene::OnEarlyUpdate()
@@ -102,11 +87,7 @@ void MainScene::OnEarlyUpdate()
 
 void MainScene::OnUpdate()
 {
-    //vao->Bind();
-    //shader->Bind();
-    //shader->UploadUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
-    //
-    //glDrawElements(GL_TRIANGLES, vao->GetIndexBuffer()->GetLength(), GL_UNSIGNED_INT, nullptr);
+    staticEntity->transform.SetPosition(staticEntity->transform.GetPosition() + glm::vec3(0.1f) * Time::GetDeltaSeconds());
 }
 
 void MainScene::OnUpdateUI()

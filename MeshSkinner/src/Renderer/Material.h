@@ -2,15 +2,15 @@
 
 #include "Shader.h"
 
-class Material
+struct Material
 {
-public:
-
-public:
 	Ref<Shader> shader;
 };
 
-class MaterialGPU
+struct MaterialGPU
 {
+	MaterialGPU(const Material &material)
+	{
 
+	}
 };

@@ -18,8 +18,8 @@ Ref<Shader> ShaderLibrary::Load(const std::string &displayedName, const std::str
 
 	if (shader)
 	{
-		Log::Warn("Attempting to load a shader which already exists \"{}\"!", displayedName);
-		return shader;
+		Log::Warn("Overwriting/recompiling shader \"{}\"!", displayedName);
+		shaders.erase(shader);
 	}
 
 	shader = MakeRef<Shader>(displayedName, vertexSourcePath, fragmentSourcePath);

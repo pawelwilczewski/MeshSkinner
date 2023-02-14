@@ -13,6 +13,8 @@ GenericBuffer::~GenericBuffer()
 
 void GenericBuffer::SetData(const void *data, GLuint sizeBytes, GLuint sizeOffset)
 {
+	Log::Info("Set data {}, size offset: {}, size: {}", data, sizeOffset, sizeBytes);
+
 	// automatically resize to twice the size if exceeded limit - like in the vector class etc.
 	auto fullSize = sizeOffset + sizeBytes;
 
