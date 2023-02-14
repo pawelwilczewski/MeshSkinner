@@ -37,14 +37,14 @@ class Renderer
 public:
 	static void Init();
 
-	static void Submit(Ref<Entity> entity);
+	static void Submit(const Ref<Entity> &entity);
 	// TODO: add Remove which should be called opon destruction of Mesh owner
 
 	static void FrameBegin();
 	static void FrameEnd();
 
 private:
-	static void SubmitMeshStatic(Ref<Entity> entity, const Mesh *mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<uint32_t(VertexArray<uint32_t> &)> fillVertexBufferFunction);
+	static void SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<uint32_t(VertexArray<uint32_t> &)> fillVertexBufferFunction);
 
 	static void RenderDrawCalls(const Ref<Camera> &camera, const DrawCalls &drawCalls);
 

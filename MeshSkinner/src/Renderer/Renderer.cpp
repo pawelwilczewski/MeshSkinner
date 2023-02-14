@@ -34,7 +34,7 @@ void Renderer::Init()
 	skeletalMeshDrawCallsDynamic = DrawCalls();
 }
 
-void Renderer::SubmitMeshStatic(Ref<Entity> entity, const Mesh *mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<uint32_t(VertexArray<uint32_t> &)> fillVertexBufferFunction)
+void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<uint32_t(VertexArray<uint32_t> &)> fillVertexBufferFunction)
 {
 	// insert new shader if necessary
 	if (drawCalls.find(mesh->material->shader) == drawCalls.end())
@@ -104,7 +104,7 @@ void Renderer::SubmitMeshStatic(Ref<Entity> entity, const Mesh *mesh, DrawCalls 
 	vertexInfo->AppendData(ids.data(), ids.size());
 }
 
-void Renderer::Submit(Ref<Entity> entity)
+void Renderer::Submit(const Ref<Entity> &entity)
 {
 	// submit all static meshes
 	auto staticMeshes = entity->GetComponents<StaticMesh>();
