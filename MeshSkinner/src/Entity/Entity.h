@@ -11,16 +11,30 @@ public:
 public:
 	Transform transform;
 
+	//template<typename T>
+	//const std::unordered_set<T *> GetComponents() const
+	//{
+	//	auto result = std::unordered_set<T *>();
+	//	for (const auto &component : components)
+	//		if (dynamic_cast<T *>(component.get()))
+	//			result.insert(component.get());
+
+	//	return result;
+	//}
+
 	template<typename T>
-	const std::unordered_set<const Ref<T> &> GetComponents() const
+	const std::unordered_set<const T *> GetComponents() const
 	{
-		auto result = std::unordered_set<const Ref<T> &>();
+		auto result = std::unordered_set<const T *>();
 		for (const auto &component : components)
-			if (dynamic_cast<T *>(component.get()))
-				result.insert(component);
+		{
+			auto asT = dynamic_cast<const T *>(component.get());
+			if (asT) result.insert(asT);
+		}
 
 		return result;
 	}
+
 
 	void AddComponent(Ref<EntityComponent> component);
 	void RemoveComponent(Ref<EntityComponent> component);

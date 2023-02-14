@@ -11,8 +11,8 @@ DrawCallInfo::DrawCallInfo() :
 	transforms(MakeUnique<StorageBuffer<glm::mat4>>()),
 	materials(MakeUnique<StorageBuffer<MaterialGPU>>()),
 	vertexInfo(MakeUnique<StorageBuffer<VertexInfo>>()),
-	entities(std::unordered_map<const Ref<Entity> &, const uint32_t>()),
-	meshes(std::unordered_map<const Ref<Mesh> &, const uint32_t>())
+	entities(std::unordered_map<Ref<Entity>, const uint32_t>()),
+	meshes(std::unordered_map<const Mesh *, const uint32_t>())
 {
 
 }
@@ -34,7 +34,7 @@ void Renderer::Init()
 	skeletalMeshDrawCallsDynamic = DrawCalls();
 }
 
-void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<Mesh> &mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<uint32_t(VertexArray<uint32_t> &)> fillVertexBufferFunction)
+void Renderer::SubmitMeshStatic(Ref<Entity> entity, const Mesh *mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<uint32_t(VertexArray<uint32_t> &)> fillVertexBufferFunction)
 {
 	// insert new shader if necessary
 	if (drawCalls.find(mesh->material->shader) == drawCalls.end())
@@ -56,7 +56,7 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<Mesh> &mesh
 
 	// get the transform id
 	uint32_t transformID;
-	if (std::find(entities.begin(), entities.end(), entity) == entities.end())
+	if (entities.find(entity) == entities.end())
 	{
 		// transform info update
 		transforms->AppendData(&entity->transform.GetMatrix(), 1);
@@ -104,7 +104,7 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<Mesh> &mesh
 	vertexInfo->AppendData(ids.data(), ids.size());
 }
 
-void Renderer::Submit(const Ref<Entity> &entity)
+void Renderer::Submit(Ref<Entity> entity)
 {
 	// submit all static meshes
 	auto staticMeshes = entity->GetComponents<StaticMesh>();
@@ -134,7 +134,7 @@ void Renderer::Submit(const Ref<Entity> &entity)
 				return indexOffset;
 			});
 	}
-	
+
 	auto skeletalMeshes = entity->GetComponents<SkeletalMesh>();
 	for (auto &mesh : skeletalMeshes)
 	{
