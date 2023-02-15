@@ -265,6 +265,7 @@ void Shader::SetupStorageBuffer(const std::string &name, uint32_t ssbo)
 		glGetProgramResourceiv(id, GL_SHADER_STORAGE_BLOCK, index, 1, &prop, 1, nullptr, &binding);
 		ssboLocations.insert({ name, binding });
 	}
+
 	// bind the ssbo
 	auto binding = ssboLocations[name];
 	glShaderStorageBlockBinding(id, index, binding);

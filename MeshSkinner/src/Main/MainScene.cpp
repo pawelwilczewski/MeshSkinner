@@ -15,7 +15,10 @@ static Ref<Shader> shader;
 
 static Ref<Entity> noneEntity;
 static Ref<Entity> staticEntity;
+static Ref<Entity> staticEntity2;
+static Ref<Entity> staticEntity3;
 static Ref<Entity> skeletalEntity;
+static Ref<Entity> skeletalEntity2;
 static Ref<Entity> staticSkeletalEntity;
 
 MainScene::MainScene() : Scene()
@@ -64,21 +67,34 @@ void MainScene::OnStart()
 
     noneEntity = MakeRef<Entity>();
 
-    staticEntity = MakeRef<Entity>();
+    staticEntity = MakeRef<Entity>(Transform(glm::vec3(0.f, 0.f, 2.f)));
     staticEntity->AddComponent(staticMesh);
 
-    skeletalEntity = MakeRef<Entity>();
+    staticEntity2 = MakeRef<Entity>(Transform(glm::vec3(0.f, 0.f, -2.f)));
+    staticEntity2->AddComponent(staticMesh);
+
+    staticEntity3 = MakeRef<Entity>(Transform(glm::vec3(0.f, 1.f, 2.f)));
+    staticEntity3->AddComponent(staticMesh);
+    //staticEntity3->AddComponent(skeletalMesh);
+
+    skeletalEntity = MakeRef<Entity>(Transform(glm::vec3(2.f, 0.f, 0.f)));
     skeletalEntity->AddComponent(skeletalMesh);
 
-    staticSkeletalEntity = MakeRef<Entity>();
-    staticSkeletalEntity->transform.SetPosition({ -2.f, 2.f, 0.f });
-    staticSkeletalEntity->AddComponent(staticMesh);
-    staticSkeletalEntity->AddComponent(skeletalMesh);
+    skeletalEntity2 = MakeRef<Entity>(Transform(glm::vec3(-2.f, 0.f, 0.f)));
+    skeletalEntity2->AddComponent(skeletalMesh);
 
-    Renderer::Submit(noneEntity);
+    //staticSkeletalEntity = MakeRef<Entity>();
+    //staticSkeletalEntity->transform.SetPosition({ -2.f, 2.f, 0.f });
+    //staticSkeletalEntity->AddComponent(staticMesh);
+    //staticSkeletalEntity->AddComponent(skeletalMesh);
+
+    //Renderer::Submit(noneEntity);
     Renderer::Submit(staticEntity);
-    Renderer::Submit(skeletalEntity);
-    Renderer::Submit(staticSkeletalEntity);
+    Renderer::Submit(staticEntity2);
+    Renderer::Submit(staticEntity3);
+    //Renderer::Submit(skeletalEntity);
+    //Renderer::Submit(skeletalEntity2);
+    //Renderer::Submit(staticSkeletalEntity);
 }
 
 void MainScene::OnEarlyUpdate()
@@ -88,7 +104,9 @@ void MainScene::OnEarlyUpdate()
 
 void MainScene::OnUpdate()
 {
-    staticEntity->transform.SetPosition(staticEntity->transform.GetPosition() + glm::vec3(0.1f) * Time::GetDeltaSeconds());
+    //staticEntity->transform.SetPosition(staticEntity->transform.GetPosition() + glm::vec3(0.1f) * Time::GetDeltaSeconds());
+    //staticEntity2->transform.SetPosition(staticEntity2->transform.GetPosition() + glm::vec3(0.1f) * Time::GetDeltaSeconds());
+    //staticEntity2->transform.SetPosition(staticEntity3->transform.GetPosition() + glm::vec3(-0.1f) * Time::GetDeltaSeconds());
 }
 
 void MainScene::OnUpdateUI()

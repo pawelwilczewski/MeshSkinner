@@ -61,6 +61,7 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 		// transform info update
 		transforms->AppendData(&entity->transform.GetMatrix(), 1);
 		transformID = transforms->GetLength() - 1;
+		Log::Trace("transform added {}, id: {}", entity->transform.GetMatrix(), transformID);
 
 		// new entity - insert for future use
 		entities.insert({ entity, transformID });
@@ -102,6 +103,11 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 	auto materialID = materials->GetLength() - 1;
 	auto ids = std::vector<VertexInfo>(indicesOffset.size(), VertexInfo(transformID, materialID));
 	vertexInfo->AppendData(ids.data(), ids.size());
+	Log::Trace("vertexinfo added");
+
+	uint32_t i = 0;
+	for (const auto &vinfo : ids)
+		Log::Trace("\t{}: t {}, m {}", i++, vinfo.transformID, vinfo.materialID);
 }
 
 void Renderer::Submit(const Ref<Entity> &entity)
