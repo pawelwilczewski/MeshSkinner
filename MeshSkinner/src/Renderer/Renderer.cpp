@@ -12,7 +12,7 @@ DrawCallInfo::DrawCallInfo() :
 	materials(MakeUnique<StorageBuffer<MaterialGPU>>()),
 	vertexInfo(MakeUnique<StorageBuffer<VertexInfo>>()),
 	entities(std::unordered_map<Ref<Entity>, const uint32_t>()),
-	meshes(std::unordered_map<const Mesh *, const uint32_t>())
+	meshes(std::unordered_set<const Mesh *>())
 {
 
 }
@@ -54,6 +54,9 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 	auto &transforms = drawCalls[mesh->material->shader]->transforms;
 	auto &materials = drawCalls[mesh->material->shader]->materials;
 
+	// calculate the index offset
+	uint32_t indexOffset = fillVertexBufferFunction(*vao.get());
+
 	// get the transform id
 	uint32_t transformID;
 	if (entities.find(entity) == entities.end())
@@ -71,21 +74,6 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 		transformID = entities[entity];
 	}
 
-	// new mesh
-	uint32_t indexOffset;
-	if (meshes.find(mesh) == meshes.end())
-	{
-		indexOffset = fillVertexBufferFunction(*vao.get());
-
-		// add the meshes to the map for reuse later
-		meshes.insert({ mesh, indexOffset });
-	}
-	// the mesh is already rendered - reuse the index offset
-	else
-	{
-		indexOffset = meshes[mesh];
-	}
-
 	// offset the indices appropriately
 	std::vector<uint32_t> indicesOffset = mesh->indices;
 	if (indexOffset > 0)
@@ -101,7 +89,7 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 
 	// append the vertex info
 	auto materialID = materials->GetLength() - 1;
-	auto ids = std::vector<VertexInfo>(indicesOffset.size(), VertexInfo(transformID, materialID));
+	auto ids = std::vector<VertexInfo>(TypedVB<StaticVertex>(vao->GetVertexBuffer(0).get())->GetLength() - indexOffset, VertexInfo(transformID, materialID));
 	vertexInfo->AppendData(ids.data(), ids.size());
 	Log::Trace("vertexinfo added");
 

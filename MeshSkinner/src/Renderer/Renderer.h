@@ -23,8 +23,7 @@ struct DrawCallInfo
 	Unique<VertexArray<uint32_t>> vao;
 	// key: entity already rendered, value: transform id to use for mesh
 	std::unordered_map<Ref<Entity>, const uint32_t> entities;
-	// key: mesh already rendered, value: ibo index offset to use if mesh is reused
-	std::unordered_map<const Mesh *, const uint32_t> meshes;
+	std::unordered_set<const Mesh *> meshes;
 	Unique<StorageBuffer<glm::mat4>> transforms;
 	Unique<StorageBuffer<MaterialGPU>> materials;
 	Unique<StorageBuffer<VertexInfo>> vertexInfo;
