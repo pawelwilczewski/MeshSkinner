@@ -68,6 +68,18 @@ static bool LoadFromFile(const std::string &path)
 	return true;
 }
 
+static const void *GetAttributeData(const tinygltf::Primitive &primitive, const std::string &attribute)
+{
+	if (primitive.attributes.find(attribute) != primitive.attributes.end())
+	{
+		auto &accessor = model.accessors[primitive.attributes.at(attribute)];
+		auto &bufferView = model.bufferViews[accessor.bufferView];
+		return &(model.buffers[bufferView.buffer].data[accessor.byteOffset + bufferView.byteOffset]);
+	}
+
+	return nullptr;
+}
+
 bool MeshLibrary::Get(const std::string &path, Ref<StaticMesh> &outMesh)
 {
 	// TODO: get from the cache map if already loaded once
@@ -88,32 +100,68 @@ bool MeshLibrary::Get(const std::string &path, Ref<StaticMesh> &outMesh)
 			{
 			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
 			{
-				uint8_t *buffer = static_cast<uint8_t *>(indicesData);
-				for (size_t i = 0; i < indices.count; ++i)
-					outMesh->indices.push_back(static_cast<uint32_t>(buffer[i]));
+				auto buffer = static_cast<uint8_t *>(indicesData);
+				outMesh->indices.insert(outMesh->indices.end(), buffer, buffer + indices.count);
 				break;
 			}
 			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
 			{
-				uint16_t *buffer = static_cast<uint16_t *>(indicesData);
-				for (size_t i = 0; i < indices.count; ++i)
-					outMesh->indices.push_back(static_cast<uint32_t>(buffer[i]));
+				auto buffer = static_cast<uint16_t *>(indicesData);
+				outMesh->indices.insert(outMesh->indices.end(), buffer, buffer + indices.count);
 				break;
 			}
 			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
 			{
-				uint32_t *buffer = static_cast<uint32_t *>(indicesData);
-				for (size_t i = 0; i < indices.count; ++i)
-					outMesh->indices.push_back(buffer[i]);
+				auto buffer = static_cast<uint32_t *>(indicesData);
+				outMesh->indices.insert(outMesh->indices.end(), buffer, buffer + indices.count);
 				break;
 			}
+			default:
+				Log::Error("GLTF Import: Unsupported index type for file: {}", path);
+				return false;
 			}
 
-			// attributes
-			for (const auto &[attribute, index] : primitive.attributes)
+			// make up the vertices
+			// get the vert count (position should always be specified)
+			auto vertCount = model.accessors[primitive.attributes.at("POSITION")].count;
+
+			// append base vertices to the mesh
+			outMesh->vertices.insert(outMesh->vertices.end(), vertCount, StaticVertex());
+			
+			// update all attributes for each vertex
+
+			auto data = GetAttributeData(primitive, "POSITION");
+			if (data)
 			{
-				
-				//model.accessors[index];
+				auto *buffer = static_cast<const glm::vec3 *>(data);
+				for (int i = 0; i < vertCount; i++)
+					outMesh->vertices[i].position = buffer[i];
+			}
+
+			data = GetAttributeData(primitive, "TEXCOORD_0");
+			if (data)
+			{
+				// TODO: texcoord is not necessarily float vec2 https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#meshes
+				auto *buffer = static_cast<const glm::vec2 *>(data);
+				for (int i = 0; i < vertCount; i++)
+					outMesh->vertices[i].texCoord = buffer[i];
+			}
+
+			data = GetAttributeData(primitive, "NORMAL");
+			if (data)
+			{
+				auto *buffer = static_cast<const glm::vec3 *>(data);
+				for (int i = 0; i < vertCount; i++)
+					outMesh->vertices[i].normal = buffer[i];
+			}
+
+			data = GetAttributeData(primitive, "COLOR_0");
+			if (data)
+			{
+				// TODO: color is not necessarily float vec3 https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#meshes
+				auto *buffer = static_cast<const glm::vec3 *>(data);
+				for (int i = 0; i < vertCount; i++)
+					outMesh->vertices[i].color = buffer[i];
 			}
 		}
 	}

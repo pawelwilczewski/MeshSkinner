@@ -21,12 +21,27 @@ const BufferLayout &SkeletalVertex::layout = BufferLayout({
 	{ "weights", ShaderDataType::Float4 },
 });
 
+Vertex::Vertex()
+{
+
+}
+
 Vertex::Vertex(const glm::vec3 &position) : position(position)
 {
 
 }
 
+StaticVertex::StaticVertex() : Vertex()
+{
+
+}
+
 StaticVertex::StaticVertex(const glm::vec3 &position, const glm::vec2 &texCoord, const glm::vec3 &normal, const glm::vec3 &color) : Vertex(position), texCoord(texCoord), normal(normal), color(color)
+{
+
+}
+
+SkeletalVertex::SkeletalVertex()
 {
 
 }

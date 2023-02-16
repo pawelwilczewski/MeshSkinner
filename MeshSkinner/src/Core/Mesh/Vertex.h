@@ -6,6 +6,7 @@
 class Vertex
 {
 public:
+	Vertex();
 	Vertex(const glm::vec3 &position);
 
 public:
@@ -17,6 +18,7 @@ public:
 class StaticVertex : public Vertex
 {
 public:
+	StaticVertex();
 	StaticVertex(const glm::vec3 &position, const glm::vec2 &texCoord, const glm::vec3 &normal, const glm::vec3 &color);
 
 public:
@@ -30,6 +32,7 @@ public:
 class SkeletalVertex : public StaticVertex
 {
 public:
+	SkeletalVertex();
 	SkeletalVertex(const glm::vec3 &position, const glm::vec2 &texCoord, const glm::vec3 &normal, const glm::vec3 &color, const glm::vec<4, uint16_t> &bones, const glm::vec4 &weights);
 
 public:

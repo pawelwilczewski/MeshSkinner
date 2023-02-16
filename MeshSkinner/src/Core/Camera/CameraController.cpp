@@ -41,7 +41,7 @@ void CameraController::OnUpdate()
 		auto forward = input.y * -camera->transform.GetRightVector();
 		auto right = input.x * camera->transform.GetForwardVector();
 
-		camera->transform.SetPosition(camera->transform.GetPosition() + Time::GetDeltaSeconds() * (forward + right));
+		camera->transform.SetPosition(camera->transform.GetPosition() + moveSpeed * Time::GetDeltaSeconds() * (forward + right));
 	}
 
 	// rotation

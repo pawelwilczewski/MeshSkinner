@@ -24,7 +24,7 @@ static Ref<Entity> staticSkeletalEntity;
 MainScene::MainScene() : Scene()
 {
     camera = MakeRef<Camera>();
-    cameraController = MakeRef<CameraController>(camera);
+    cameraController = MakeRef<CameraController>(camera, 10.f);
 
     Renderer::activeCamera = camera;
 }
@@ -82,6 +82,12 @@ void MainScene::OnStart()
     staticSkeletalEntity->AddComponent(staticMesh);
     staticSkeletalEntity->AddComponent(skeletalMesh);
 
+    auto mesh = MakeRef<StaticMesh>(std::vector<StaticVertex>(), std::vector<uint32_t>(), MaterialLibrary::GetDefault(), true);
+    MeshLibrary::Get("assets/models/shark.gltf", mesh);
+    noneEntity->AddComponent(mesh);
+    noneEntity->transform.SetScale(glm::vec3(0.01f));
+    noneEntity->transform.Translate(glm::vec3(5.f, 0.f, 0.f));
+
     Renderer::Submit(noneEntity);
     Renderer::Submit(staticEntity);
     Renderer::Submit(staticEntity2);
@@ -89,9 +95,6 @@ void MainScene::OnStart()
     Renderer::Submit(skeletalEntity);
     Renderer::Submit(skeletalEntity2);
     Renderer::Submit(staticSkeletalEntity);
-
-    auto mesh = MakeRef<StaticMesh>(std::vector<StaticVertex>(), std::vector<uint32_t>(), MaterialLibrary::GetDefault(), true);
-    MeshLibrary::Get("assets/models/shark.gltf", mesh);
 }
 
 void MainScene::OnEarlyUpdate()
