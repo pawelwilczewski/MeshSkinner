@@ -1,7 +1,7 @@
 project "tinygltf"
 	kind "StaticLib"
 	language "C++"
-	cppdialect "C++11"
+	cppdialect "C++14"
     staticruntime "on"
 
 	files {
@@ -10,4 +10,8 @@ project "tinygltf"
 		"stb_image.h",
 		"stb_image_write.h",
 		"json.hpp"
+	}
+
+	defines {
+		"TINYGLTF_USE_CPP14"
 	}
