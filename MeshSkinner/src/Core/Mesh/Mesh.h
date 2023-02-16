@@ -2,8 +2,8 @@
 
 #include "Application/Core.h"
 #include "Vertex.h"
-#include "Material.h"
-#include "Entity/EntityComponent.h"
+#include "Core/Renderer/Material/Material.h"
+#include "Core/Entity/EntityComponent.h"
 
 class Mesh : public EntityComponent
 {

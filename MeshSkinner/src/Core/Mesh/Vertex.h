@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Application/Core.h"
-#include "BufferLayout.h"
+#include "Core/Renderer/Buffer/BufferLayout.h"
 
 class Vertex
 {

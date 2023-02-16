@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "MainScene.h"
 
-#include "Renderer/Renderer.h"
-#include "Renderer/Buffer.h"
-#include "Renderer/Camera.h"
-#include "Renderer/CameraController.h"
+#include "Core/Renderer/Renderer.h"
+#include "Core/Renderer/Buffer/Buffer.h"
+#include "Core/Camera/Camera.h"
+#include "Core/Camera/CameraController.h"
 
 static Ref<Camera> camera;
 static Ref<CameraController> cameraController;

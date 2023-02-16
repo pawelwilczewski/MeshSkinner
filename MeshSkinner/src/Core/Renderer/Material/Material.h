@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Shader.h"
+#include "Core/Renderer/Shader/Shader.h"
 
 struct Material
 {
