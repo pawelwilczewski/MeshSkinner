@@ -2,26 +2,27 @@
 #include "Window.h"
 #include "Error.h"
 
-GLFWwindow *Window::s_Window;
-GLuint Window::s_FramebufferTexture;
+GLFWwindow *Window::window;
+GLuint Window::framebufferTexture;
 
 static GLuint fbo, rbo;
+static glm::ivec2 previousBufferSize = glm::ivec2(0);
 
-void Window::Init(int width, int height, const char *title, int vsync)
+void Window::Init(const glm::ivec2 &windowSize, const char *title, int vsync)
 {
     glfwSetErrorCallback(Error::CallbackGLFW);
 
     if (!glfwInit())
         exit(EXIT_FAILURE);
 
-    s_Window = glfwCreateWindow(width, height, title, NULL, NULL);
-    if (!s_Window)
+    window = glfwCreateWindow(windowSize.x, windowSize.y, title, NULL, NULL);
+    if (!window)
     {
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
 
-    glfwMakeContextCurrent(s_Window);
+    glfwMakeContextCurrent(window);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -42,24 +43,58 @@ void Window::Init(int width, int height, const char *title, int vsync)
 
     glfwSwapInterval(vsync);
 
-    // --------------------------
-    // setup rendering to texture
+    // gl setup - TODO: better move elsewhere
+    glEnable(GL_DEPTH_TEST);
 
-    // create the FBO
-    glGenFramebuffers(1, &fbo); // TODO: change glGen... to glCreate...
+    // create the framebuffer and framebuffer texture
+    glCreateFramebuffers(1, &fbo);
+    glCreateTextures(GL_TEXTURE_2D, 1, &framebufferTexture);
+    glCreateRenderbuffers(1, &rbo);
+}
+
+void Window::FrameBegin()
+{
+    auto bufferSize = UserInterface::GetViewportSize();
+
+    // regen buffer if window resized
+    if (bufferSize != previousBufferSize)
+        RegenFramebuffer(bufferSize);
+    previousBufferSize = bufferSize;
+
+    // bind framebuffer and clear viewport
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glViewport(0, 0, bufferSize.x, bufferSize.y);
+}
+
+void Window::FrameEnd()
+{
+    // swap buffers poll events
+    glfwSwapBuffers(Window::GetNativeWindow());
+    glfwPollEvents();
+    
+    // TODO: abstraction for all the viewport and framebuffer logic
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Window::Terminate()
+{
+    glfwDestroyWindow(window);
+    glfwTerminate();
+}
+
+void Window::RegenFramebuffer(const glm::ivec2 bufferSize)
+{
+    Log::Trace("Regen framebuffer {}", bufferSize);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     // create the render target texture
-    glGenTextures(1, &s_FramebufferTexture);
-    glBindTexture(GL_TEXTURE_2D, s_FramebufferTexture);
-    auto bufferSize = Window::GetFramebufferSize();
+    glBindTexture(GL_TEXTURE_2D, framebufferTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, bufferSize.x, bufferSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, s_FramebufferTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
 
     // create the RBO
-    glGenRenderbuffers(1, &rbo);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, bufferSize.x, bufferSize.y);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
@@ -69,32 +104,20 @@ void Window::Init(int width, int height, const char *title, int vsync)
         Log::Error("Framebuffer is not complete!");
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Window::FrameBegin()
+GLFWwindow *Window::GetNativeWindow() { return window; }
+glm::ivec2 Window::GetFramebufferSize()
 {
-    // clear the frame buffer
-    auto bufferSize = Window::GetFramebufferSize();
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glViewport(0, 0, bufferSize.x, bufferSize.y);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    // setup rendering to the FBO
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    return { width, height };
 }
+GLuint Window::GetFramebufferTexture() { return framebufferTexture; }
+bool Window::IsPendingClose() { return glfwWindowShouldClose(window); }
 
-void Window::FrameEnd()
+void Window::SetCursorVisibility(bool visible)
 {
-    // swap buffers poll events
-    glfwSwapBuffers(Window::GetNativeWindow());
-    glfwPollEvents();
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-void Window::Terminate()
-{
-    glfwDestroyWindow(s_Window);
-    glfwTerminate();
+    glfwSetInputMode(window, GLFW_CURSOR, visible ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
 }

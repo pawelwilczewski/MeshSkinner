@@ -3,12 +3,17 @@
 
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
 
-#include "../ImGui/backends/imgui_impl_opengl3.cpp"
-#include "../ImGui/backends/imgui_impl_glfw.cpp"
+#include "../imgui/backends/imgui_impl_opengl3.cpp"
+#include "../imgui/backends/imgui_impl_glfw.cpp"
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
+
+glm::ivec2 UserInterface::viewportSize = glm::ivec2(1);
+
+glm::ivec2 UserInterface::GetViewportSize() { return viewportSize; }
+void UserInterface::UpdateViewportSize(const glm::ivec2 &newSize) { viewportSize = newSize; }
 
 void UserInterface::Init()
 {
@@ -36,11 +41,45 @@ void UserInterface::Init()
     ImGui_ImplOpenGL3_Init("#version 430");
 }
 
+static void SetupDockspaceViewport()
+{
+    // setup dockspace window
+    ImGuiViewport *viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->WorkPos);
+    ImGui::SetNextWindowSize(viewport->WorkSize);
+    ImGui::SetNextWindowViewport(viewport->ID);
+
+    // setup dockspace style
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+    // setup window flags
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+    windowFlags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+    windowFlags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+    // create the dockspace
+    ImGui::Begin("Dockspace", NULL, windowFlags);
+    ImGui::PopStyleVar();
+    ImGui::DockSpace(ImGui::GetID("Main Dockspace"), ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+    ImGui::End();
+    ImGui::PopStyleVar(2);
+
+    ImGui::Begin("Viewport");
+    ImVec2 availableSize = ImGui::GetContentRegionAvail();
+    UserInterface::UpdateViewportSize(glm::ivec2(glm::max(0, (int)availableSize.x), glm::max(0, (int)availableSize.y)));
+    ImGui::Image((void *)(intptr_t)Window::GetFramebufferTexture(), availableSize);
+    ImGui::End();
+}
+
 void UserInterface::FrameBegin()
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+
+    SetupDockspaceViewport();
 }
 
 void UserInterface::FrameEnd()

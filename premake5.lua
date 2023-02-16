@@ -90,6 +90,7 @@ project "MeshSkinner"
 			"PLATFORM_LINUX"
 		}
 
+include "assets"
 
 group "Dependencies"
 	include "thirdparty/glfw"
