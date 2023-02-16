@@ -89,6 +89,9 @@ void MainScene::OnStart()
     Renderer::Submit(skeletalEntity);
     Renderer::Submit(skeletalEntity2);
     Renderer::Submit(staticSkeletalEntity);
+
+    auto mesh = MakeRef<StaticMesh>(std::vector<StaticVertex>(), std::vector<uint32_t>(), MaterialLibrary::GetDefault(), true);
+    MeshLibrary::Get("assets/models/shark.gltf", mesh);
 }
 
 void MainScene::OnEarlyUpdate()

@@ -68,17 +68,60 @@ static bool LoadFromFile(const std::string &path)
 	return true;
 }
 
-bool MeshLibrary::Get(const std::string &path, Ref<StaticMesh> &mesh)
+bool MeshLibrary::Get(const std::string &path, Ref<StaticMesh> &outMesh)
 {
+	// TODO: get from the cache map if already loaded once
+
 	if (!LoadFromFile(path))
 		return false;
 	
 	// for now, we just assume the imported file is .gltf
+	for (const auto &mesh : model.meshes)
+	{
+		for (const auto &primitive : mesh.primitives)
+		{
+			// add indices
+			auto &indices = model.accessors[primitive.indices];
+			void *indicesData = &(model.buffers[model.bufferViews[indices.bufferView].buffer].data[indices.byteOffset + model.bufferViews[indices.bufferView].byteOffset]);
+
+			switch (indices.componentType)
+			{
+			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+			{
+				uint8_t *buffer = static_cast<uint8_t *>(indicesData);
+				for (size_t i = 0; i < indices.count; ++i)
+					outMesh->indices.push_back(static_cast<uint32_t>(buffer[i]));
+				break;
+			}
+			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+			{
+				uint16_t *buffer = static_cast<uint16_t *>(indicesData);
+				for (size_t i = 0; i < indices.count; ++i)
+					outMesh->indices.push_back(static_cast<uint32_t>(buffer[i]));
+				break;
+			}
+			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
+			{
+				uint32_t *buffer = static_cast<uint32_t *>(indicesData);
+				for (size_t i = 0; i < indices.count; ++i)
+					outMesh->indices.push_back(buffer[i]);
+				break;
+			}
+			}
+
+			// attributes
+			for (const auto &[attribute, index] : primitive.attributes)
+			{
+				
+				//model.accessors[index];
+			}
+		}
+	}
 
 	return true;
 }
 
-bool MeshLibrary::Get(const std::string &path, Ref<Skeleton> &skeleton, Ref<SkeletalMesh> &mesh)
+bool MeshLibrary::Get(const std::string &path, Ref<Skeleton> &outSkeleton, Ref<SkeletalMesh> &outMesh)
 {
 	if (!LoadFromFile(path))
 		return false;
