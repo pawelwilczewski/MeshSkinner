@@ -83,18 +83,18 @@ void MainScene::OnStart()
     skeletalEntity2 = MakeRef<Entity>(Transform(glm::vec3(-2.f, 0.f, 0.f)));
     skeletalEntity2->AddComponent(skeletalMesh);
 
-    //staticSkeletalEntity = MakeRef<Entity>();
-    //staticSkeletalEntity->transform.SetPosition({ -2.f, 2.f, 0.f });
-    //staticSkeletalEntity->AddComponent(staticMesh);
-    //staticSkeletalEntity->AddComponent(skeletalMesh);
+    staticSkeletalEntity = MakeRef<Entity>();
+    staticSkeletalEntity->transform.SetPosition({ -2.f, 2.f, 0.f });
+    staticSkeletalEntity->AddComponent(staticMesh);
+    staticSkeletalEntity->AddComponent(skeletalMesh);
 
-    //Renderer::Submit(noneEntity);
+    Renderer::Submit(noneEntity);
     Renderer::Submit(staticEntity);
     Renderer::Submit(staticEntity2);
     Renderer::Submit(staticEntity3);
-    //Renderer::Submit(skeletalEntity);
-    //Renderer::Submit(skeletalEntity2);
-    //Renderer::Submit(staticSkeletalEntity);
+    Renderer::Submit(skeletalEntity);
+    Renderer::Submit(skeletalEntity2);
+    Renderer::Submit(staticSkeletalEntity);
 }
 
 void MainScene::OnEarlyUpdate()
@@ -104,9 +104,12 @@ void MainScene::OnEarlyUpdate()
 
 void MainScene::OnUpdate()
 {
-    //staticEntity->transform.SetPosition(staticEntity->transform.GetPosition() + glm::vec3(0.1f) * Time::GetDeltaSeconds());
-    //staticEntity2->transform.SetPosition(staticEntity2->transform.GetPosition() + glm::vec3(0.1f) * Time::GetDeltaSeconds());
-    //staticEntity2->transform.SetPosition(staticEntity3->transform.GetPosition() + glm::vec3(-0.1f) * Time::GetDeltaSeconds());
+    staticEntity->transform.SetPosition(staticEntity->transform.GetPosition() + glm::vec3(0.1f) * Time::GetDeltaSeconds());
+    staticEntity2->transform.SetPosition(staticEntity2->transform.GetPosition() + glm::vec3(0.1f) * Time::GetDeltaSeconds());
+    staticEntity3->transform.SetPosition(staticEntity3->transform.GetPosition() + glm::vec3(-0.1f) * Time::GetDeltaSeconds());
+    staticSkeletalEntity->transform.SetPosition(staticSkeletalEntity->transform.GetPosition() + glm::vec3(-0.1f) * Time::GetDeltaSeconds());
+
+    staticEntity->transform.SetScale(glm::vec3(glm::sin(Time::GetTimeSeconds())));
 }
 
 void MainScene::OnUpdateUI()

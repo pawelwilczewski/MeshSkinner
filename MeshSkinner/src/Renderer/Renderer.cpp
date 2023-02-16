@@ -34,7 +34,7 @@ void Renderer::Init()
 	skeletalMeshDrawCallsDynamic = DrawCalls();
 }
 
-void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<uint32_t(VertexArray<uint32_t> &)> fillVertexBufferFunction)
+void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<void(VertexArray<uint32_t> &)> fillVertexBufferFunction)
 {
 	// insert new shader if necessary
 	if (drawCalls.find(mesh->material->shader) == drawCalls.end())
@@ -54,9 +54,6 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 	auto &transforms = drawCalls[mesh->material->shader]->transforms;
 	auto &materials = drawCalls[mesh->material->shader]->materials;
 
-	// calculate the index offset
-	uint32_t indexOffset = fillVertexBufferFunction(*vao.get());
-
 	// get the transform id
 	uint32_t transformID;
 	if (entities.find(entity) == entities.end())
@@ -64,7 +61,6 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 		// transform info update
 		transforms->AppendData(&entity->transform.GetMatrix(), 1);
 		transformID = transforms->GetLength() - 1;
-		Log::Trace("transform added {}, id: {}", entity->transform.GetMatrix(), transformID);
 
 		// new entity - insert for future use
 		entities.insert({ entity, transformID });
@@ -73,6 +69,10 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 	{
 		transformID = entities[entity];
 	}
+
+	// fet the index offset, fill in the vbo
+	uint32_t indexOffset = vao->GetVertexBuffer(0)->GetLength();
+	fillVertexBufferFunction(*vao.get());
 
 	// offset the indices appropriately
 	std::vector<uint32_t> indicesOffset = mesh->indices;
@@ -89,13 +89,8 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 
 	// append the vertex info
 	auto materialID = materials->GetLength() - 1;
-	auto ids = std::vector<VertexInfo>(TypedVB<StaticVertex>(vao->GetVertexBuffer(0).get())->GetLength() - indexOffset, VertexInfo(transformID, materialID));
+	auto ids = std::vector<VertexInfo>(vao->GetVertexBuffer(0)->GetLength() - indexOffset, VertexInfo(transformID, materialID));
 	vertexInfo->AppendData(ids.data(), ids.size());
-	Log::Trace("vertexinfo added");
-
-	uint32_t i = 0;
-	for (const auto &vinfo : ids)
-		Log::Trace("\t{}: t {}, m {}", i++, vinfo.transformID, vinfo.materialID);
 }
 
 void Renderer::Submit(const Ref<Entity> &entity)
@@ -119,14 +114,13 @@ void Renderer::Submit(const Ref<Entity> &entity)
 				vao.SetVertexBuffer(vbo, 0);
 				vao.SetIndexBuffer(ibo);
 			},
-			[&](VertexArray<uint32_t> &vao) -> uint32_t
+			[&](VertexArray<uint32_t> &vao)
 			{
 				// append the vertices to the vbo
 				auto vbo = TypedVB<StaticVertex>(vao.GetVertexBuffer(0).get());
-				auto indexOffset = vbo->GetLength();
 				vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
-				return indexOffset;
-			});
+			}
+			);
 	}
 
 	auto skeletalMeshes = entity->GetComponents<SkeletalMesh>();
@@ -146,13 +140,11 @@ void Renderer::Submit(const Ref<Entity> &entity)
 				vao.SetVertexBuffer(vbo, 0);
 				vao.SetIndexBuffer(ibo);
 			},
-			[&](VertexArray<uint32_t> &vao) -> uint32_t
+			[&](VertexArray<uint32_t> &vao)
 			{
 				// append the vertices to the vbo
 				auto vbo = TypedVB<SkeletalVertex>(vao.GetVertexBuffer(0).get());
-				auto indexOffset = vbo->GetLength();
 				vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
-				return indexOffset;
 			}
 		);
 	}
@@ -167,11 +159,6 @@ void Renderer::RenderDrawCalls(const Ref<Camera> &camera, const DrawCalls &drawC
 {
 	for (const auto &[shader, info] : drawCalls)
 	{
-		// update the transforms if necessary (TODO: probably batch this operation to decrease gpu calls?)
-		for (auto &[entity, transformID] : info->entities)
-			if (!entity->transform.IsMatrixUpdated())
-				info->transforms->SetData(&entity->transform.GetMatrix(), 1, transformID);
-
 		// TODO: same for materials
 
 		shader->Bind();
@@ -186,10 +173,31 @@ void Renderer::RenderDrawCalls(const Ref<Camera> &camera, const DrawCalls &drawC
 	}
 }
 
+void UpdateTransforms(const DrawCallInfo *info, std::unordered_set<const Entity *> &entitiesToUpdate)
+{
+	// update the transforms if necessary
+	for (auto &[entity, transformID] : info->entities)
+	{
+		if (!entity->transform.IsMatrixUpdated() || entitiesToUpdate.find(entity.get()) != entitiesToUpdate.end())
+		{
+			info->transforms->SetData(&entity->transform.GetMatrix(), 1, transformID);
+			entitiesToUpdate.insert(entity.get());
+		}
+	}
+}
+
 void Renderer::FrameEnd()
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	std::unordered_set<const Entity *> entitiesToUpdate;
+
+	for (const auto &[shader, info] : staticMeshDrawCallsStatic)
+		UpdateTransforms(info.get(), entitiesToUpdate);
+
+	for (const auto &[shader, info] : skeletalMeshDrawCallsStatic)
+		UpdateTransforms(info.get(), entitiesToUpdate);
 
 	RenderDrawCalls(activeCamera, staticMeshDrawCallsStatic);
 	RenderDrawCalls(activeCamera, skeletalMeshDrawCallsStatic);
