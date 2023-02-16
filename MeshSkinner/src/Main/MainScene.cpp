@@ -104,10 +104,10 @@ void MainScene::OnEarlyUpdate()
 
 void MainScene::OnUpdate()
 {
-    staticEntity->transform.SetPosition(staticEntity->transform.GetPosition() + glm::vec3(0.1f) * Time::GetDeltaSeconds());
-    staticEntity2->transform.SetPosition(staticEntity2->transform.GetPosition() + glm::vec3(0.1f) * Time::GetDeltaSeconds());
-    staticEntity3->transform.SetPosition(staticEntity3->transform.GetPosition() + glm::vec3(-0.1f) * Time::GetDeltaSeconds());
-    staticSkeletalEntity->transform.SetPosition(staticSkeletalEntity->transform.GetPosition() + glm::vec3(-0.1f) * Time::GetDeltaSeconds());
+    staticEntity->transform.Translate(glm::vec3(0.1f) * Time::GetDeltaSeconds());
+    staticEntity2->transform.Translate(glm::vec3(0.1f) * Time::GetDeltaSeconds());
+    staticEntity3->transform.Translate(glm::vec3(-0.1f) * Time::GetDeltaSeconds());
+    staticSkeletalEntity->transform.Translate(glm::vec3(-0.1f) * Time::GetDeltaSeconds());
 
     staticEntity->transform.SetScale(glm::vec3(glm::sin(Time::GetTimeSeconds())));
 }
