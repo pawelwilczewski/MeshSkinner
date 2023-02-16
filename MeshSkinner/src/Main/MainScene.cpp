@@ -27,8 +27,6 @@ MainScene::MainScene() : Scene()
     cameraController = MakeRef<CameraController>(camera);
 
     Renderer::activeCamera = camera;
-
-    ShaderLibrary::Load("UnlitDebug", "assets/shaders/UnlitDebug.vert", "assets/shaders/UnlitDebug.frag");
 }
 
 MainScene::~MainScene()
@@ -58,17 +56,13 @@ void MainScene::OnStart()
     indices.push_back(3);
     indices.push_back(0);
 
-    auto staticMaterial = MakeRef<Material>();
-    staticMaterial->shader = ShaderLibrary::Get("UnlitDebug");
-    auto skeletalMaterial = MakeRef<Material>();
-    skeletalMaterial->shader = ShaderLibrary::Get("UnlitDebug");
-    auto staticMesh = MakeRef<StaticMesh>(staticVertices, indices, staticMaterial, true);
-    auto skeletalMesh = MakeRef<SkeletalMesh>(skeletalVertices, indices, skeletalMaterial, true);
+    auto staticMesh = MakeRef<StaticMesh>(staticVertices, indices, MaterialLibrary::GetDefault(), true);
+    auto skeletalMesh = MakeRef<SkeletalMesh>(skeletalVertices, indices, MaterialLibrary::GetDefault(), true);
 
     noneEntity = MakeRef<Entity>();
 
     staticEntity = MakeRef<Entity>(Transform(glm::vec3(0.f, 0.f, 2.f)));
-    staticEntity->AddComponent(staticMesh);
+    staticEntity->AddComponent(MeshLibrary::GetCube());
 
     staticEntity2 = MakeRef<Entity>(Transform(glm::vec3(0.f, 0.f, -2.f)));
     staticEntity2->AddComponent(staticMesh);

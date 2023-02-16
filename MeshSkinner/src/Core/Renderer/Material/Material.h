@@ -4,13 +4,12 @@
 
 struct Material
 {
+	Material(Ref<Shader> shader);
+
 	Ref<Shader> shader;
 };
 
 struct MaterialGPU
 {
-	MaterialGPU(const Material &material)
-	{
-
-	}
+	MaterialGPU(const Material &material);
 };

@@ -16,6 +16,8 @@ void Application::Init(const glm::ivec2 &windowSize, const char *title, int vsyn
     Input::Init();
     UserInterface::Init();
     Renderer::Init();
+    ShaderLibrary::Init();
+    MaterialLibrary::Init();
 
     Log::Trace("Application initialized...");
 }
