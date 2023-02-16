@@ -53,6 +53,7 @@
 #include "Core/Renderer/Material/Material.h"
 #include "Core/Renderer/Material/MaterialLibrary.h"
 #include "Core/Mesh/Mesh.h"
+#include "Core/Mesh/Skeleton.h"
 #include "Core/Mesh/MeshLibrary.h"
 #include "Utils/FileUtils.h"
 

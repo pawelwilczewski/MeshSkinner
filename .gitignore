@@ -9,6 +9,7 @@
 **/imgui.ini
 **/Makefile
 test
+*.blend*
 
 # User-specific files
 *.rsuser
