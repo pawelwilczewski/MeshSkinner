@@ -82,8 +82,13 @@ void MainScene::OnStart()
     staticSkeletalEntity->AddComponent(staticMesh);
     staticSkeletalEntity->AddComponent(skeletalMesh);
 
-    auto mesh = MakeRef<StaticMesh>(std::vector<StaticVertex>(), std::vector<uint32_t>(), MaterialLibrary::GetDefault(), true);
-    MeshLibrary::Get("assets/models/shark.gltf", mesh);
+    //auto mesh = MakeRef<StaticMesh>();
+    //MeshLibrary::Get("assets/models/shark.gltf", mesh);
+
+    auto mesh = MakeRef<SkeletalMesh>();
+    auto skeleton = MakeRef<Skeleton>();
+    MeshLibrary::Get("assets/models/shark.gltf", skeleton, mesh);
+
     noneEntity->AddComponent(mesh);
     noneEntity->transform.SetScale(glm::vec3(0.01f));
     noneEntity->transform.Translate(glm::vec3(5.f, 0.f, 0.f));

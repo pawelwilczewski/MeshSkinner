@@ -187,10 +187,91 @@ bool MeshLibrary::Get(const std::string &path, Ref<StaticMesh> &outMesh)
 
 bool MeshLibrary::Get(const std::string &path, Ref<Skeleton> &outSkeleton, Ref<SkeletalMesh> &outMesh)
 {
+	// TODO: get from the cache map if already loaded once
+
 	if (!LoadFromFile(path))
 		return false;
 
 	// for now, we just assume the imported file is .gltf
+	for (const auto &mesh : model.meshes)
+	{
+		for (const auto &primitive : mesh.primitives)
+		{
+			// import the indices
+			if (!UpdateIndices(primitive, outMesh))
+				Log::Error("GLTF Import: Indices importing error for file: {}", path);
+
+			// create the vertices
+
+			// get the vert count (position should always be specified)
+			auto vertCount = model.accessors[primitive.attributes.at("POSITION")].count;
+
+			// append base vertices to the mesh
+			outMesh->vertices.insert(outMesh->vertices.end(), vertCount, SkeletalVertex());
+
+			// update all attributes for each vertex
+
+			auto data = GetAttributeData(primitive, "POSITION");
+			if (data)
+			{
+				auto *buffer = static_cast<const glm::vec3 *>(data);
+				for (int i = 0; i < vertCount; i++)
+					outMesh->vertices[i].position = buffer[i];
+			}
+
+			data = GetAttributeData(primitive, "NORMAL");
+			if (data)
+			{
+				auto *buffer = static_cast<const glm::vec3 *>(data);
+				for (int i = 0; i < vertCount; i++)
+					outMesh->vertices[i].normal = buffer[i];
+			}
+
+			data = GetAttributeData(primitive, "TANGENT");
+			if (data)
+			{
+				auto *buffer = static_cast<const glm::vec4 *>(data);
+				for (int i = 0; i < vertCount; i++)
+					outMesh->vertices[i].tangent = buffer[i];
+			}
+
+			data = GetAttributeData(primitive, "TEXCOORD_0");
+			if (data)
+			{
+				// TODO: texcoord is not necessarily float vec2 https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#meshes
+				auto *buffer = static_cast<const glm::vec2 *>(data);
+				for (int i = 0; i < vertCount; i++)
+					outMesh->vertices[i].texCoord = buffer[i];
+			}
+
+			data = GetAttributeData(primitive, "COLOR_0");
+			if (data)
+			{
+				// TODO: color is not necessarily float vec3 https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#meshes
+				auto *buffer = static_cast<const glm::vec3 *>(data);
+				for (int i = 0; i < vertCount; i++)
+					outMesh->vertices[i].color = buffer[i];
+			}
+
+			data = GetAttributeData(primitive, "JOINTS_0");
+			if (data)
+			{
+				// TODO: joints can also be unsigned bytes https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#meshes
+				auto *buffer = static_cast<const glm::vec<4, uint16_t> *>(data);
+				for (int i = 0; i < vertCount; i++)
+					outMesh->vertices[i].bones = buffer[i];
+			}
+
+			data = GetAttributeData(primitive, "WEIGHTS_0");
+			if (data)
+			{
+				// TODO: weights is not necessarily floats https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#meshes
+				auto *buffer = static_cast<const glm::vec4 *>(data);
+				for (int i = 0; i < vertCount; i++)
+					outMesh->vertices[i].weights = buffer[i];
+			}
+		}
+	}
 
 	return true;
 }
