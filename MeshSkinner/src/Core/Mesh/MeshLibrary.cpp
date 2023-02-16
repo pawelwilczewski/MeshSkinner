@@ -11,10 +11,10 @@ Ref<StaticMesh> MeshLibrary::GetCube()
 	if (staticMeshes.find("Cube") == staticMeshes.end())
 	{
 		std::vector<StaticVertex> vertices;
-		vertices.push_back(StaticVertex(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
-		vertices.push_back(StaticVertex(glm::vec3( 0.5f, -0.5f, -0.5f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
-		vertices.push_back(StaticVertex(glm::vec3( 0.5f, -0.5f,  0.5f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
-		vertices.push_back(StaticVertex(glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f)));
+		vertices.push_back(StaticVertex(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.f)));
+		vertices.push_back(StaticVertex(glm::vec3( 0.5f, -0.5f, -0.5f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.f)));
+		vertices.push_back(StaticVertex(glm::vec3( 0.5f, -0.5f,  0.5f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.f)));
+		vertices.push_back(StaticVertex(glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.f)));
 
 		std::vector<uint32_t> indices;
 		indices.push_back(0);
@@ -80,6 +80,38 @@ static const void *GetAttributeData(const tinygltf::Primitive &primitive, const 
 	return nullptr;
 }
 
+static bool UpdateIndices(const tinygltf::Primitive &primitive, const Ref<Mesh> &outMesh)
+{
+	// add indices
+	auto &indices = model.accessors[primitive.indices];
+	void *indicesData = &(model.buffers[model.bufferViews[indices.bufferView].buffer].data[indices.byteOffset + model.bufferViews[indices.bufferView].byteOffset]);
+
+	switch (indices.componentType)
+	{
+	case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+	{
+		auto buffer = static_cast<uint8_t *>(indicesData);
+		outMesh->indices.insert(outMesh->indices.end(), buffer, buffer + indices.count);
+		break;
+	}
+	case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+	{
+		auto buffer = static_cast<uint16_t *>(indicesData);
+		outMesh->indices.insert(outMesh->indices.end(), buffer, buffer + indices.count);
+		break;
+	}
+	case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
+	{
+		auto buffer = static_cast<uint32_t *>(indicesData);
+		outMesh->indices.insert(outMesh->indices.end(), buffer, buffer + indices.count);
+		break;
+	}
+	default:
+		return false;
+	}
+	return true;
+}
+
 bool MeshLibrary::Get(const std::string &path, Ref<StaticMesh> &outMesh)
 {
 	// TODO: get from the cache map if already loaded once
@@ -92,36 +124,12 @@ bool MeshLibrary::Get(const std::string &path, Ref<StaticMesh> &outMesh)
 	{
 		for (const auto &primitive : mesh.primitives)
 		{
-			// add indices
-			auto &indices = model.accessors[primitive.indices];
-			void *indicesData = &(model.buffers[model.bufferViews[indices.bufferView].buffer].data[indices.byteOffset + model.bufferViews[indices.bufferView].byteOffset]);
+			// import the indices
+			if (!UpdateIndices(primitive, outMesh))
+				Log::Error("GLTF Import: Indices importing error for file: {}", path);
 
-			switch (indices.componentType)
-			{
-			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
-			{
-				auto buffer = static_cast<uint8_t *>(indicesData);
-				outMesh->indices.insert(outMesh->indices.end(), buffer, buffer + indices.count);
-				break;
-			}
-			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
-			{
-				auto buffer = static_cast<uint16_t *>(indicesData);
-				outMesh->indices.insert(outMesh->indices.end(), buffer, buffer + indices.count);
-				break;
-			}
-			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
-			{
-				auto buffer = static_cast<uint32_t *>(indicesData);
-				outMesh->indices.insert(outMesh->indices.end(), buffer, buffer + indices.count);
-				break;
-			}
-			default:
-				Log::Error("GLTF Import: Unsupported index type for file: {}", path);
-				return false;
-			}
+			// create the vertices
 
-			// make up the vertices
 			// get the vert count (position should always be specified)
 			auto vertCount = model.accessors[primitive.attributes.at("POSITION")].count;
 
@@ -138,6 +146,22 @@ bool MeshLibrary::Get(const std::string &path, Ref<StaticMesh> &outMesh)
 					outMesh->vertices[i].position = buffer[i];
 			}
 
+			data = GetAttributeData(primitive, "NORMAL");
+			if (data)
+			{
+				auto *buffer = static_cast<const glm::vec3 *>(data);
+				for (int i = 0; i < vertCount; i++)
+					outMesh->vertices[i].normal = buffer[i];
+			}
+
+			data = GetAttributeData(primitive, "TANGENT");
+			if (data)
+			{
+				auto *buffer = static_cast<const glm::vec4 *>(data);
+				for (int i = 0; i < vertCount; i++)
+					outMesh->vertices[i].tangent = buffer[i];
+			}
+
 			data = GetAttributeData(primitive, "TEXCOORD_0");
 			if (data)
 			{
@@ -145,14 +169,6 @@ bool MeshLibrary::Get(const std::string &path, Ref<StaticMesh> &outMesh)
 				auto *buffer = static_cast<const glm::vec2 *>(data);
 				for (int i = 0; i < vertCount; i++)
 					outMesh->vertices[i].texCoord = buffer[i];
-			}
-
-			data = GetAttributeData(primitive, "NORMAL");
-			if (data)
-			{
-				auto *buffer = static_cast<const glm::vec3 *>(data);
-				for (int i = 0; i < vertCount; i++)
-					outMesh->vertices[i].normal = buffer[i];
 			}
 
 			data = GetAttributeData(primitive, "COLOR_0");
