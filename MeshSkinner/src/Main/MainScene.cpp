@@ -86,8 +86,7 @@ void MainScene::OnStart()
     //MeshLibrary::Get("assets/models/shark.gltf", mesh);
 
     auto mesh = MakeRef<SkeletalMesh>();
-    auto skeleton = MakeRef<Skeleton>();
-    MeshLibrary::Get("assets/models/shark.gltf", skeleton, mesh);
+    MeshLibrary::Get("assets/models/shark.gltf", mesh);
 
     noneEntity->AddComponent(mesh);
     noneEntity->transform.SetScale(glm::vec3(0.01f));

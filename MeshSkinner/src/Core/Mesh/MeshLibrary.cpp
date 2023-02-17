@@ -4,7 +4,7 @@
 #include "tiny_gltf.h"
 
 std::unordered_map<std::string, Ref<StaticMesh>> MeshLibrary::staticMeshes;
-std::unordered_map<std::string, std::pair<Ref<Skeleton>, Ref<SkeletalMesh>>> MeshLibrary::skeletalMeshes;
+std::unordered_map<std::string, Ref<SkeletalMesh>> MeshLibrary::skeletalMeshes;
 
 Ref<StaticMesh> MeshLibrary::GetCube()
 {
@@ -185,7 +185,7 @@ bool MeshLibrary::Get(const std::string &path, Ref<StaticMesh> &outMesh)
 	return true;
 }
 
-bool MeshLibrary::Get(const std::string &path, Ref<Skeleton> &outSkeleton, Ref<SkeletalMesh> &outMesh)
+bool MeshLibrary::Get(const std::string &path, Ref<SkeletalMesh> &outMesh)
 {
 	// TODO: get from the cache map if already loaded once
 
@@ -193,6 +193,54 @@ bool MeshLibrary::Get(const std::string &path, Ref<Skeleton> &outSkeleton, Ref<S
 		return false;
 
 	// for now, we just assume the imported file is .gltf
+
+	outMesh->skeleton = MakeRef<Skeleton>();
+	// import the skeleton
+	for (const auto &skin : model.skins)
+	{
+		// skeleton root
+		outMesh->skeleton->root = skin.skeleton;
+
+		// initialize bones simple
+		outMesh->skeleton->bones.resize(outMesh->skeleton->bones.size() + skin.joints.size());
+
+		// get hold of inverse bind matrices data
+		auto &inverseBindMatrices = model.accessors[skin.inverseBindMatrices];
+		void *inverseBindMatricesData = &(model.buffers[model.bufferViews[inverseBindMatrices.bufferView].buffer].data[inverseBindMatrices.byteOffset + model.bufferViews[inverseBindMatrices.bufferView].byteOffset]);
+		glm::mat4 *inverseBindMatricesMatData = static_cast<glm::mat4 *>(inverseBindMatricesData);
+
+		for (const auto &joint : skin.joints)
+		{
+			// name
+			outMesh->skeleton->bones[joint].name = model.nodes[joint].name;
+
+			// inverse bind matrix
+			outMesh->skeleton->bones[joint].inverseBindMatrix = inverseBindMatricesMatData[joint];
+
+			// local transform
+			if (model.nodes[joint].translation.size() > 0)
+			{
+				std::vector<float> translationData(model.nodes[joint].translation.begin(), model.nodes[joint].translation.end());
+				outMesh->skeleton->bones[joint].localTransform.SetPosition(glm::make_vec3(translationData.data()));
+			}
+			if (model.nodes[joint].rotation.size() > 0)
+			{
+				std::vector<float> rotationData(model.nodes[joint].rotation.begin(), model.nodes[joint].rotation.end());
+				outMesh->skeleton->bones[joint].localTransform.SetRotation(glm::make_vec3(rotationData.data()));
+			}
+			if (model.nodes[joint].scale.size() > 0)
+			{
+				std::vector<float> scaleData(model.nodes[joint].scale.begin(), model.nodes[joint].scale.end());
+				outMesh->skeleton->bones[joint].localTransform.SetScale(glm::make_vec3(scaleData.data()));
+			}
+
+			// update children's parent index
+			for (const auto &child : model.nodes[joint].children)
+				outMesh->skeleton->bones[child].parentIndex = joint;
+		}
+	}
+
+	// import the mesh
 	for (const auto &mesh : model.meshes)
 	{
 		for (const auto &primitive : mesh.primitives)

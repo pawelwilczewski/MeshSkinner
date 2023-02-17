@@ -5,6 +5,7 @@
 #include "Core/Renderer/Material/Material.h"
 #include "Core/Entity/EntityComponent.h"
 #include "Core/Renderer/Material/MaterialLibrary.h"
+#include "Core/Mesh/Skeleton.h"
 
 class Mesh : public EntityComponent
 {
@@ -35,5 +36,6 @@ public:
 	virtual ~SkeletalMesh() = default;
 
 public:
+	Ref<Skeleton> skeleton;
 	std::vector<SkeletalVertex> vertices;
 };

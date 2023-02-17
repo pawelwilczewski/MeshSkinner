@@ -9,9 +9,9 @@ public:
 
 public:
 	static bool Get(const std::string &path, Ref<StaticMesh> &outMesh);
-	static bool Get(const std::string &path, Ref<Skeleton> &outSkeleton, Ref<SkeletalMesh> &outMesh);
+	static bool Get(const std::string &path, Ref<SkeletalMesh> &outMesh);
 
 private:
 	static std::unordered_map<std::string, Ref<StaticMesh>> staticMeshes;
-	static std::unordered_map<std::string, std::pair<Ref<Skeleton>, Ref<SkeletalMesh>>> skeletalMeshes;
+	static std::unordered_map<std::string, Ref<SkeletalMesh>> skeletalMeshes;
 };
