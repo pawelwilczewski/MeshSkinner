@@ -17,6 +17,10 @@ public:
 	void SetRotation(const glm::vec3 &rotation);
 	void SetScale(const glm::vec3 &scale);
 
+	void Translate(const glm::vec3 &translation);
+	void Rotate(const glm::vec3 &rotation);
+	void Scale(const glm::vec3 &scaleMultiplier);
+
 public:
 	const glm::vec3 GetForwardVector() const;
 	const glm::vec3 GetRightVector() const;

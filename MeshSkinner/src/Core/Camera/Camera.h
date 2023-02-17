@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Transform.h"
+#include "Application/Core.h"
+#include "Core/Entity/Transform.h"
 
 class Camera
 {

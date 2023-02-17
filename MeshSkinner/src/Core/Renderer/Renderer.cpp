@@ -85,7 +85,8 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 	ibo->AppendData(indicesOffset.data(), indicesOffset.size());
 
 	// append the material data
-	materials->AppendData(&MaterialGPU(*mesh->material.get()), 1);
+	auto mat = MaterialGPU(*mesh->material.get());
+	materials->AppendData(&mat, 1);
 
 	// append the vertex info
 	auto materialID = materials->GetLength() - 1;

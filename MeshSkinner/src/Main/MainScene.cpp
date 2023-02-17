@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "MainScene.h"
 
-#include "Renderer/Renderer.h"
-#include "Renderer/Buffer.h"
-#include "Renderer/Camera.h"
-#include "Renderer/CameraController.h"
+#include "Core/Renderer/Renderer.h"
+#include "Core/Renderer/Buffer/Buffer.h"
+#include "Core/Camera/Camera.h"
+#include "Core/Camera/CameraController.h"
 
 static Ref<Camera> camera;
 static Ref<CameraController> cameraController;
@@ -24,11 +24,9 @@ static Ref<Entity> staticSkeletalEntity;
 MainScene::MainScene() : Scene()
 {
     camera = MakeRef<Camera>();
-    cameraController = MakeRef<CameraController>(camera);
+    cameraController = MakeRef<CameraController>(camera, 10.f);
 
     Renderer::activeCamera = camera;
-
-    ShaderLibrary::Load("UnlitDebug", "assets/shaders/UnlitDebug.vert", "assets/shaders/UnlitDebug.frag");
 }
 
 MainScene::~MainScene()
@@ -39,16 +37,16 @@ MainScene::~MainScene()
 void MainScene::OnStart()
 {
     std::vector<StaticVertex> staticVertices;
-    staticVertices.push_back(StaticVertex(glm::vec3(-0.6f, -0.4f, -0.1f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.f, 0.5f, 1.f)));
-    staticVertices.push_back(StaticVertex(glm::vec3(0.6f, -0.4f, 0.3f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f, 0.3f, 0.f)));
-    staticVertices.push_back(StaticVertex(glm::vec3(0.f, 0.6f, 0.5f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.f, 0.f, 0.8f)));
-    staticVertices.push_back(StaticVertex(glm::vec3(0.4f, -0.6f, -0.4f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.f, 0.3f, 1.f)));
+    staticVertices.push_back(StaticVertex(glm::vec3(-0.6f, -0.4f, -0.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(0.f, 0.5f, 1.f)));
+    staticVertices.push_back(StaticVertex(glm::vec3(0.6f, -0.4f, 0.3f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.f, 0.3f, 0.f)));
+    staticVertices.push_back(StaticVertex(glm::vec3(0.f, 0.6f, 0.5f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.f, 0.f, 0.8f)));
+    staticVertices.push_back(StaticVertex(glm::vec3(0.4f, -0.6f, -0.4f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(0.f, 0.3f, 1.f)));
 
     std::vector<SkeletalVertex> skeletalVertices;
-    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-2.8f, -0.5f, -1.1f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.0f, 1.0f, 0.f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
-    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-1.6f, -0.7f, -2.1f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
-    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-0.6f, 3.4f, -1.1f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
-    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-1.2f, 0.4f, -4.1f), glm::vec2(0.f), glm::vec3(0.f), glm::vec3(0.0f, 0.0f, 1.f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
+    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-2.8f, -0.5f, -1.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(0.0f, 1.0f, 0.f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
+    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-1.6f, -0.7f, -2.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
+    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-0.6f, 3.4f, -1.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
+    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-1.2f, 0.4f, -4.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(0.0f, 0.0f, 1.f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
 
     std::vector<uint32_t> indices;
     indices.push_back(0);
@@ -58,17 +56,13 @@ void MainScene::OnStart()
     indices.push_back(3);
     indices.push_back(0);
 
-    auto staticMaterial = MakeRef<Material>();
-    staticMaterial->shader = ShaderLibrary::Get("UnlitDebug");
-    auto skeletalMaterial = MakeRef<Material>();
-    skeletalMaterial->shader = ShaderLibrary::Get("UnlitDebug");
-    auto staticMesh = MakeRef<StaticMesh>(staticVertices, indices, staticMaterial, true);
-    auto skeletalMesh = MakeRef<SkeletalMesh>(skeletalVertices, indices, skeletalMaterial, true);
+    auto staticMesh = MakeRef<StaticMesh>(staticVertices, indices, MaterialLibrary::GetDefault(), true);
+    auto skeletalMesh = MakeRef<SkeletalMesh>(skeletalVertices, indices, MaterialLibrary::GetDefault(), true);
 
     noneEntity = MakeRef<Entity>();
 
     staticEntity = MakeRef<Entity>(Transform(glm::vec3(0.f, 0.f, 2.f)));
-    staticEntity->AddComponent(staticMesh);
+    staticEntity->AddComponent(MeshLibrary::GetCube());
 
     staticEntity2 = MakeRef<Entity>(Transform(glm::vec3(0.f, 0.f, -2.f)));
     staticEntity2->AddComponent(staticMesh);
@@ -88,6 +82,13 @@ void MainScene::OnStart()
     staticSkeletalEntity->AddComponent(staticMesh);
     staticSkeletalEntity->AddComponent(skeletalMesh);
 
+    auto mesh = MakeRef<SkeletalMesh>();
+    MeshLibrary::Get("assets/models/shark.gltf", mesh);
+    
+    noneEntity->AddComponent(mesh);
+    noneEntity->transform.SetScale(glm::vec3(0.01f));
+    noneEntity->transform.Translate(glm::vec3(5.f, 0.f, 0.f));
+
     Renderer::Submit(noneEntity);
     Renderer::Submit(staticEntity);
     Renderer::Submit(staticEntity2);
@@ -104,10 +105,10 @@ void MainScene::OnEarlyUpdate()
 
 void MainScene::OnUpdate()
 {
-    staticEntity->transform.SetPosition(staticEntity->transform.GetPosition() + glm::vec3(0.1f) * Time::GetDeltaSeconds());
-    staticEntity2->transform.SetPosition(staticEntity2->transform.GetPosition() + glm::vec3(0.1f) * Time::GetDeltaSeconds());
-    staticEntity3->transform.SetPosition(staticEntity3->transform.GetPosition() + glm::vec3(-0.1f) * Time::GetDeltaSeconds());
-    staticSkeletalEntity->transform.SetPosition(staticSkeletalEntity->transform.GetPosition() + glm::vec3(-0.1f) * Time::GetDeltaSeconds());
+    staticEntity->transform.Translate(glm::vec3(0.1f) * Time::GetDeltaSeconds());
+    staticEntity2->transform.Translate(glm::vec3(0.1f) * Time::GetDeltaSeconds());
+    staticEntity3->transform.Translate(glm::vec3(-0.1f) * Time::GetDeltaSeconds());
+    staticSkeletalEntity->transform.Translate(glm::vec3(-0.1f) * Time::GetDeltaSeconds());
 
     staticEntity->transform.SetScale(glm::vec3(glm::sin(Time::GetTimeSeconds())));
 }

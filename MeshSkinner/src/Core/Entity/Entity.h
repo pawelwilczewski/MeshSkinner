@@ -1,6 +1,8 @@
 #pragma once
 
+#include "Application/Core.h"
 #include "EntityComponent.h"
+#include "Core/Entity/Transform.h"
 
 class Entity
 {
@@ -10,17 +12,6 @@ public:
 
 public:
 	Transform transform;
-
-	//template<typename T>
-	//const std::unordered_set<T *> GetComponents() const
-	//{
-	//	auto result = std::unordered_set<T *>();
-	//	for (const auto &component : components)
-	//		if (dynamic_cast<T *>(component.get()))
-	//			result.insert(component.get());
-
-	//	return result;
-	//}
 
 	template<typename T>
 	const std::unordered_set<const T *> GetComponents() const

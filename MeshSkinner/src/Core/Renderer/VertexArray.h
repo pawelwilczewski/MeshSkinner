@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Application/Core.h"
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
+#include "Core/Renderer/Buffer/VertexBuffer.h"
+#include "Core/Renderer/Buffer/IndexBuffer.h"
 
 static GLenum ShaderTypeToGL(const ShaderDataType &type)
 {

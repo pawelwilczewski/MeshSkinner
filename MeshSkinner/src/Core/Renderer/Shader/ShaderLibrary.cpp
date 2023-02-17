@@ -12,6 +12,11 @@ Ref<Shader> ShaderLibrary::FindShader(const std::string &displayedName)
 	return nullptr;
 }
 
+void ShaderLibrary::Init()
+{
+	ShaderLibrary::Load("Default", "assets/shaders/Default.vert", "assets/shaders/Default.frag");
+}
+
 Ref<Shader> ShaderLibrary::Load(const std::string &displayedName, const std::string &vertexSourcePath, const std::string &fragmentSourcePath)
 {
 	auto shader = FindShader(displayedName);
@@ -35,4 +40,9 @@ Ref<Shader> ShaderLibrary::Get(const std::string &displayedName)
 		Log::Critical("The shader \"{}\" not loaded: get attempt failure!", displayedName);
 
 	return result;
+}
+
+Ref<Shader> ShaderLibrary::GetDefault()
+{
+	return Get("Default");
 }

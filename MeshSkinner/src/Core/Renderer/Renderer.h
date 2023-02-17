@@ -1,12 +1,12 @@
 #pragma once
 
 #include "Application/Core.h"
-#include "Mesh.h"
 #include "VertexArray.h"
-#include "Transform.h"
-#include "Entity/Entity.h"
-#include "Camera.h"
-#include "StorageBuffer.h"
+#include "Core/Mesh/Mesh.h"
+#include "Core/Entity/Transform.h"
+#include "Core/Entity/Entity.h"
+#include "Core/Camera/Camera.h"
+#include "Core/Renderer/Buffer/StorageBuffer.h"
 
 struct VertexInfo
 {

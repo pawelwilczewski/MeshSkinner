@@ -10,9 +10,9 @@ Transform::Transform(const glm::vec3 &position, const glm::vec3 &rotation, const
 	RecalculateMatrix();
 }
 
-const glm::vec3 &Transform::GetPosition() const { return position; }
-const glm::vec3 &Transform::GetRotation() const { return rotation; }
-const glm::vec3 &Transform::GetScale() const { return scale; }
+const glm::vec3 &Transform::GetPosition() const	{ return position; }
+const glm::vec3 &Transform::GetRotation() const	{ return rotation; }
+const glm::vec3 &Transform::GetScale() const	{ return scale; }
 
 void Transform::SetPosition(const glm::vec3 &position)
 {
@@ -32,9 +32,13 @@ void Transform::SetScale(const glm::vec3 &scale)
 	isMatrixUpdated = false;
 }
 
-const glm::vec3 Transform::GetForwardVector() const { return glm::quat(glm::radians(rotation)) * vectorForward; }
-const glm::vec3 Transform::GetRightVector() const { return glm::quat(glm::radians(rotation)) * vectorRight; }
-const glm::vec3 Transform::GetUpVector() const { return glm::quat(glm::radians(rotation)) * vectorUp; }
+void Transform::Translate(const glm::vec3 &translation)	{ SetPosition(GetPosition() + translation); }
+void Transform::Rotate(const glm::vec3 &rotation)		{ SetRotation(GetRotation() + rotation); }
+void Transform::Scale(const glm::vec3 &scaleMultiplier)	{ SetScale(GetScale() * scaleMultiplier); }
+
+const glm::vec3 Transform::GetForwardVector() const	{ return glm::quat(glm::radians(rotation)) * vectorForward; }
+const glm::vec3 Transform::GetRightVector() const	{ return glm::quat(glm::radians(rotation)) * vectorRight; }
+const glm::vec3 Transform::GetUpVector() const		{ return glm::quat(glm::radians(rotation)) * vectorUp; }
 
 bool Transform::IsMatrixUpdated() const
 {

@@ -10,9 +10,6 @@
 #include <string>
 #include <memory>
 
-#include "Log.h"
-
-
 template<typename T>
 using Unique = std::unique_ptr<T>;
 template<typename T, typename ...Args>
