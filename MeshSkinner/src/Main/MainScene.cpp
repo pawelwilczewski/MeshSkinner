@@ -82,12 +82,9 @@ void MainScene::OnStart()
     staticSkeletalEntity->AddComponent(staticMesh);
     staticSkeletalEntity->AddComponent(skeletalMesh);
 
-    //auto mesh = MakeRef<StaticMesh>();
-    //MeshLibrary::Get("assets/models/shark.gltf", mesh);
-
     auto mesh = MakeRef<SkeletalMesh>();
     MeshLibrary::Get("assets/models/shark.gltf", mesh);
-
+    
     noneEntity->AddComponent(mesh);
     noneEntity->transform.SetScale(glm::vec3(0.01f));
     noneEntity->transform.Translate(glm::vec3(5.f, 0.f, 0.f));
