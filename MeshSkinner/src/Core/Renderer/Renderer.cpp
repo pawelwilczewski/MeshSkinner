@@ -94,9 +94,9 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 	vertexInfo->AppendData(ids.data(), ids.size());
 }
 
-void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const StaticMesh *mesh)
+void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh)
 {
-	SubmitMeshStatic(entity, mesh, staticMeshDrawCallsStatic,
+	SubmitMeshStatic(entity, mesh.get(), staticMeshDrawCallsStatic,
 		[&](VertexArray<uint32_t> &vao)
 		{
 			// initialize the ibo and vbo
@@ -113,9 +113,9 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const StaticMesh *mes
 		});
 }
 
-void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const SkeletalMesh *mesh)
+void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh)
 {
-	SubmitMeshStatic(entity, mesh, skeletalMeshDrawCallsStatic,
+	SubmitMeshStatic(entity, mesh.get(), skeletalMeshDrawCallsStatic,
 		[&](VertexArray<uint32_t> &vao)
 		{
 			// initialize the ibo and vbo
@@ -130,6 +130,8 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const SkeletalMesh *m
 			auto vbo = TypedVB<SkeletalVertex>(vao.GetVertexBuffer(0).get());
 			vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
 		});
+
+	//SubmitMeshStatic(entity)
 }
 
 void Renderer::Submit(const Ref<Entity> &entity)

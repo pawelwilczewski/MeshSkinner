@@ -14,12 +14,12 @@ public:
 	Transform transform;
 
 	template<typename T>
-	const std::unordered_set<const T *> GetComponents() const
+	const std::unordered_set<Ref<T>> GetComponents() const
 	{
-		auto result = std::unordered_set<const T *>();
+		auto result = std::unordered_set<Ref<T>>();
 		for (const auto &component : components)
 		{
-			auto asT = dynamic_cast<const T *>(component.get());
+			auto asT = std::dynamic_pointer_cast<T>(component);
 			if (asT) result.insert(asT);
 		}
 
