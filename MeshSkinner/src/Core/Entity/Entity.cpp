@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Entity.h"
 
-Entity::Entity(const Transform &transform, const std::string &name) : name(name)
+Entity::Entity(const std::string &name, const Transform &transform) : name(name), transform(transform)
 {
 	RecalculateWorldMatrix();
 }

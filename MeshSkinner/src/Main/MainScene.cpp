@@ -62,19 +62,18 @@ void MainScene::OnStart()
     auto rootBone = Ref<Bone>();
     MeshLibrary::Get("assets/models/shark.gltf", skeletalMesh, rootBone);
 
-    noneEntity = MakeRef<Entity>();
+    noneEntity = MakeRef<Entity>("none");
 
-    staticEntity = MakeRef<Entity>(Transform(glm::vec3(0.f, 0.f, 2.f)));
+    staticEntity = MakeRef<Entity>("static", Transform(glm::vec3(0.f, 0.f, 2.f)));
     staticEntity->AddComponent(MeshLibrary::GetCube());
 
-    staticEntity2 = MakeRef<Entity>(Transform(glm::vec3(0.f, 0.f, -2.f)));
+    staticEntity2 = MakeRef<Entity>("static2", Transform(glm::vec3(0.f, 0.f, -2.f)));
     staticEntity2->AddComponent(staticMesh);
 
-    staticEntity3 = MakeRef<Entity>(Transform(glm::vec3(0.f, 1.f, 2.f)));
+    staticEntity3 = MakeRef<Entity>("static 3", Transform(glm::vec3(0.f, 1.f, 2.f)));
     staticEntity3->AddComponent(staticMesh);
-    //staticEntity3->AddComponent(skeletalMesh);
 
-    skeletalEntity = MakeRef<Entity>(Transform(glm::vec3(15.f, 0.f, 2.f)));
+    skeletalEntity = MakeRef<Entity>("skeletal", Transform(glm::vec3(15.f, 0.f, 2.f)));
     skeletalEntity->AddComponent(skeletalMesh);
     skeletalEntity->transform.SetScale(glm::vec3(0.01f));
     rootBone->parent = skeletalEntity;
@@ -82,10 +81,10 @@ void MainScene::OnStart()
     for (auto &bone : skeletalMesh->skeleton->bones)
         bone->AddComponent(MeshLibrary::GetCube());
 
-    skeletalEntity2 = MakeRef<Entity>(Transform(glm::vec3(-2.f, 0.f, 0.f)));
+    skeletalEntity2 = MakeRef<Entity>("skeletal 2", Transform(glm::vec3(-2.f, 0.f, 0.f)));
     skeletalEntity2->AddComponent(skeletalMesh);
 
-    staticSkeletalEntity = MakeRef<Entity>();
+    staticSkeletalEntity = MakeRef<Entity>("static skeletal");
     staticSkeletalEntity->transform.SetPosition({ -2.f, 2.f, 0.f });
     staticSkeletalEntity->AddComponent(staticMesh);
     staticSkeletalEntity->AddComponent(skeletalMesh);

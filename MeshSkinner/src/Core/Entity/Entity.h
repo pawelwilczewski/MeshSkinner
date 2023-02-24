@@ -7,7 +7,7 @@
 class Entity
 {
 public:
-	Entity(const Transform &transform = Transform(), const std::string &name = "entity");
+	Entity(const std::string &name = "entity", const Transform &transform = Transform());
 	virtual ~Entity() = default;
 
 public:
