@@ -94,6 +94,44 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 	vertexInfo->AppendData(ids.data(), ids.size());
 }
 
+void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const StaticMesh *mesh)
+{
+	SubmitMeshStatic(entity, mesh, staticMeshDrawCallsStatic,
+		[&](VertexArray<uint32_t> &vao)
+		{
+			// initialize the ibo and vbo
+			auto ibo = MakeRef<IndexBuffer<uint32_t>>();
+			auto vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
+			vao.SetVertexBuffer(vbo, 0);
+			vao.SetIndexBuffer(ibo);
+		},
+		[&](VertexArray<uint32_t> &vao)
+		{
+			// append the vertices to the vbo
+			auto vbo = TypedVB<StaticVertex>(vao.GetVertexBuffer(0).get());
+		vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
+		});
+}
+
+void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const SkeletalMesh *mesh)
+{
+	SubmitMeshStatic(entity, mesh, skeletalMeshDrawCallsStatic,
+		[&](VertexArray<uint32_t> &vao)
+		{
+			// initialize the ibo and vbo
+			auto ibo = MakeRef<IndexBuffer<uint32_t>>();
+			auto vbo = MakeRef<VertexBuffer<SkeletalVertex>>(SkeletalVertex::layout);
+			vao.SetVertexBuffer(vbo, 0);
+			vao.SetIndexBuffer(ibo);
+		},
+		[&](VertexArray<uint32_t> &vao)
+		{
+			// append the vertices to the vbo
+			auto vbo = TypedVB<SkeletalVertex>(vao.GetVertexBuffer(0).get());
+			vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
+		});
+}
+
 void Renderer::Submit(const Ref<Entity> &entity)
 {
 	// submit all static meshes
@@ -103,51 +141,16 @@ void Renderer::Submit(const Ref<Entity> &entity)
 		if (!mesh->isStatic)
 			continue;
 
-		SubmitMeshStatic(
-			entity,
-			mesh,
-			staticMeshDrawCallsStatic,
-			[&](VertexArray<uint32_t> &vao)
-			{
-				// initialize the ibo and vbo
-				auto ibo = MakeRef<IndexBuffer<uint32_t>>();
-				auto vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
-				vao.SetVertexBuffer(vbo, 0);
-				vao.SetIndexBuffer(ibo);
-			},
-			[&](VertexArray<uint32_t> &vao)
-			{
-				// append the vertices to the vbo
-				auto vbo = TypedVB<StaticVertex>(vao.GetVertexBuffer(0).get());
-				vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
-			}
-			);
+		SubmitMeshStatic(entity, mesh);
 	}
 
+	// submit all skeletal meshes
 	auto skeletalMeshes = entity->GetComponents<SkeletalMesh>();
 	for (auto &mesh : skeletalMeshes)
 	{
 		if (!mesh->isStatic) continue;
 
-		SubmitMeshStatic(
-			entity,
-			mesh,
-			skeletalMeshDrawCallsStatic,
-			[&](VertexArray<uint32_t> &vao)
-			{
-				// initialize the ibo and vbo
-				auto ibo = MakeRef<IndexBuffer<uint32_t>>();
-				auto vbo = MakeRef<VertexBuffer<SkeletalVertex>>(SkeletalVertex::layout);
-				vao.SetVertexBuffer(vbo, 0);
-				vao.SetIndexBuffer(ibo);
-			},
-			[&](VertexArray<uint32_t> &vao)
-			{
-				// append the vertices to the vbo
-				auto vbo = TypedVB<SkeletalVertex>(vao.GetVertexBuffer(0).get());
-				vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
-			}
-		);
+		SubmitMeshStatic(entity, mesh);
 	}
 }
 
