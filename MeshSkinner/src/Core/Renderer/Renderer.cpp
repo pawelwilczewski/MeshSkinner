@@ -12,7 +12,7 @@ DrawCallInfo::DrawCallInfo() :
 	materials(MakeUnique<StorageBuffer<MaterialGPU>>()),
 	vertexInfo(MakeUnique<StorageBuffer<VertexInfo>>()),
 	entities(std::unordered_map<Ref<Entity>, const uint32_t>()),
-	meshes(std::unordered_set<const Mesh *>())
+	skeletons(std::unordered_map<Ref<Skeleton>, const uint32_t>())
 {
 
 }
@@ -49,7 +49,6 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 
 	auto &vao = drawCalls[mesh->material->shader]->vao;
 	auto &entities = drawCalls[mesh->material->shader]->entities;
-	auto &meshes = drawCalls[mesh->material->shader]->meshes;
 	auto &vertexInfo = drawCalls[mesh->material->shader]->vertexInfo;
 	auto &transforms = drawCalls[mesh->material->shader]->transforms;
 	auto &materials = drawCalls[mesh->material->shader]->materials;
@@ -59,7 +58,7 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 	if (entities.find(entity) == entities.end())
 	{
 		// transform info update
-		transforms->AppendData(&entity->transform.GetMatrix(), 1);
+		transforms->AppendData(&entity->GetWorldMatrix(), 1);
 		transformID = transforms->GetLength() - 1;
 
 		// new entity - insert for future use
@@ -131,7 +130,23 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMes
 			vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
 		});
 
-	//SubmitMeshStatic(entity)
+	auto &skeletons = skeletalMeshDrawCallsStatic[mesh->material->shader]->skeletons;
+	auto &transforms = skeletalMeshDrawCallsStatic[mesh->material->shader]->transforms;
+
+	if (skeletons.find(mesh->skeleton) == skeletons.end())
+	{
+		uint32_t skeletonTransformOffset;
+		skeletonTransformOffset = transforms->GetLength();
+		skeletons.insert({ mesh->skeleton, skeletonTransformOffset });
+
+		for (auto &bone : mesh->skeleton->bones)
+			Submit(bone);
+	}
+	else
+	{
+		Log::Error("Trying to render the same skeleton more than once");
+		//skeletonTransformOffset = skeletons[mesh->skeleton];
+	}
 }
 
 void Renderer::Submit(const Ref<Entity> &entity)
@@ -184,9 +199,9 @@ void UpdateTransforms(const DrawCallInfo *info, std::unordered_set<const Entity 
 	// update the transforms if necessary
 	for (auto &[entity, transformID] : info->entities)
 	{
-		if (!entity->transform.IsMatrixUpdated() || entitiesToUpdate.find(entity.get()) != entitiesToUpdate.end())
+		if (!entity->IsWorldMatrixUpdated() || entitiesToUpdate.find(entity.get()) != entitiesToUpdate.end())
 		{
-			info->transforms->SetData(&entity->transform.GetMatrix(), 1, transformID);
+			info->transforms->SetData(&entity->GetWorldMatrix(), 1, transformID);
 			entitiesToUpdate.insert(entity.get());
 		}
 	}

@@ -57,7 +57,10 @@ void MainScene::OnStart()
     indices.push_back(0);
 
     auto staticMesh = MakeRef<StaticMesh>(staticVertices, indices, MaterialLibrary::GetDefault(), true);
-    auto skeletalMesh = MakeRef<SkeletalMesh>(skeletalVertices, indices, MaterialLibrary::GetDefault(), true);
+    //auto skeletalMesh = MakeRef<SkeletalMesh>(skeletalVertices, indices, MaterialLibrary::GetDefault(), true);
+    auto skeletalMesh = MakeRef<SkeletalMesh>();
+    auto rootBone = Ref<Bone>();
+    MeshLibrary::Get("assets/models/shark.gltf", skeletalMesh, rootBone);
 
     noneEntity = MakeRef<Entity>();
 
@@ -71,8 +74,13 @@ void MainScene::OnStart()
     staticEntity3->AddComponent(staticMesh);
     //staticEntity3->AddComponent(skeletalMesh);
 
-    skeletalEntity = MakeRef<Entity>(Transform(glm::vec3(2.f, 0.f, 0.f)));
+    skeletalEntity = MakeRef<Entity>(Transform(glm::vec3(15.f, 0.f, 2.f)));
     skeletalEntity->AddComponent(skeletalMesh);
+    skeletalEntity->transform.SetScale(glm::vec3(0.01f));
+    rootBone->parent = skeletalEntity;
+
+    for (auto &bone : skeletalMesh->skeleton->bones)
+        bone->AddComponent(MeshLibrary::GetCube());
 
     skeletalEntity2 = MakeRef<Entity>(Transform(glm::vec3(-2.f, 0.f, 0.f)));
     skeletalEntity2->AddComponent(skeletalMesh);
@@ -82,20 +90,13 @@ void MainScene::OnStart()
     staticSkeletalEntity->AddComponent(staticMesh);
     staticSkeletalEntity->AddComponent(skeletalMesh);
 
-    auto mesh = MakeRef<SkeletalMesh>();
-    MeshLibrary::Get("assets/models/shark.gltf", mesh);
-    
-    noneEntity->AddComponent(mesh);
-    noneEntity->transform.SetScale(glm::vec3(0.01f));
-    noneEntity->transform.Translate(glm::vec3(5.f, 0.f, 0.f));
-
     Renderer::Submit(noneEntity);
     Renderer::Submit(staticEntity);
     Renderer::Submit(staticEntity2);
     Renderer::Submit(staticEntity3);
     Renderer::Submit(skeletalEntity);
-    Renderer::Submit(skeletalEntity2);
-    Renderer::Submit(staticSkeletalEntity);
+    //Renderer::Submit(skeletalEntity2);
+    //Renderer::Submit(staticSkeletalEntity);
 }
 
 void MainScene::OnEarlyUpdate()

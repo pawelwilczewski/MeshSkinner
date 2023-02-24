@@ -23,7 +23,8 @@ struct DrawCallInfo
 	Unique<VertexArray<uint32_t>> vao;
 	// key: entity already rendered, value: transform id to use for mesh
 	std::unordered_map<Ref<Entity>, const uint32_t> entities;
-	std::unordered_set<const Mesh *> meshes;
+	// key: skeleton already rendered, value: transform id to use for bones (start)
+	std::unordered_map<Ref<Skeleton>, const uint32_t> skeletons;
 	Unique<StorageBuffer<glm::mat4>> transforms;
 	Unique<StorageBuffer<MaterialGPU>> materials;
 	Unique<StorageBuffer<VertexInfo>> vertexInfo;
@@ -44,6 +45,8 @@ public:
 
 private:
 	static void SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<void(VertexArray<uint32_t> &)> fillVertexBufferFunction);
+
+	void Renderer::SubmitBoneStatic(const Ref<Entity> &entity, const Bone *bone, const Ref<Shader> &shader, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<void(VertexArray<uint32_t> &)> fillVertexBufferFunction);
 
 	static void SubmitMeshStatic(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh);
 	static void SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh);
