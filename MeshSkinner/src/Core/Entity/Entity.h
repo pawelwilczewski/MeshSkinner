@@ -11,8 +11,6 @@ public:
 	virtual ~Entity() = default;
 
 public:
-	Transform transform;
-
 	template<typename T>
 	const std::unordered_set<Ref<T>> GetComponents() const
 	{
@@ -26,13 +24,12 @@ public:
 		return result;
 	}
 
-
 	void AddComponent(Ref<EntityComponent> component);
 	void RemoveComponent(Ref<EntityComponent> component);
 
 public:
-	std::string name = "entity";
-	Ref<Entity> parent = nullptr;
+	void SetParent(const Ref<Entity> &parent);
+	const Ref<Entity> &GetParent() const;
 
 public:
 	const glm::mat4 &GetWorldMatrix();
@@ -46,6 +43,13 @@ private:
 	//  we would add everything to the set of EntityComponents and then to the set of T if T != EntityComponent and have T default to EntityComponent
 	std::unordered_set<Ref<EntityComponent>> components;
 
+public:
+	std::string name;
+	Transform transform;
+
 private:
+	Ref<Entity> parent = nullptr;
+
 	glm::mat4 worldMatrix;
+	bool worldMatrixDirty = true;
 };

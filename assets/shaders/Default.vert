@@ -2,6 +2,7 @@
 
 //#include "include/Material.glsl"
 #include "include/VertexInfo.glsl"
+#include "include/Random.glsl"
 
 layout(location = 0) in vec3 in_Position;
 layout(location = 1) in vec3 in_Normal;
@@ -21,7 +22,10 @@ out vec3 io_Color;
 
 void main()
 {
-	io_Color = in_Color;
-	vec4 worldPosition = transforms[vertexInfo[gl_VertexID].transformID] * vec4(in_Position, 1.0);
+	uint transformID = vertexInfo[gl_VertexID].transformID;
+	
+	io_Color = randomColor(float(transformID));//in_Color;
+
+	vec4 worldPosition = transforms[transformID] * vec4(in_Position, 1.0);
 	gl_Position = u_ViewProjection * worldPosition;
 }

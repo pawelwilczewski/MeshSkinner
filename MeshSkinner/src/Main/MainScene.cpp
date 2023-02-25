@@ -76,7 +76,8 @@ void MainScene::OnStart()
     skeletalEntity = MakeRef<Entity>("skeletal", Transform(glm::vec3(15.f, 0.f, 2.f)));
     skeletalEntity->AddComponent(skeletalMesh);
     skeletalEntity->transform.SetScale(glm::vec3(0.01f));
-    rootBone->parent = skeletalEntity;
+    rootBone->SetParent(skeletalEntity);
+    rootBone->transform.Translate(glm::vec3(-5.f, 0.f, 0.f));
 
     for (auto &bone : skeletalMesh->skeleton->bones)
         bone->AddComponent(MeshLibrary::GetCube());

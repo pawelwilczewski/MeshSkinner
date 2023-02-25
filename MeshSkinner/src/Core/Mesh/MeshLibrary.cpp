@@ -230,13 +230,13 @@ bool MeshLibrary::Get(const std::string &path, Ref<SkeletalMesh> &outMesh, Ref<B
 
 			// update children's parent index
 			for (const auto &child : model.nodes[joint].children)
-				outMesh->skeleton->bones[child]->parent = outMesh->skeleton->bones[joint];
+				outMesh->skeleton->bones[child]->SetParent(outMesh->skeleton->bones[joint]);
 		}
 
 		// update the root
 		for (int i = 0; i < outMesh->skeleton->bones.size(); i++)
 		{
-			if (outMesh->skeleton->bones[i]->parent == nullptr)
+			if (outMesh->skeleton->bones[i]->GetParent() == nullptr)
 			{
 				outMesh->skeleton->root = i;
 				outRoot = outMesh->skeleton->bones[i];

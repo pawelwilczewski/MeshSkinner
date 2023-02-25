@@ -16,6 +16,17 @@ void Entity::RemoveComponent(Ref<EntityComponent> component)
 	components.erase(component);
 }
 
+void Entity::SetParent(const Ref<Entity> &parent)
+{
+	worldMatrixDirty = true;
+	this->parent = parent;
+}
+
+const Ref<Entity> &Entity::GetParent() const
+{
+	return this->parent;
+}
+
 const glm::mat4 &Entity::GetWorldMatrix()
 {
 	if (!IsWorldMatrixUpdated())
@@ -26,6 +37,9 @@ const glm::mat4 &Entity::GetWorldMatrix()
 
 bool Entity::IsWorldMatrixUpdated() const
 {
+	if (!worldMatrixDirty)
+		return false;
+
 	auto updated = transform.IsMatrixUpdated();
 
 	if (!updated)
@@ -56,4 +70,6 @@ void Entity::RecalculateWorldMatrix()
 
 		p = p->parent;
 	}
+
+	worldMatrixDirty = false;
 }
