@@ -17,19 +17,34 @@ const glm::vec3 &Transform::GetScale() const	{ return scale; }
 void Transform::SetPosition(const glm::vec3 &position)
 {
 	this->position = position;
-	isMatrixUpdated = false;
+
+	if (isMatrixUpdated)
+	{
+		isMatrixUpdated = false;
+		onMatrixDirty.Invoke();
+	}
 }
 
 void Transform::SetRotation(const glm::vec3 &rotation)
 {
 	this->rotation = rotation;
-	isMatrixUpdated = false;
+
+	if (isMatrixUpdated)
+	{
+		isMatrixUpdated = false;
+		onMatrixDirty.Invoke();
+	}
 }
 
 void Transform::SetScale(const glm::vec3 &scale)
 {
 	this->scale = scale;
-	isMatrixUpdated = false;
+
+	if (isMatrixUpdated)
+	{
+		isMatrixUpdated = false;
+		onMatrixDirty.Invoke();
+	}
 }
 
 void Transform::Translate(const glm::vec3 &translation)	{ SetPosition(GetPosition() + translation); }
@@ -60,4 +75,14 @@ void Transform::RecalculateMatrix()
 	matrix = glm::scale(matrix, scale);
 
 	isMatrixUpdated = true;
+}
+
+void Transform::OnMatrixDirtySubscribe(const CallbackNoArgRef &callback)
+{
+	onMatrixDirty.Subscribe(callback);
+}
+
+void Transform::OnMatrixDirtyUnsubscribe(const CallbackNoArgRef &callback)
+{
+	onMatrixDirty.Unsubscribe(callback);
 }

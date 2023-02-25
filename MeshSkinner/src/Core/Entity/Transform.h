@@ -5,6 +5,11 @@
 class Transform
 {
 public:
+	static const glm::vec3 vectorForward;
+	static const glm::vec3 vectorRight;
+	static const glm::vec3 vectorUp;
+
+public:
 	Transform(const glm::vec3 &position = glm::vec3(0.f), const glm::vec3 &rotation = glm::vec3(0.f), const glm::vec3 &scale = glm::vec3(1.f));
 	virtual ~Transform() = default;
 
@@ -34,9 +39,11 @@ protected:
 	virtual void RecalculateMatrix();
 
 public:
-	static const glm::vec3 vectorForward;
-	static const glm::vec3 vectorRight;
-	static const glm::vec3 vectorUp;
+	void OnMatrixDirtySubscribe(const CallbackNoArgRef &callback);
+	void OnMatrixDirtyUnsubscribe(const CallbackNoArgRef &callback);
+
+private:
+	EventNoArg onMatrixDirty;
 
 private:
 	glm::vec3 position;

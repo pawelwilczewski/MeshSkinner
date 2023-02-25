@@ -24,12 +24,12 @@ public:
 	virtual ~Event() = default;
 
 public:
-	void Subscribe(CallbackRef<T> callback)
+	void Subscribe(const CallbackRef<T> &callback)
 	{
 		subscribers.insert(callback);
 	}
 
-	void Unsubscribe(CallbackRef<T> callback)
+	void Unsubscribe(const CallbackRef<T> &callback)
 	{
 		subscribers.erase(callback);
 	}
@@ -55,12 +55,12 @@ public:
 	virtual ~Event() = default;
 
 public:
-	void Subscribe(CallbackNoArgRef callback)
+	void Subscribe(const CallbackNoArgRef &callback)
 	{
 		subscribers.insert(callback);
 	}
 
-	void Unsubscribe(CallbackNoArgRef callback)
+	void Unsubscribe(const CallbackNoArgRef &callback)
 	{
 		subscribers.erase(callback);
 	}

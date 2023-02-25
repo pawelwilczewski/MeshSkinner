@@ -1,9 +1,22 @@
 #include "pch.h"
 #include "Entity.h"
 
-Entity::Entity(const std::string &name, const Transform &transform) : name(name), transform(transform)
+Entity::Entity(const std::string &name, Transform transform) : name(name), transform(transform)
 {
 	RecalculateWorldMatrix();
+
+	// setup the dirty matrxi callback
+	onDirtyMatrixCallback = MakeCallbackNoArgRef([&]() { DirtyWorldMatrix(); });
+	this->transform.OnMatrixDirtySubscribe(onDirtyMatrixCallback);
+}
+
+Entity::~Entity()
+{
+	for (const auto &child : children)
+		child->parent = nullptr;
+
+	// cleanup dirty matrix callback
+	transform.OnMatrixDirtyUnsubscribe(onDirtyMatrixCallback);
 }
 
 void Entity::AddComponent(Ref<EntityComponent> component)
@@ -18,8 +31,19 @@ void Entity::RemoveComponent(Ref<EntityComponent> component)
 
 void Entity::SetParent(const Ref<Entity> &parent)
 {
-	isWorldMatrixUpdated = false;
+	// remove this from parent's children
+	if (this->parent)
+		this->parent->children.erase(Ref<Entity>(this));
+
+	// update the parent, dirty world matrix
 	this->parent = parent;
+
+	// add to new parent's children
+	if (this->parent)
+		parent->children.insert(Ref<Entity>(this));
+
+	// dirty world matrix for this entity
+	DirtyWorldMatrix();
 }
 
 const Ref<Entity> &Entity::GetParent() const
@@ -29,28 +53,15 @@ const Ref<Entity> &Entity::GetParent() const
 
 const glm::mat4 &Entity::GetWorldMatrix()
 {
-	if (!IsWorldMatrixUpdated())
+	if (!isWorldMatrixUpdated)
 		RecalculateWorldMatrix();
 
 	return worldMatrix;
 }
 
-bool Entity::IsWorldMatrixUpdated() const
+bool Entity::GetIsWorldMatrixUpdated() const
 {
-	if (!isWorldMatrixUpdated)
-		return false;
-
-	// no recursion because it's just unnecessary
-	auto e = this;
-	while (e != nullptr)
-	{
-		if (!e->transform.IsMatrixUpdated()) 
-			return false;
-
-		e = e->parent.get();
-	}
-
-	return true;
+	return isWorldMatrixUpdated;
 }
 
 void Entity::RecalculateWorldMatrix()
@@ -70,4 +81,13 @@ void Entity::RecalculateWorldMatrix()
 
 	isWorldMatrixUpdated = true;
 	Log::Info("Calculating transform for {}: {}", name, calc);
+}
+
+void Entity::DirtyWorldMatrix()
+{
+	isWorldMatrixUpdated = false;
+
+	// all children have dirty matrix recursively as well
+	for (const auto &child : children)
+		child->DirtyWorldMatrix();
 }

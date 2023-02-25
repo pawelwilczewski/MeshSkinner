@@ -199,7 +199,7 @@ void UpdateTransforms(const DrawCallInfo *info, std::unordered_set<const Entity 
 	// update the transforms if necessary
 	for (auto &[entity, transformID] : info->entities)
 	{
-		if (!entity->IsWorldMatrixUpdated() || entitiesToUpdate.find(entity.get()) != entitiesToUpdate.end())
+		if (!entity->GetIsWorldMatrixUpdated() || entitiesToUpdate.find(entity.get()) != entitiesToUpdate.end())
 		{
 			info->transforms->SetData(&entity->GetWorldMatrix(), 1, transformID);
 			entitiesToUpdate.insert(entity.get());

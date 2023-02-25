@@ -7,8 +7,8 @@
 class Entity
 {
 public:
-	Entity(const std::string &name = "entity", const Transform &transform = Transform());
-	virtual ~Entity() = default;
+	Entity(const std::string &name = "entity", Transform transform = Transform());
+	virtual ~Entity();
 
 public:
 	template<typename T>
@@ -33,15 +33,20 @@ public:
 
 public:
 	const glm::mat4 &GetWorldMatrix();
-	bool IsWorldMatrixUpdated() const;
+	bool GetIsWorldMatrixUpdated() const;
 
 protected:
 	void RecalculateWorldMatrix();
 
 private:
+	void DirtyWorldMatrix();
+
+private:
 	// TODO: map of unordered sets as the component storing method - then it's trivial to get all components of type (also more performant)
 	//  we would add everything to the set of EntityComponents and then to the set of T if T != EntityComponent and have T default to EntityComponent
 	std::unordered_set<Ref<EntityComponent>> components;
+
+	std::unordered_set<Ref<Entity>> children;
 
 public:
 	std::string name;
@@ -52,4 +57,7 @@ private:
 
 	glm::mat4 worldMatrix;
 	bool isWorldMatrixUpdated = false;
+
+private:
+	CallbackNoArgRef onDirtyMatrixCallback;
 };
