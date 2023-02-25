@@ -133,7 +133,7 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMes
 	auto &skeletons = skeletalMeshDrawCallsStatic[mesh->material->shader]->skeletons;
 	auto &transforms = skeletalMeshDrawCallsStatic[mesh->material->shader]->transforms;
 
-	// TODO: URGENT the skeletons must be replicated with no duplication check!
+	// submit all bones
 	if (skeletons.find(mesh->skeleton) == skeletons.end())
 	{
 		uint32_t skeletonTransformOffset = transforms->GetLength();
@@ -144,8 +144,7 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMes
 	}
 	else
 	{
-		Log::Error("Trying to render the same skeleton more than once");
-		//skeletonTransformOffset = skeletons[mesh->skeleton];
+		Log::Error("Trying to render the same skeleton more than once!");
 	}
 }
 

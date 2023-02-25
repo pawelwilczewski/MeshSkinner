@@ -50,6 +50,7 @@ private:
 
 public:
 	std::string name;
+	// TODO: this transform shouldn't be settable because of events it holds reference to (replace by GetTransform())
 	Transform transform;
 
 private:
