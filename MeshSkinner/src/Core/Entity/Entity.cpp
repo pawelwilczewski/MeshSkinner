@@ -18,7 +18,7 @@ void Entity::RemoveComponent(Ref<EntityComponent> component)
 
 void Entity::SetParent(const Ref<Entity> &parent)
 {
-	worldMatrixDirty = true;
+	isWorldMatrixUpdated = false;
 	this->parent = parent;
 }
 
@@ -37,22 +37,17 @@ const glm::mat4 &Entity::GetWorldMatrix()
 
 bool Entity::IsWorldMatrixUpdated() const
 {
-	if (!worldMatrixDirty)
-		return false;
-
-	auto updated = transform.IsMatrixUpdated();
-
-	if (!updated)
+	if (!isWorldMatrixUpdated)
 		return false;
 
 	// no recursion because it's just unnecessary
-	Ref<Entity> p = this->parent;
-	while (p != nullptr)
+	auto e = this;
+	while (e != nullptr)
 	{
-		if (!p->transform.IsMatrixUpdated()) 
+		if (!e->transform.IsMatrixUpdated()) 
 			return false;
 
-		p = p->parent;
+		e = e->parent.get();
 	}
 
 	return true;
@@ -60,6 +55,7 @@ bool Entity::IsWorldMatrixUpdated() const
 
 void Entity::RecalculateWorldMatrix()
 {
+	std::string calc = name;
 	worldMatrix = transform.GetMatrix();
 
 	// no recursion because it's just unnecessary
@@ -67,9 +63,11 @@ void Entity::RecalculateWorldMatrix()
 	while (p != nullptr)
 	{
 		worldMatrix = p->transform.GetMatrix() * worldMatrix;
+		calc = p->name + " * " + calc;
 
 		p = p->parent;
 	}
 
-	worldMatrixDirty = false;
+	isWorldMatrixUpdated = true;
+	Log::Info("Calculating transform for {}: {}", name, calc);
 }

@@ -133,10 +133,10 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMes
 	auto &skeletons = skeletalMeshDrawCallsStatic[mesh->material->shader]->skeletons;
 	auto &transforms = skeletalMeshDrawCallsStatic[mesh->material->shader]->transforms;
 
+	// TODO: URGENT the skeletons must be replicated with no duplication check!
 	if (skeletons.find(mesh->skeleton) == skeletons.end())
 	{
-		uint32_t skeletonTransformOffset;
-		skeletonTransformOffset = transforms->GetLength();
+		uint32_t skeletonTransformOffset = transforms->GetLength();
 		skeletons.insert({ mesh->skeleton, skeletonTransformOffset });
 
 		for (auto &bone : mesh->skeleton->bones)

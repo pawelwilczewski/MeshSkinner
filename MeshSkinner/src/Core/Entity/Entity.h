@@ -51,5 +51,5 @@ private:
 	Ref<Entity> parent = nullptr;
 
 	glm::mat4 worldMatrix;
-	bool worldMatrixDirty = true;
+	bool isWorldMatrixUpdated = false;
 };

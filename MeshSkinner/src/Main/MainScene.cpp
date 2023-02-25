@@ -77,7 +77,8 @@ void MainScene::OnStart()
     skeletalEntity->AddComponent(skeletalMesh);
     skeletalEntity->transform.SetScale(glm::vec3(0.01f));
     rootBone->SetParent(skeletalEntity);
-    rootBone->transform.Translate(glm::vec3(-5.f, 0.f, 0.f));
+    rootBone->transform.Translate(glm::vec3(-500.f, 0.f, 0.f));
+    //rootBone->transform.SetScale(glm::vec3(10.f, 10.f, 10.f));
 
     for (auto &bone : skeletalMesh->skeleton->bones)
         bone->AddComponent(MeshLibrary::GetCube());
@@ -112,6 +113,8 @@ void MainScene::OnUpdate()
     staticSkeletalEntity->transform.Translate(glm::vec3(-0.1f) * Time::GetDeltaSeconds());
 
     staticEntity->transform.SetScale(glm::vec3(glm::sin(Time::GetTimeSeconds())));
+
+    skeletalEntity->transform.Translate(glm::vec3(0.f, -1.f, 0.f) * Time::GetDeltaSeconds());
 }
 
 void MainScene::OnUpdateUI()
