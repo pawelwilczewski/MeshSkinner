@@ -7,4 +7,5 @@ public:
 
 public:
 	static Ref<Material> GetDefault();
+	static Ref<Material> GetDefaultOverlay();
 };

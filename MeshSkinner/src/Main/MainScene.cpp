@@ -78,12 +78,14 @@ void MainScene::OnStart()
     //skeletalEntity->transform.SetScale(glm::vec3(0.01f));
     skeletalEntity->SetParent(rootBone);
     //rootBone->transform.SetScale(glm::vec3(0.01f));
-    //rootBone->transform.Translate(glm::vec3(-5.f, 0.f, 0.f));
+    rootBone->transform.Translate(glm::vec3(-500.f, 0.f, 0.f));
     //rootBone->transform.Translate(glm::vec3(-500.f, 0.f, 0.f));
     //rootBone->transform.SetScale(glm::vec3(10.f, 10.f, 10.f));
 
+    auto boneMesh = MeshLibrary::GetCube();
+    boneMesh->material = MaterialLibrary::GetDefaultOverlay();
     for (auto &bone : skeletalMesh->skeleton->bones)
-        bone->AddComponent(MeshLibrary::GetCube());
+        bone->AddComponent(boneMesh);
 
     skeletalEntity2 = MakeRef<Entity>("skeletal 2", Transform(glm::vec3(-2.f, 0.f, 0.f)));
     skeletalEntity2->AddComponent(skeletalMesh);

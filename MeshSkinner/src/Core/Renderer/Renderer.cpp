@@ -44,7 +44,16 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 
 		vaoInitFunction(*drawCallInfo->vao.get());
 
-		drawCalls.insert({ mesh->material->shader, drawCallInfo });
+		// calculate the insert index by comparing the depth value of each shader
+		auto insertIndex = drawCalls.begin();
+		for (const auto &drawCall : drawCalls)
+		{
+			if (drawCall.first->GetDepth() > mesh->material->shader->GetDepth())
+				break;
+			insertIndex++;
+		}
+
+		drawCalls.insert(insertIndex, {mesh->material->shader, drawCallInfo});
 	}
 
 	auto &vao = drawCalls[mesh->material->shader]->vao;
@@ -177,9 +186,14 @@ void Renderer::FrameBegin()
 
 void Renderer::RenderDrawCalls(const Ref<Camera> &camera, const DrawCalls &drawCalls)
 {
+	uint16_t lastDepth = 0;
 	for (const auto &[shader, info] : drawCalls)
 	{
-		// TODO: same for materials
+		// clear depth if necessary
+		if (shader->GetDepth() > lastDepth)
+			glClear(GL_DEPTH_BUFFER_BIT);
+
+		lastDepth = shader->GetDepth();
 
 		shader->Bind();
 		shader->UploadUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
@@ -208,7 +222,7 @@ void UpdateTransforms(const DrawCallInfo *info, std::unordered_set<const Entity 
 
 void Renderer::FrameEnd()
 {
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	std::unordered_set<const Entity *> entitiesToUpdate;
@@ -219,6 +233,7 @@ void Renderer::FrameEnd()
 	for (const auto &[shader, info] : skeletalMeshDrawCallsStatic)
 		UpdateTransforms(info.get(), entitiesToUpdate);
 
-	RenderDrawCalls(activeCamera, staticMeshDrawCallsStatic);
+	// TODO: draw them in the order according to depth, not static first, skeletal second
 	RenderDrawCalls(activeCamera, skeletalMeshDrawCallsStatic);
+	RenderDrawCalls(activeCamera, staticMeshDrawCallsStatic);
 }

@@ -30,7 +30,7 @@ struct DrawCallInfo
 	Unique<StorageBuffer<VertexInfo>> vertexInfo;
 };
 
-using DrawCalls = std::unordered_map<Ref<Shader>, Ref<DrawCallInfo>>;
+using DrawCalls = std::map<Ref<Shader>, Ref<DrawCallInfo>>;
 
 class Renderer
 {
@@ -38,15 +38,13 @@ public:
 	static void Init();
 
 	static void Submit(const Ref<Entity> &entity);
-	// TODO: add Remove which should be called opon destruction of Mesh owner
+	// TODO: add Remove which should be called upon destruction of Mesh owning entity
 
 	static void FrameBegin();
 	static void FrameEnd();
 
 private:
 	static void SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<void(VertexArray<uint32_t> &)> fillVertexBufferFunction);
-
-	void Renderer::SubmitBoneStatic(const Ref<Entity> &entity, const Bone *bone, const Ref<Shader> &shader, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<void(VertexArray<uint32_t> &)> fillVertexBufferFunction);
 
 	static void SubmitMeshStatic(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh);
 	static void SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh);

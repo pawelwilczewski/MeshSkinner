@@ -3,21 +3,11 @@
 
 #include "tiny_gltf.h"
 
-std::unordered_map<std::string, Ref<StaticMesh>> MeshLibrary::staticMeshes;
-std::unordered_map<std::string, Ref<SkeletalMesh>> MeshLibrary::skeletalMeshes;
-
 Ref<StaticMesh> MeshLibrary::GetCube()
 {
-	if (staticMeshes.find("Cube") == staticMeshes.end())
-	{
-		auto cubeMesh = MakeRef<StaticMesh>();
-		if (Get("assets/models/default/cube.glb", cubeMesh))
-			staticMeshes.insert({ "Cube", cubeMesh });
-		else
-			Log::Error("Failure during default cube initialization");
-	}
-
-	return staticMeshes["Cube"];
+	auto cubeMesh = MakeRef<StaticMesh>();
+	Get("assets/models/default/cube.glb", cubeMesh);
+	return cubeMesh;
 }
 
 static tinygltf::Model model;
@@ -33,9 +23,9 @@ static bool LoadGLTF(const std::string &path)
 	if (extension == ".gltf")		success = loader.LoadASCIIFromFile(&model, &err, &warn, path);
 	else if (extension == ".glb")	success = loader.LoadBinaryFromFile(&model, &err, &warn, path);
 
-	if (!warn.empty())	Log::Error("GLTF Import: Warning: {}", path);
-	if (!err.empty())	Log::Error("GLTF Import: Error: {}", path);
-	if (!success)		Log::Error("GLTF Import: Failed to parse from file: {}", path);
+	if (!warn.empty())	Log::Warn("GLTF Import from file {}: Warning: {}", path, warn);
+	if (!err.empty())	Log::Error("GLTF Import from file {}: Error: {}", path, err);
+	if (!success)		Log::Error("GLTF Import: Failed to parse from file {}", path);
 
 	return success;
 }
