@@ -35,6 +35,8 @@ protected:
 	std::string vertexPath;
 	std::string fragmentPath;
 
+	// NOTE: don't create a setter unless changing the depth is handled correctly in the Renderer!
+	//  currently, upon adding a shader to the renderer, it is emplaced to keep the container sorted
 	uint16_t depth;
 
 private:

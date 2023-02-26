@@ -184,29 +184,6 @@ void Renderer::FrameBegin()
 	// TODO: submit all dynamic meshes
 }
 
-void Renderer::RenderDrawCalls(const Ref<Camera> &camera, const DrawCalls &drawCalls)
-{
-	uint16_t lastDepth = 0;
-	for (const auto &[shader, info] : drawCalls)
-	{
-		// clear depth if necessary
-		if (shader->GetDepth() > lastDepth)
-			glClear(GL_DEPTH_BUFFER_BIT);
-
-		lastDepth = shader->GetDepth();
-
-		shader->Bind();
-		shader->UploadUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
-		// TODO: probably id shouldn't be necessary (similar to uploading uniforms)
-		shader->SetupStorageBuffer("ss_VertexInfo", info->vertexInfo->GetID());
-		shader->SetupStorageBuffer("ss_Transforms", info->transforms->GetID());
-		//shader->SetupStorageBuffer("ss_Materials", info->materials->GetID());
-
-		info->vao->Bind();
-		glDrawElements(GL_TRIANGLES, info->vao->GetIndexBuffer()->GetLength(), GL_UNSIGNED_INT, nullptr);
-	}
-}
-
 static void UpdateTransforms(const DrawCallInfo *info, std::unordered_set<const Entity *> &entitiesToUpdate)
 {
 	// update the transforms if necessary
@@ -220,7 +197,7 @@ static void UpdateTransforms(const DrawCallInfo *info, std::unordered_set<const 
 	}
 }
 
-void Renderer::RenderNext(const DrawCalls::iterator &it)
+void Renderer::Render(const DrawCalls::iterator &it)
 {
 	const auto &shader = it->first;
 	const auto &info = it->second;
@@ -250,28 +227,39 @@ void Renderer::FrameEnd()
 		UpdateTransforms(info.get(), entitiesToUpdate);
 
 	// render all draw calls respecting the depth for each shader (drawCalls are already sorted)
-	auto staticIterator = staticMeshDrawCallsStatic.begin();
-	auto skeletalIterator = skeletalMeshDrawCallsStatic.begin();
+
+	std::vector<std::pair<DrawCalls::iterator, DrawCalls::iterator>> drawCallIterators = {
+		{ staticMeshDrawCallsStatic.begin(), staticMeshDrawCallsStatic.end() },
+		{ skeletalMeshDrawCallsStatic.begin(), skeletalMeshDrawCallsStatic.end() }
+	};
+
 	uint16_t depth = 0;
 	while (true)
 	{
-		// render all static of current depth
-		while (staticIterator != staticMeshDrawCallsStatic.end() && staticIterator->first->GetDepth() <= depth)
-			RenderNext(staticIterator++);
+		// render each draw calls element
+		bool finished = true;
+		for (auto &iterator : drawCallIterators)
+		{
+			while (iterator.first != iterator.second && iterator.first->first->GetDepth() <= depth)
+				Render(iterator.first++);
 
-		// render all skeletal of current depth
-		while (skeletalIterator != skeletalMeshDrawCallsStatic.end() && skeletalIterator->first->GetDepth() <= depth)
-			RenderNext(skeletalIterator++);
+			if (iterator.first != iterator.second)
+				finished = false;
+		}
+
+		// break if all finished
+		if (finished)
+			break;
 
 		// update the depth
-		if (staticIterator == staticMeshDrawCallsStatic.end() && skeletalIterator == skeletalMeshDrawCallsStatic.end())
-			break;
-		else if (staticIterator == staticMeshDrawCallsStatic.end())
-			depth = skeletalIterator->first->GetDepth();
-		else if (skeletalIterator == skeletalMeshDrawCallsStatic.end())
-			depth = staticIterator->first->GetDepth();
-		else
-			depth = glm::min(staticIterator->first->GetDepth(), skeletalIterator->first->GetDepth());
+		uint16_t minDepth = -1;
+		for (const auto &iterator : drawCallIterators)
+		{
+			if (iterator.first != iterator.second && iterator.first->first->GetDepth() < minDepth)
+				minDepth = iterator.first->first->GetDepth();
+		}
+
+		depth = minDepth;
 
 		// clear the depth buffer
 		glClear(GL_DEPTH_BUFFER_BIT);

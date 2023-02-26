@@ -49,8 +49,7 @@ private:
 	static void SubmitMeshStatic(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh);
 	static void SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh);
 
-	static void RenderNext(const DrawCalls::iterator &it);
-	static void RenderDrawCalls(const Ref<Camera> &camera, const DrawCalls &drawCalls);
+	static void Render(const DrawCalls::iterator &it);
 
 public:
 	static Ref<Camera> activeCamera;
