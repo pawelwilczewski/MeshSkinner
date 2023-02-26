@@ -184,7 +184,7 @@ void Renderer::FrameBegin()
 	// TODO: submit all dynamic meshes
 }
 
-static void UpdateTransforms(const DrawCallInfo *info, std::unordered_set<const Entity *> &entitiesToUpdate)
+static void UpdateTransforms(const Ref<DrawCallInfo> &info, std::unordered_set<const Entity *> &entitiesToUpdate)
 {
 	// update the transforms if necessary
 	for (auto &[entity, transformID] : info->entities)
@@ -215,34 +215,37 @@ void Renderer::Render(const DrawCalls::iterator &it)
 
 void Renderer::FrameEnd()
 {
+	// clear the screen before rendering anything
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	std::unordered_set<const Entity *> entitiesToUpdate;
-
-	for (const auto &[shader, info] : staticMeshDrawCallsStatic)
-		UpdateTransforms(info.get(), entitiesToUpdate);
-
-	for (const auto &[shader, info] : skeletalMeshDrawCallsStatic)
-		UpdateTransforms(info.get(), entitiesToUpdate);
-
-	// render all draw calls respecting the depth for each shader (drawCalls are already sorted)
-
+	// helper iterators used for rendering with correct depth - insert other DrawCalls here to effectively dispatch them
 	std::vector<std::pair<DrawCalls::iterator, DrawCalls::iterator>> drawCallIterators = {
 		{ staticMeshDrawCallsStatic.begin(), staticMeshDrawCallsStatic.end() },
 		{ skeletalMeshDrawCallsStatic.begin(), skeletalMeshDrawCallsStatic.end() }
 	};
 
+	// helper array to ensure all transforms are updated (some entities have static and skeletal meshes)
+	std::unordered_set<const Entity *> entitiesToUpdate;
+
+	// render all draw calls respecting the depth for each shader (drawCalls are already sorted)
 	uint16_t depth = 0;
 	while (true)
 	{
-		// render each draw calls element
+		// dispatch all draw calls
 		bool finished = true;
 		for (auto &iterator : drawCallIterators)
 		{
 			while (iterator.first != iterator.second && iterator.first->first->GetDepth() <= depth)
-				Render(iterator.first++);
+			{
+				// update all transforms before rendering
+				UpdateTransforms(iterator.first->second, entitiesToUpdate);
 
+				// render
+				Render(iterator.first++);
+			}
+
+			// not finished if anything left
 			if (iterator.first != iterator.second)
 				finished = false;
 		}
@@ -254,10 +257,8 @@ void Renderer::FrameEnd()
 		// update the depth
 		uint16_t minDepth = -1;
 		for (const auto &iterator : drawCallIterators)
-		{
 			if (iterator.first != iterator.second && iterator.first->first->GetDepth() < minDepth)
 				minDepth = iterator.first->first->GetDepth();
-		}
 
 		depth = minDepth;
 
