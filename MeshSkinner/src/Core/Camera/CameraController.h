@@ -5,7 +5,7 @@
 class CameraController
 {
 public:
-	CameraController(Ref<Camera> camera, float moveSpeed = 10.f);
+	CameraController(const Ref<Camera> &camera, float moveSpeed = 10.f, float moveSpeedMultiplier = 1.f, float moveSpeedMultiplierDelta = 0.2f, float maxSpeed = 10000.f, float minSpeed = 0.1f);
 	virtual ~CameraController();
 
 protected:
@@ -13,6 +13,7 @@ protected:
 	void OnLateUpdate();
 
 	void OnKeyPressed(int key);
+	void OnMouseScrolled(const glm::vec2 &delta);
 
 public:
 	float moveSpeed;
@@ -22,4 +23,15 @@ protected:
 	glm::vec2 lastMousePos = glm::vec2(0.f);
 	bool active = false;
 	bool initialMouseMove = true;
+
+	float moveSpeedMultiplier;
+	float moveSpeedMultiplierDelta;
+	float maxSpeed;
+	float minSpeed;
+
+private:
+	CallbackNoArgRef onUpdateCallback;
+	CallbackNoArgRef onLateUpdateCallback;
+	CallbackRef<int> onKeyPressedCallback;
+	CallbackRef<glm::vec2> onMouseScrolledCallback;
 };

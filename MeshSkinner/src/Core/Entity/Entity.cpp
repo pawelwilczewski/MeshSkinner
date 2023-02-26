@@ -66,7 +66,6 @@ bool Entity::GetIsWorldMatrixUpdated() const
 
 void Entity::RecalculateWorldMatrix()
 {
-	std::string calc = name;
 	worldMatrix = transform.GetMatrix();
 
 	// no recursion because it's just unnecessary
@@ -74,13 +73,10 @@ void Entity::RecalculateWorldMatrix()
 	while (p != nullptr)
 	{
 		worldMatrix = p->transform.GetMatrix() * worldMatrix;
-		calc = p->name + " * " + calc;
-
 		p = p->parent;
 	}
 
 	isWorldMatrixUpdated = true;
-	Log::Info("Calculating transform for {}: {}", name, calc);
 }
 
 void Entity::DirtyWorldMatrix()

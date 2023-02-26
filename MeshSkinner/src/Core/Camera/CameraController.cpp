@@ -1,19 +1,17 @@
 #include "pch.h"
 #include "CameraController.h"
 
-static CallbackNoArgRef onUpdateCallback;
-static CallbackNoArgRef onLateUpdateCallback;
-static CallbackRef<int> onKeyPressedCallback;
-
-CameraController::CameraController(Ref<Camera> camera, float moveSpeed) : camera(camera), moveSpeed(moveSpeed)
+CameraController::CameraController(const Ref<Camera> &camera, float moveSpeed, float moveSpeedMultiplier, float moveSpeedMultiplierDelta, float maxSpeed, float minSpeed) : camera(camera), moveSpeed(moveSpeed), moveSpeedMultiplier(moveSpeedMultiplier), moveSpeedMultiplierDelta(moveSpeedMultiplierDelta), maxSpeed(maxSpeed), minSpeed(minSpeed)
 {
 	onUpdateCallback = MakeCallbackNoArgRef([&]() { OnUpdate(); });
 	onLateUpdateCallback = MakeCallbackNoArgRef([&]() { OnLateUpdate(); });
 	onKeyPressedCallback = MakeCallbackRef<int>([&](int key) { OnKeyPressed(key); });
+	onMouseScrolledCallback = MakeCallbackRef<glm::vec2>([&](const glm::vec2 &delta) { OnMouseScrolled(delta); });
 
 	Application::OnUpdateSubscribe(onUpdateCallback);
 	Application::OnLateUpdateSubscribe(onLateUpdateCallback);
 	Input::OnKeyPressedSubscribe(onKeyPressedCallback);
+	Input::OnMouseScrolledSubscribe(onMouseScrolledCallback);
 }
 
 CameraController::~CameraController()
@@ -21,6 +19,7 @@ CameraController::~CameraController()
 	Application::OnUpdateUnsubscribe(onUpdateCallback);
 	Application::OnLateUpdateUnsubscribe(onLateUpdateCallback);
 	Input::OnKeyPressedUnsubscribe(onKeyPressedCallback);
+	Input::OnMouseScrolledUnsubscribe(onMouseScrolledCallback);
 }
 
 void CameraController::OnUpdate()
@@ -41,7 +40,7 @@ void CameraController::OnUpdate()
 		auto forward = input.y * -camera->transform.GetRightVector();
 		auto right = input.x * camera->transform.GetForwardVector();
 
-		camera->transform.SetPosition(camera->transform.GetPosition() + moveSpeed * Time::GetDeltaSeconds() * (forward + right));
+		camera->transform.SetPosition(camera->transform.GetPosition() + moveSpeed * moveSpeedMultiplier * Time::GetDeltaSeconds() * (forward + right));
 	}
 
 	// rotation
@@ -70,4 +69,10 @@ void CameraController::OnKeyPressed(int key)
 		if (active)
 			initialMouseMove = true;
 	}
+}
+
+void CameraController::OnMouseScrolled(const glm::vec2 &delta)
+{
+	moveSpeedMultiplier += delta.y * moveSpeedMultiplierDelta * glm::pow(moveSpeedMultiplier, 1.01f);
+	moveSpeedMultiplier = glm::clamp(moveSpeedMultiplier, minSpeed, maxSpeed);
 }

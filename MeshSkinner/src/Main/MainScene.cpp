@@ -75,9 +75,11 @@ void MainScene::OnStart()
 
     skeletalEntity = MakeRef<Entity>("skeletal", Transform(glm::vec3(15.f, 0.f, 2.f)));
     skeletalEntity->AddComponent(skeletalMesh);
-    skeletalEntity->transform.SetScale(glm::vec3(0.01f));
-    rootBone->SetParent(skeletalEntity);
-    rootBone->transform.Translate(glm::vec3(-500.f, 0.f, 0.f));
+    //skeletalEntity->transform.SetScale(glm::vec3(0.01f));
+    skeletalEntity->SetParent(rootBone);
+    //rootBone->transform.SetScale(glm::vec3(0.01f));
+    //rootBone->transform.Translate(glm::vec3(-5.f, 0.f, 0.f));
+    //rootBone->transform.Translate(glm::vec3(-500.f, 0.f, 0.f));
     //rootBone->transform.SetScale(glm::vec3(10.f, 10.f, 10.f));
 
     for (auto &bone : skeletalMesh->skeleton->bones)
@@ -111,8 +113,8 @@ void MainScene::OnUpdate()
     staticEntity2->transform.Translate(glm::vec3(0.1f) * Time::GetDeltaSeconds());
     staticEntity3->transform.Translate(glm::vec3(-0.1f) * Time::GetDeltaSeconds());
     //staticSkeletalEntity->transform.Translate(glm::vec3(-0.1f) * Time::GetDeltaSeconds());
-    skeletalEntity->transform.Translate(glm::vec3(0.f, -1.f, 0.f) * Time::GetDeltaSeconds());
-    skeletalEntity->transform.Rotate(glm::vec3(30.f, 0.f, 0.f) * Time::GetDeltaSeconds());
+    //skeletalEntity->transform.Translate(glm::vec3(0.f, -1.f, 0.f) * Time::GetDeltaSeconds());
+    //skeletalEntity->transform.Rotate(glm::vec3(30.f, 0.f, 0.f) * Time::GetDeltaSeconds());
     staticEntity->transform.SetScale(glm::vec3(glm::sin(Time::GetTimeSeconds())));
 }
 
