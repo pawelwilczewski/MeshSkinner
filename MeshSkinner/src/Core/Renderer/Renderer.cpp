@@ -117,7 +117,7 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<StaticMesh>
 		{
 			// append the vertices to the vbo
 			auto vbo = TypedVB<StaticVertex>(vao.GetVertexBuffer(0).get());
-		vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
+			vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
 		});
 }
 
@@ -225,7 +225,8 @@ void Renderer::FrameEnd()
 		{ skeletalMeshDrawCallsStatic.begin(), skeletalMeshDrawCallsStatic.end() }
 	};
 
-	// helper array to ensure all transforms are updated (some entities have static and skeletal meshes)
+	// helper array to ensure all transforms are updated (some entities have static and skeletal meshes
+	//  - transform needs to be updated for entities in all draw calls)
 	std::unordered_set<const Entity *> entitiesToUpdate;
 
 	// render all draw calls respecting the depth for each shader (drawCalls are already sorted)
