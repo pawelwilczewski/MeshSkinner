@@ -207,7 +207,7 @@ void Renderer::RenderDrawCalls(const Ref<Camera> &camera, const DrawCalls &drawC
 	}
 }
 
-void UpdateTransforms(const DrawCallInfo *info, std::unordered_set<const Entity *> &entitiesToUpdate)
+static void UpdateTransforms(const DrawCallInfo *info, std::unordered_set<const Entity *> &entitiesToUpdate)
 {
 	// update the transforms if necessary
 	for (auto &[entity, transformID] : info->entities)
@@ -218,6 +218,22 @@ void UpdateTransforms(const DrawCallInfo *info, std::unordered_set<const Entity 
 			entitiesToUpdate.insert(entity.get());
 		}
 	}
+}
+
+void Renderer::RenderNext(const DrawCalls::iterator &it)
+{
+	const auto &shader = it->first;
+	const auto &info = it->second;
+
+	shader->Bind();
+	shader->UploadUniformMat4("u_ViewProjection", activeCamera->GetViewProjectionMatrix());
+	// TODO: probably id shouldn't be necessary (similar to uploading uniforms)
+	shader->SetupStorageBuffer("ss_VertexInfo", info->vertexInfo->GetID());
+	shader->SetupStorageBuffer("ss_Transforms", info->transforms->GetID());
+	//shader->SetupStorageBuffer("ss_Materials", info->materials->GetID());
+
+	info->vao->Bind();
+	glDrawElements(GL_TRIANGLES, info->vao->GetIndexBuffer()->GetLength(), GL_UNSIGNED_INT, nullptr);
 }
 
 void Renderer::FrameEnd()
@@ -233,7 +249,31 @@ void Renderer::FrameEnd()
 	for (const auto &[shader, info] : skeletalMeshDrawCallsStatic)
 		UpdateTransforms(info.get(), entitiesToUpdate);
 
-	// TODO: draw them in the order according to depth, not static first, skeletal second
-	RenderDrawCalls(activeCamera, skeletalMeshDrawCallsStatic);
-	RenderDrawCalls(activeCamera, staticMeshDrawCallsStatic);
+	// render all draw calls respecting the depth for each shader (drawCalls are already sorted)
+	auto staticIterator = staticMeshDrawCallsStatic.begin();
+	auto skeletalIterator = skeletalMeshDrawCallsStatic.begin();
+	uint16_t depth = 0;
+	while (true)
+	{
+		// render all static of current depth
+		while (staticIterator != staticMeshDrawCallsStatic.end() && staticIterator->first->GetDepth() <= depth)
+			RenderNext(staticIterator++);
+
+		// render all skeletal of current depth
+		while (skeletalIterator != skeletalMeshDrawCallsStatic.end() && skeletalIterator->first->GetDepth() <= depth)
+			RenderNext(skeletalIterator++);
+
+		// update the depth
+		if (staticIterator == staticMeshDrawCallsStatic.end() && skeletalIterator == skeletalMeshDrawCallsStatic.end())
+			break;
+		else if (staticIterator == staticMeshDrawCallsStatic.end())
+			depth = skeletalIterator->first->GetDepth();
+		else if (skeletalIterator == skeletalMeshDrawCallsStatic.end())
+			depth = staticIterator->first->GetDepth();
+		else
+			depth = glm::min(staticIterator->first->GetDepth(), skeletalIterator->first->GetDepth());
+
+		// clear the depth buffer
+		glClear(GL_DEPTH_BUFFER_BIT);
+	}
 }

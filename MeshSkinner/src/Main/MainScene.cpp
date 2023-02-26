@@ -78,7 +78,7 @@ void MainScene::OnStart()
     //skeletalEntity->transform.SetScale(glm::vec3(0.01f));
     skeletalEntity->SetParent(rootBone);
     //rootBone->transform.SetScale(glm::vec3(0.01f));
-    rootBone->transform.Translate(glm::vec3(-500.f, 0.f, 0.f));
+    rootBone->transform.Translate(glm::vec3(-200.f, 0.f, 0.f));
     //rootBone->transform.Translate(glm::vec3(-500.f, 0.f, 0.f));
     //rootBone->transform.SetScale(glm::vec3(10.f, 10.f, 10.f));
 
