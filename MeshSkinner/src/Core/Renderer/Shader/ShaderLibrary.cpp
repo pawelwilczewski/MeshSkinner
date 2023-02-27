@@ -15,9 +15,10 @@ Ref<Shader> ShaderLibrary::FindShader(const std::string &displayedName)
 void ShaderLibrary::Init()
 {
 	ShaderLibrary::Load("Default", "assets/shaders/Default.vert", "assets/shaders/Default.frag");
+	ShaderLibrary::Load("DefaultOverlay", "assets/shaders/Default.vert", "assets/shaders/Default.frag", -1);
 }
 
-Ref<Shader> ShaderLibrary::Load(const std::string &displayedName, const std::string &vertexSourcePath, const std::string &fragmentSourcePath)
+Ref<Shader> ShaderLibrary::Load(const std::string &displayedName, const std::string &vertexSourcePath, const std::string &fragmentSourcePath, uint16_t depth)
 {
 	auto shader = FindShader(displayedName);
 
@@ -27,7 +28,7 @@ Ref<Shader> ShaderLibrary::Load(const std::string &displayedName, const std::str
 		shaders.erase(shader);
 	}
 
-	shader = MakeRef<Shader>(displayedName, vertexSourcePath, fragmentSourcePath);
+	shader = MakeRef<Shader>(displayedName, vertexSourcePath, fragmentSourcePath, depth);
 	shaders.insert(shader);
 	return shader;
 }
@@ -45,4 +46,9 @@ Ref<Shader> ShaderLibrary::Get(const std::string &displayedName)
 Ref<Shader> ShaderLibrary::GetDefault()
 {
 	return Get("Default");
+}
+
+Ref<Shader> ShaderLibrary::GetDefaultOverlay()
+{
+	return Get("DefaultOverlay");
 }

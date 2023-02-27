@@ -23,13 +23,14 @@ struct DrawCallInfo
 	Unique<VertexArray<uint32_t>> vao;
 	// key: entity already rendered, value: transform id to use for mesh
 	std::unordered_map<Ref<Entity>, const uint32_t> entities;
-	std::unordered_set<const Mesh *> meshes;
+	// key: skeleton already rendered, value: transform id to use for bones (start)
+	std::unordered_map<Ref<Skeleton>, const uint32_t> skeletons;
 	Unique<StorageBuffer<glm::mat4>> transforms;
 	Unique<StorageBuffer<MaterialGPU>> materials;
 	Unique<StorageBuffer<VertexInfo>> vertexInfo;
 };
 
-using DrawCalls = std::unordered_map<Ref<Shader>, Ref<DrawCallInfo>>;
+using DrawCalls = std::map<Ref<Shader>, Ref<DrawCallInfo>>;
 
 class Renderer
 {
@@ -37,7 +38,7 @@ public:
 	static void Init();
 
 	static void Submit(const Ref<Entity> &entity);
-	// TODO: add Remove which should be called opon destruction of Mesh owner
+	// TODO: add Remove which should be called upon destruction of Mesh owning entity
 
 	static void FrameBegin();
 	static void FrameEnd();
@@ -45,7 +46,10 @@ public:
 private:
 	static void SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<void(VertexArray<uint32_t> &)> fillVertexBufferFunction);
 
-	static void RenderDrawCalls(const Ref<Camera> &camera, const DrawCalls &drawCalls);
+	static void SubmitMeshStatic(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh);
+	static void SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh);
+
+	static void Render(const DrawCalls::iterator &it);
 
 public:
 	static Ref<Camera> activeCamera;

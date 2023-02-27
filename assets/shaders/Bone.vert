@@ -24,7 +24,7 @@ void main()
 {
 	uint transformID = vertexInfo[gl_VertexID].transformID;
 	
-	io_Color = randomColor(float(transformID));//in_Color;
+	io_Color = in_Color;
 
 	vec4 worldPosition = transforms[transformID] * vec4(in_Position, 1.0);
 	gl_Position = u_ViewProjection * worldPosition;

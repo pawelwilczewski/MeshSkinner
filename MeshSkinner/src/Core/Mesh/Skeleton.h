@@ -3,17 +3,13 @@
 #include "Application/Core.h"
 #include "Core/Entity/Transform.h"
 
-class Bone
+class Bone : public Entity
 {
 public:
 	Bone();
-	Bone(const std::string &name, uint16_t parentIndex, const Transform &localTransform, const glm::mat4& inverseBindMatrix);
 
 public:
-	std::string name;
-	uint16_t parentIndex;
-	Transform localTransform;
-	glm::mat4 inverseBindMatrix;
+	glm::mat4 inverseBindMatrix = glm::mat4(1.f);
 };
 
 class Skeleton
@@ -24,6 +20,6 @@ public:
 	// TODO: [] operator which gives the bone by string name
 
 public:
-	std::vector<Bone> bones;
-	uint16_t root;
+	std::vector<Ref<Bone>> bones;
+	uint16_t root = -1;
 };

@@ -3,21 +3,29 @@
 
 #include "tiny_gltf.h"
 
-std::unordered_map<std::string, Ref<StaticMesh>> MeshLibrary::staticMeshes;
-std::unordered_map<std::string, Ref<SkeletalMesh>> MeshLibrary::skeletalMeshes;
-
 Ref<StaticMesh> MeshLibrary::GetCube()
 {
-	if (staticMeshes.find("Cube") == staticMeshes.end())
+	auto cubeMesh = MakeRef<StaticMesh>();
+	Get("assets/models/default/cube.glb", cubeMesh);
+	return cubeMesh;
+}
+
+Ref<StaticMesh> MeshLibrary::GetBone(float length)
+{
+	// take cube, offset the vertices accordingly and set the color to random (gradient)
+	auto mesh = MakeRef<StaticMesh>();
+	Get("assets/models/default/cube.glb", mesh);
+
+	// offset to correct the origin
+	for (auto &vertex : mesh->vertices)
 	{
-		auto cubeMesh = MakeRef<StaticMesh>();
-		if (Get("assets/models/default/cube.glb", cubeMesh))
-			staticMeshes.insert({ "Cube", cubeMesh });
-		else
-			Log::Error("Failure during default cube initialization");
+		vertex.position += 0.5;
+
+		if (vertex.position.y > 0.5f)
+			vertex.position.y += length - 1.f;
 	}
 
-	return staticMeshes["Cube"];
+	return mesh;
 }
 
 static tinygltf::Model model;
@@ -33,9 +41,9 @@ static bool LoadGLTF(const std::string &path)
 	if (extension == ".gltf")		success = loader.LoadASCIIFromFile(&model, &err, &warn, path);
 	else if (extension == ".glb")	success = loader.LoadBinaryFromFile(&model, &err, &warn, path);
 
-	if (!warn.empty())	Log::Error("GLTF Import: Warning: {}", path);
-	if (!err.empty())	Log::Error("GLTF Import: Error: {}", path);
-	if (!success)		Log::Error("GLTF Import: Failed to parse from file: {}", path);
+	if (!warn.empty())	Log::Warn("GLTF Import from file {}: Warning: {}", path, warn);
+	if (!err.empty())	Log::Error("GLTF Import from file {}: Error: {}", path, err);
+	if (!success)		Log::Error("GLTF Import: Failed to parse from file {}", path);
 
 	return success;
 }
@@ -175,7 +183,7 @@ bool MeshLibrary::Get(const std::string &path, Ref<StaticMesh> &outMesh)
 	return true;
 }
 
-bool MeshLibrary::Get(const std::string &path, Ref<SkeletalMesh> &outMesh)
+bool MeshLibrary::Get(const std::string &path, Ref<SkeletalMesh> &outMesh, Ref<Bone> &outRoot)
 {
 	// TODO: get from the cache map if already loaded once
 
@@ -189,10 +197,14 @@ bool MeshLibrary::Get(const std::string &path, Ref<SkeletalMesh> &outMesh)
 	for (const auto &skin : model.skins)
 	{
 		// skeleton root
-		outMesh->skeleton->root = skin.skeleton;
+		outMesh->skeleton->root = -1;
 
 		// initialize bones simple
 		outMesh->skeleton->bones.resize(outMesh->skeleton->bones.size() + skin.joints.size());
+
+		// init bones
+		for (auto &bone : outMesh->skeleton->bones)
+			bone.reset(new Bone());
 
 		// get hold of inverse bind matrices data
 		auto &inverseBindMatrices = model.accessors[skin.inverseBindMatrices];
@@ -202,31 +214,41 @@ bool MeshLibrary::Get(const std::string &path, Ref<SkeletalMesh> &outMesh)
 		for (const auto &joint : skin.joints)
 		{
 			// name
-			outMesh->skeleton->bones[joint].name = model.nodes[joint].name;
+			outMesh->skeleton->bones[joint]->name = model.nodes[joint].name;
 
 			// inverse bind matrix
-			outMesh->skeleton->bones[joint].inverseBindMatrix = inverseBindMatricesMatData[joint];
+			outMesh->skeleton->bones[joint]->inverseBindMatrix = inverseBindMatricesMatData[joint];
 
 			// local transform
 			if (model.nodes[joint].translation.size() > 0)
 			{
 				std::vector<float> translationData(model.nodes[joint].translation.begin(), model.nodes[joint].translation.end());
-				outMesh->skeleton->bones[joint].localTransform.SetPosition(glm::make_vec3(translationData.data()));
+				outMesh->skeleton->bones[joint]->transform.SetPosition(glm::make_vec3(translationData.data()));
 			}
 			if (model.nodes[joint].rotation.size() > 0)
 			{
 				std::vector<float> rotationData(model.nodes[joint].rotation.begin(), model.nodes[joint].rotation.end());
-				outMesh->skeleton->bones[joint].localTransform.SetRotation(glm::make_vec3(rotationData.data()));
+				outMesh->skeleton->bones[joint]->transform.SetRotation(glm::degrees(glm::eulerAngles(glm::make_quat(rotationData.data()))));
 			}
 			if (model.nodes[joint].scale.size() > 0)
 			{
 				std::vector<float> scaleData(model.nodes[joint].scale.begin(), model.nodes[joint].scale.end());
-				outMesh->skeleton->bones[joint].localTransform.SetScale(glm::make_vec3(scaleData.data()));
+				outMesh->skeleton->bones[joint]->transform.SetScale(glm::make_vec3(scaleData.data()));
 			}
 
 			// update children's parent index
 			for (const auto &child : model.nodes[joint].children)
-				outMesh->skeleton->bones[child].parentIndex = joint;
+				outMesh->skeleton->bones[child]->SetParent(outMesh->skeleton->bones[joint]);
+		}
+
+		// update the root
+		for (int i = 0; i < outMesh->skeleton->bones.size(); i++)
+		{
+			if (outMesh->skeleton->bones[i]->GetParent() == nullptr)
+			{
+				outMesh->skeleton->root = i;
+				outRoot = outMesh->skeleton->bones[i];
+			}
 		}
 	}
 

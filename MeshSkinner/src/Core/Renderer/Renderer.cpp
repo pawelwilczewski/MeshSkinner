@@ -12,7 +12,7 @@ DrawCallInfo::DrawCallInfo() :
 	materials(MakeUnique<StorageBuffer<MaterialGPU>>()),
 	vertexInfo(MakeUnique<StorageBuffer<VertexInfo>>()),
 	entities(std::unordered_map<Ref<Entity>, const uint32_t>()),
-	meshes(std::unordered_set<const Mesh *>())
+	skeletons(std::unordered_map<Ref<Skeleton>, const uint32_t>())
 {
 
 }
@@ -44,12 +44,20 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 
 		vaoInitFunction(*drawCallInfo->vao.get());
 
-		drawCalls.insert({ mesh->material->shader, drawCallInfo });
+		// calculate the insert index by comparing the depth value of each shader
+		auto insertIndex = drawCalls.begin();
+		for (const auto &drawCall : drawCalls)
+		{
+			if (drawCall.first->GetDepth() > mesh->material->shader->GetDepth())
+				break;
+			insertIndex++;
+		}
+
+		drawCalls.insert(insertIndex, {mesh->material->shader, drawCallInfo});
 	}
 
 	auto &vao = drawCalls[mesh->material->shader]->vao;
 	auto &entities = drawCalls[mesh->material->shader]->entities;
-	auto &meshes = drawCalls[mesh->material->shader]->meshes;
 	auto &vertexInfo = drawCalls[mesh->material->shader]->vertexInfo;
 	auto &transforms = drawCalls[mesh->material->shader]->transforms;
 	auto &materials = drawCalls[mesh->material->shader]->materials;
@@ -59,7 +67,7 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 	if (entities.find(entity) == entities.end())
 	{
 		// transform info update
-		transforms->AppendData(&entity->transform.GetMatrix(), 1);
+		transforms->AppendData(&entity->GetWorldMatrix(), 1);
 		transformID = transforms->GetLength() - 1;
 
 		// new entity - insert for future use
@@ -94,6 +102,61 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 	vertexInfo->AppendData(ids.data(), ids.size());
 }
 
+void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh)
+{
+	SubmitMeshStatic(entity, mesh.get(), staticMeshDrawCallsStatic,
+		[&](VertexArray<uint32_t> &vao)
+		{
+			// initialize the ibo and vbo
+			auto ibo = MakeRef<IndexBuffer<uint32_t>>();
+			auto vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
+			vao.SetVertexBuffer(vbo, 0);
+			vao.SetIndexBuffer(ibo);
+		},
+		[&](VertexArray<uint32_t> &vao)
+		{
+			// append the vertices to the vbo
+			auto vbo = TypedVB<StaticVertex>(vao.GetVertexBuffer(0).get());
+			vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
+		});
+}
+
+void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh)
+{
+	SubmitMeshStatic(entity, mesh.get(), skeletalMeshDrawCallsStatic,
+		[&](VertexArray<uint32_t> &vao)
+		{
+			// initialize the ibo and vbo
+			auto ibo = MakeRef<IndexBuffer<uint32_t>>();
+			auto vbo = MakeRef<VertexBuffer<SkeletalVertex>>(SkeletalVertex::layout);
+			vao.SetVertexBuffer(vbo, 0);
+			vao.SetIndexBuffer(ibo);
+		},
+		[&](VertexArray<uint32_t> &vao)
+		{
+			// append the vertices to the vbo
+			auto vbo = TypedVB<SkeletalVertex>(vao.GetVertexBuffer(0).get());
+			vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
+		});
+
+	auto &skeletons = skeletalMeshDrawCallsStatic[mesh->material->shader]->skeletons;
+	auto &transforms = skeletalMeshDrawCallsStatic[mesh->material->shader]->transforms;
+
+	// submit all bones
+	if (skeletons.find(mesh->skeleton) == skeletons.end())
+	{
+		uint32_t skeletonTransformOffset = transforms->GetLength();
+		skeletons.insert({ mesh->skeleton, skeletonTransformOffset });
+
+		for (auto &bone : mesh->skeleton->bones)
+			Submit(bone);
+	}
+	else
+	{
+		Log::Error("Trying to render the same skeleton more than once!");
+	}
+}
+
 void Renderer::Submit(const Ref<Entity> &entity)
 {
 	// submit all static meshes
@@ -103,51 +166,16 @@ void Renderer::Submit(const Ref<Entity> &entity)
 		if (!mesh->isStatic)
 			continue;
 
-		SubmitMeshStatic(
-			entity,
-			mesh,
-			staticMeshDrawCallsStatic,
-			[&](VertexArray<uint32_t> &vao)
-			{
-				// initialize the ibo and vbo
-				auto ibo = MakeRef<IndexBuffer<uint32_t>>();
-				auto vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
-				vao.SetVertexBuffer(vbo, 0);
-				vao.SetIndexBuffer(ibo);
-			},
-			[&](VertexArray<uint32_t> &vao)
-			{
-				// append the vertices to the vbo
-				auto vbo = TypedVB<StaticVertex>(vao.GetVertexBuffer(0).get());
-				vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
-			}
-			);
+		SubmitMeshStatic(entity, mesh);
 	}
 
+	// submit all skeletal meshes
 	auto skeletalMeshes = entity->GetComponents<SkeletalMesh>();
 	for (auto &mesh : skeletalMeshes)
 	{
 		if (!mesh->isStatic) continue;
 
-		SubmitMeshStatic(
-			entity,
-			mesh,
-			skeletalMeshDrawCallsStatic,
-			[&](VertexArray<uint32_t> &vao)
-			{
-				// initialize the ibo and vbo
-				auto ibo = MakeRef<IndexBuffer<uint32_t>>();
-				auto vbo = MakeRef<VertexBuffer<SkeletalVertex>>(SkeletalVertex::layout);
-				vao.SetVertexBuffer(vbo, 0);
-				vao.SetIndexBuffer(ibo);
-			},
-			[&](VertexArray<uint32_t> &vao)
-			{
-				// append the vertices to the vbo
-				auto vbo = TypedVB<SkeletalVertex>(vao.GetVertexBuffer(0).get());
-				vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
-			}
-		);
+		SubmitMeshStatic(entity, mesh);
 	}
 }
 
@@ -156,50 +184,86 @@ void Renderer::FrameBegin()
 	// TODO: submit all dynamic meshes
 }
 
-void Renderer::RenderDrawCalls(const Ref<Camera> &camera, const DrawCalls &drawCalls)
-{
-	for (const auto &[shader, info] : drawCalls)
-	{
-		// TODO: same for materials
-
-		shader->Bind();
-		shader->UploadUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
-		// TODO: probably id shouldn't be necessary (similar to uploading uniforms)
-		shader->SetupStorageBuffer("ss_VertexInfo", info->vertexInfo->GetID());
-		shader->SetupStorageBuffer("ss_Transforms", info->transforms->GetID());
-		//shader->SetupStorageBuffer("ss_Materials", info->materials->GetID());
-
-		info->vao->Bind();
-		glDrawElements(GL_TRIANGLES, info->vao->GetIndexBuffer()->GetLength(), GL_UNSIGNED_INT, nullptr);
-	}
-}
-
-void UpdateTransforms(const DrawCallInfo *info, std::unordered_set<const Entity *> &entitiesToUpdate)
+static void UpdateTransforms(const Ref<DrawCallInfo> &info, std::unordered_set<const Entity *> &entitiesToUpdate)
 {
 	// update the transforms if necessary
 	for (auto &[entity, transformID] : info->entities)
 	{
-		if (!entity->transform.IsMatrixUpdated() || entitiesToUpdate.find(entity.get()) != entitiesToUpdate.end())
+		if (!entity->GetIsWorldMatrixUpdated() || entitiesToUpdate.find(entity.get()) != entitiesToUpdate.end())
 		{
-			info->transforms->SetData(&entity->transform.GetMatrix(), 1, transformID);
+			info->transforms->SetData(&entity->GetWorldMatrix(), 1, transformID);
 			entitiesToUpdate.insert(entity.get());
 		}
 	}
 }
 
+void Renderer::Render(const DrawCalls::iterator &it)
+{
+	const auto &shader = it->first;
+	const auto &info = it->second;
+
+	shader->Bind();
+	shader->UploadUniformMat4("u_ViewProjection", activeCamera->GetViewProjectionMatrix());
+	// TODO: probably id shouldn't be necessary (similar to uploading uniforms)
+	shader->SetupStorageBuffer("ss_VertexInfo", info->vertexInfo->GetID());
+	shader->SetupStorageBuffer("ss_Transforms", info->transforms->GetID());
+	//shader->SetupStorageBuffer("ss_Materials", info->materials->GetID());
+
+	info->vao->Bind();
+	glDrawElements(GL_TRIANGLES, info->vao->GetIndexBuffer()->GetLength(), GL_UNSIGNED_INT, nullptr);
+}
+
 void Renderer::FrameEnd()
 {
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	// clear the screen before rendering anything
+	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	// helper iterators used for rendering with correct depth - insert other DrawCalls here to effectively dispatch them
+	std::vector<std::pair<DrawCalls::iterator, DrawCalls::iterator>> drawCallIterators = {
+		{ staticMeshDrawCallsStatic.begin(), staticMeshDrawCallsStatic.end() },
+		{ skeletalMeshDrawCallsStatic.begin(), skeletalMeshDrawCallsStatic.end() }
+	};
+
+	// helper array to ensure all transforms are updated (some entities have static and skeletal meshes
+	//  - transform needs to be updated for entities in all draw calls)
 	std::unordered_set<const Entity *> entitiesToUpdate;
 
-	for (const auto &[shader, info] : staticMeshDrawCallsStatic)
-		UpdateTransforms(info.get(), entitiesToUpdate);
+	// render all draw calls respecting the depth for each shader (drawCalls are already sorted)
+	uint16_t depth = 0;
+	while (true)
+	{
+		// dispatch all draw calls
+		bool finished = true;
+		for (auto &iterator : drawCallIterators)
+		{
+			while (iterator.first != iterator.second && iterator.first->first->GetDepth() <= depth)
+			{
+				// update all transforms before rendering
+				UpdateTransforms(iterator.first->second, entitiesToUpdate);
 
-	for (const auto &[shader, info] : skeletalMeshDrawCallsStatic)
-		UpdateTransforms(info.get(), entitiesToUpdate);
+				// render
+				Render(iterator.first++);
+			}
 
-	RenderDrawCalls(activeCamera, staticMeshDrawCallsStatic);
-	RenderDrawCalls(activeCamera, skeletalMeshDrawCallsStatic);
+			// not finished if anything left
+			if (iterator.first != iterator.second)
+				finished = false;
+		}
+
+		// break if all finished
+		if (finished)
+			break;
+
+		// update the depth
+		uint16_t minDepth = -1;
+		for (const auto &iterator : drawCallIterators)
+			if (iterator.first != iterator.second && iterator.first->first->GetDepth() < minDepth)
+				minDepth = iterator.first->first->GetDepth();
+
+		depth = minDepth;
+
+		// clear the depth buffer
+		glClear(GL_DEPTH_BUFFER_BIT);
+	}
 }

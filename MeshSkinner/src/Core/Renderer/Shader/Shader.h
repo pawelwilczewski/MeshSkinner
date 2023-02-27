@@ -3,7 +3,7 @@
 class Shader
 {
 public:
-	Shader(const std::string &displayedName, const std::string &vertexSourcePath, const std::string &fragmentSourcePath);
+	Shader(const std::string &displayedName, const std::string &vertexSourcePath, const std::string &fragmentSourcePath, uint16_t depth = 0);
 	virtual ~Shader();
 
 	virtual void Bind() const;
@@ -24,6 +24,9 @@ private:
 	GLint GetUniformLocation(const std::string &name);
 
 public:
+	uint16_t GetDepth() const;
+
+public:
 	virtual bool operator==(const Shader &other);
 	virtual bool operator==(const std::string &other);
 
@@ -31,6 +34,10 @@ protected:
 	std::string displayedName;
 	std::string vertexPath;
 	std::string fragmentPath;
+
+	// NOTE: don't create a setter unless changing the depth is handled correctly in the Renderer!
+	//  currently, upon adding a shader to the renderer, it is emplaced to keep the container sorted
+	uint16_t depth;
 
 private:
 	GLuint id;

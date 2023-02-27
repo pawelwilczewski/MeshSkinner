@@ -13,4 +13,12 @@ protected:
 	virtual void OnUpdateUI() = 0;
 	virtual void OnLateUpdate() = 0;
 	virtual void OnEnd() = 0;
+
+private:
+	CallbackNoArgRef onStartCallback;
+	CallbackNoArgRef onEarlyUpdateCallback;
+	CallbackNoArgRef onUpdateCallback;
+	CallbackNoArgRef onUpdateUICallback;
+	CallbackNoArgRef onLateUpdateCallback;
+	CallbackNoArgRef onEndCallback;
 };

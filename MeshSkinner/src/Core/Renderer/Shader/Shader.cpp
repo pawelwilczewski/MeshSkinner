@@ -95,7 +95,7 @@ static std::string ResolveIncludes(const std::string &filePath, const std::strin
 	return result;
 }
 
-Shader::Shader(const std::string &displayedName, const std::string &vertexSourcePath, const std::string &fragmentSourcePath) : displayedName(displayedName)
+Shader::Shader(const std::string &displayedName, const std::string &vertexSourcePath, const std::string &fragmentSourcePath, uint16_t depth) : displayedName(displayedName), depth(depth)
 {
 	std::unordered_map<GLenum, std::string> data;
 	data[GL_VERTEX_SHADER] = ResolveIncludes(vertexSourcePath, FileUtils::ReadFile(vertexSourcePath));
@@ -196,6 +196,11 @@ GLint Shader::GetUniformLocation(const std::string &name)
 	GLint result = glGetUniformLocation(id, name.c_str());
 	uniformLocations[name] = result;
 	return result;
+}
+
+uint16_t Shader::GetDepth() const
+{
+	return depth;
 }
 
 bool Shader::operator==(const Shader &other)

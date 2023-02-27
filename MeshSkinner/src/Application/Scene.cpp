@@ -1,13 +1,6 @@
 #include "pch.h"
 #include "Scene.h"
 
-static CallbackNoArgRef onStartCallback;
-static CallbackNoArgRef onEarlyUpdateCallback;
-static CallbackNoArgRef onUpdateCallback;
-static CallbackNoArgRef onUpdateUICallback;
-static CallbackNoArgRef onLateUpdateCallback;
-static CallbackNoArgRef onEndCallback;
-
 Scene::Scene()
 {
 	onStartCallback = MakeCallbackNoArgRef([&]() { OnStart(); });
