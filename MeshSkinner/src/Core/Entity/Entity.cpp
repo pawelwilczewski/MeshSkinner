@@ -51,6 +51,11 @@ const Ref<Entity> &Entity::GetParent() const
 	return this->parent;
 }
 
+const std::unordered_set<Ref<Entity>> &Entity::GetChildren() const
+{
+	return children;
+}
+
 const glm::mat4 &Entity::GetWorldMatrix()
 {
 	if (!isWorldMatrixUpdated)

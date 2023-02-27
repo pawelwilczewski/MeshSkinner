@@ -27,6 +27,8 @@ MainScene::MainScene() : Scene()
     cameraController = MakeRef<CameraController>(camera, 10.f);
 
     Renderer::activeCamera = camera;
+
+    ShaderLibrary::Load("Bone", "assets/shaders/Bone.vert", "assets/shaders/Bone.frag", 1);
 }
 
 MainScene::~MainScene()
@@ -82,10 +84,20 @@ void MainScene::OnStart()
     //rootBone->transform.Translate(glm::vec3(-500.f, 0.f, 0.f));
     //rootBone->transform.SetScale(glm::vec3(10.f, 10.f, 10.f));
 
-    auto boneMesh = MeshLibrary::GetCube();
-    boneMesh->material = MaterialLibrary::GetDefaultOverlay();
+    // add bone meshes
+    auto boneMat = MakeRef<Material>(ShaderLibrary::Get("Bone"));
     for (auto &bone : skeletalMesh->skeleton->bones)
+    {
+        // calculate the bone length with some default for tip bones
+        auto boneLength = 50.f;
+        auto &children = bone->GetChildren();
+        if (children.size() == 1)
+            boneLength = glm::length(bone->GetChildren().begin()->get()->transform.GetPosition());
+
+        auto boneMesh = MeshLibrary::GetBone(boneLength);
+        boneMesh->material = boneMat;
         bone->AddComponent(boneMesh);
+    }
 
     skeletalEntity2 = MakeRef<Entity>("skeletal 2", Transform(glm::vec3(-2.f, 0.f, 0.f)));
     skeletalEntity2->AddComponent(skeletalMesh);

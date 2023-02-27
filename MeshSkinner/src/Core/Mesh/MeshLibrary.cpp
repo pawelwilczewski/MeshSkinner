@@ -10,6 +10,24 @@ Ref<StaticMesh> MeshLibrary::GetCube()
 	return cubeMesh;
 }
 
+Ref<StaticMesh> MeshLibrary::GetBone(float length)
+{
+	// take cube, offset the vertices accordingly and set the color to random (gradient)
+	auto mesh = MakeRef<StaticMesh>();
+	Get("assets/models/default/cube.glb", mesh);
+
+	// offset to correct the origin
+	for (auto &vertex : mesh->vertices)
+	{
+		vertex.position += 0.5;
+
+		if (vertex.position.y > 0.5f)
+			vertex.position.y += length - 1.f;
+	}
+
+	return mesh;
+}
+
 static tinygltf::Model model;
 static tinygltf::TinyGLTF loader;
 static std::string err;

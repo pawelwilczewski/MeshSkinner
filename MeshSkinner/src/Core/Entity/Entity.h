@@ -31,6 +31,8 @@ public:
 	void SetParent(const Ref<Entity> &parent);
 	const Ref<Entity> &GetParent() const;
 
+	const std::unordered_set<Ref<Entity>> &GetChildren() const;
+
 public:
 	const glm::mat4 &GetWorldMatrix();
 	bool GetIsWorldMatrixUpdated() const;
