@@ -148,21 +148,17 @@ void MainScene::OnUpdateUI()
     frameTimes += Time::GetDeltaSeconds();
     fps += Time::GetFPS();
 
-    // debug panel
-    ImGui::Begin("Debug info");
-    ImGui::Text("Scene info:");
+    // scene stats
+    ImGui::Begin("Scene Stats");
     ImGui::Text("FPS:            %f", Time::GetFPS());
     ImGui::Text("Frame time:     %f ms", Time::GetDeltaSeconds() * 1000.f);
     ImGui::Text("Avg FPS:        %f", fps / updates);
     ImGui::Text("Avg frame time: %f ms", frameTimes / updates * 1000.f);
-    ImGui::Separator();
-    ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->bones.size() - 1);
     ImGui::End();
 
-    // debug panel 2
-    ImGui::Begin("Hello info");
-    ImGui::Text("Scene info 2:");
-    ImGui::Text("FPS:            %f", Time::GetFPS());
+    // edited mesh
+    ImGui::Begin("Edited Mesh");
+    ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->bones.size() - 1);
     ImGui::End();
 }
 
