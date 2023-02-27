@@ -11,7 +11,7 @@ glm::mat4 Animation::Evaluate(const char *boneName, float time)
 
 	assert(frames.size() > 0);
 
-	if (loop)
+	if (loop && frames.back().time > glm::epsilon<float>()) // effectively do not divide by 0
 		time = glm::modf(time, frames.back().time);
 
 	for (size_t i = 1; i < frames.size(); i++)
