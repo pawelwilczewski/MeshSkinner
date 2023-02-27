@@ -18,7 +18,7 @@ DrawCallInfo::DrawCallInfo() :
 }
 
 Ref<Camera> Renderer::activeCamera;
-int Renderer::activeBone = -1;
+int Renderer::activeBone = 0;
 
 DrawCalls Renderer::staticMeshDrawCallsStatic;
 DrawCalls Renderer::skeletalMeshDrawCallsStatic;

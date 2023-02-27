@@ -21,6 +21,8 @@ static Ref<Entity> skeletalEntity;
 static Ref<Entity> skeletalEntity2;
 static Ref<Entity> staticSkeletalEntity;
 
+static Ref<SkeletalMesh> editedMesh;
+
 MainScene::MainScene() : Scene()
 {
     camera = MakeRef<Camera>();
@@ -116,6 +118,8 @@ void MainScene::OnStart()
     Renderer::Submit(skeletalEntity);
     //Renderer::Submit(skeletalEntity2);
     //Renderer::Submit(staticSkeletalEntity);
+
+    editedMesh = skeletalMesh;
 }
 
 void MainScene::OnEarlyUpdate()
@@ -151,6 +155,8 @@ void MainScene::OnUpdateUI()
     ImGui::Text("Frame time:     %f ms", Time::GetDeltaSeconds() * 1000.f);
     ImGui::Text("Avg FPS:        %f", fps / updates);
     ImGui::Text("Avg frame time: %f ms", frameTimes / updates * 1000.f);
+    ImGui::Separator();
+    ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->bones.size() - 1);
     ImGui::End();
 
     // debug panel 2
