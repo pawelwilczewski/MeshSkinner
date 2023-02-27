@@ -27,15 +27,27 @@ void main()
 	
 //	uint skeleton = vertexInfo[gl_VertexID].skeletonID;
 
-	io_Color = vec3(0.0);
+	float weight = 0.0;
 	if (in_Bones[0] == u_ActiveBone)
-		io_Color += vec3(in_Weights[0]);
+		weight += in_Weights[0];
 	else if (in_Bones[1] == u_ActiveBone)
-		io_Color += vec3(in_Weights[1]);
+		weight += in_Weights[1];
 	else if (in_Bones[2] == u_ActiveBone)
-		io_Color += vec3(in_Weights[2]);
+		weight += in_Weights[2];
 	else if (in_Bones[3] == u_ActiveBone)
-		io_Color += vec3(in_Weights[3]);
+		weight += in_Weights[3];
+
+	vec3 blue = vec3(0.0, 0.0, 1.0);
+	vec3 green = vec3(0.0, 1.0, 0.0);
+	vec3 yellow = vec3(1.0, 1.0, 0.0);
+	vec3 red = vec3(1.0, 0.0, 0.0);
+
+	if (weight < 0.33333)
+		io_Color = mix(blue, green, (weight - 0.0) / 0.33333);
+	else if (weight < 0.66667)
+		io_Color = mix(green, yellow, (weight - 0.33333) / 0.33333);
+	else
+		io_Color = mix(yellow, red, (weight - 0.66667) / 0.33333);
 
 	vec4 worldPosition = transforms[transformID] * vec4(in_Position, 1.0);
 	gl_Position = u_ViewProjection * worldPosition;
