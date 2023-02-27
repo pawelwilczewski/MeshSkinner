@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Input.h"
 
+glm::vec2 Input::mouseDelta = glm::vec2(0.f);
+
 Event<int> Input::onKeyPressed;
 Event<int> Input::onKeyReleased;
 Event<int> Input::onMouseButtonPressed;
@@ -16,6 +18,8 @@ void Input::Init()
 	glfwSetMouseButtonCallback(Window::GetNativeWindow(), &HandleMouseButtonCallback);
 	glfwSetScrollCallback(Window::GetNativeWindow(), &HandleMouseScrolledCallback);
 	glfwSetWindowSizeCallback(Window::GetNativeWindow(), &HandleWindowResizedCallback);
+
+	//Application::OnUpdateSubscribe();
 }
 
 bool Input::IsKeyPressed(int key)
@@ -36,6 +40,11 @@ glm::vec2 Input::GetMousePosition()
 	return { (float)x, (float)y };
 }
 
+glm::vec2 Input::GetMouseDelta()
+{
+	return mouseDelta;
+}
+
 void Input::HandleKeyCallback(GLFWwindow *window, int key, int, int action, int)
 {
 	if (action == GLFW_PRESS) onKeyPressed.Invoke(key);
@@ -50,7 +59,28 @@ void Input::HandleMouseButtonCallback(GLFWwindow *window, int button, int action
 
 void Input::HandleMouseMovedCallback(GLFWwindow *window, double x, double y)
 {
-	onMouseMoved.Invoke({ (float)x, (float)y });
+	// having two frames of buffer before registering the input of the input ensures no sudden cursor jumps
+	static int inputModeOneFrameAgo = GLFW_CURSOR_NORMAL;
+	static int inputModeTwoFramesAgo = GLFW_CURSOR_NORMAL;
+	static glm::vec2 lastMousePosition;
+
+	// update the pos and input mode
+	auto pos = glm::vec2(x, y);
+	auto inputMode = glfwGetInputMode(window, GLFW_CURSOR);
+
+	// calculate the delta
+	if (inputMode != inputModeOneFrameAgo || inputMode != inputModeTwoFramesAgo)
+		mouseDelta = glm::vec2(0.f);
+	else
+		mouseDelta = pos - lastMousePosition;
+
+	// event invocation
+	onMouseMoved.Invoke(pos);
+
+	// update "last" variables
+	lastMousePosition = pos;
+	inputModeTwoFramesAgo = inputModeOneFrameAgo;
+	inputModeOneFrameAgo = inputMode;
 }
 
 void Input::HandleMouseScrolledCallback(GLFWwindow *window, double offsetX, double offsetY)

@@ -4,20 +4,20 @@
 CameraController::CameraController(const Ref<Camera> &camera, float moveSpeed, float moveSpeedMultiplier, float moveSpeedMultiplierDelta, float maxSpeed, float minSpeed) : camera(camera), moveSpeed(moveSpeed), moveSpeedMultiplier(moveSpeedMultiplier), moveSpeedMultiplierDelta(moveSpeedMultiplierDelta), maxSpeed(maxSpeed), minSpeed(minSpeed)
 {
 	onUpdateCallback = MakeCallbackNoArgRef([&]() { OnUpdate(); });
-	onLateUpdateCallback = MakeCallbackNoArgRef([&]() { OnLateUpdate(); });
 	onMouseScrolledCallback = MakeCallbackRef<glm::vec2>([&](const glm::vec2 &delta) { OnMouseScrolled(delta); });
 	onMouseMovedCallback = MakeCallbackRef<glm::vec2>([&](const glm::vec2 &delta) { OnMouseMoved(delta); });
 
 	Application::OnUpdateSubscribe(onUpdateCallback);
-	Application::OnLateUpdateSubscribe(onLateUpdateCallback);
 	Input::OnMouseScrolledSubscribe(onMouseScrolledCallback);
 	Input::OnMouseMovedSubscribe(onMouseMovedCallback);
+
+	// TODO: investigate why setting this rotation resolves initial camera jump on mouse move
+	camera->transform.SetRotation(glm::vec3(0.f));
 }
 
 CameraController::~CameraController()
 {
 	Application::OnUpdateUnsubscribe(onUpdateCallback);
-	Application::OnLateUpdateUnsubscribe(onLateUpdateCallback);
 	Input::OnMouseScrolledUnsubscribe(onMouseScrolledCallback);
 	Input::OnMouseMovedUnsubscribe(onMouseMovedCallback);
 }
@@ -39,16 +39,11 @@ void CameraController::OnUpdate()
 		input = glm::normalize(input);
 
 		// camera has messed up right and forward vectors in this coordinate system
-		auto forward = input.y * -camera->transform.GetRightVector();
-		auto right = input.x * camera->transform.GetForwardVector();
+		auto forward = -input.y * camera->transform.GetRightVector();
+		auto right = -input.x * camera->transform.GetForwardVector();
 
 		camera->transform.SetPosition(camera->transform.GetPosition() + moveSpeed * moveSpeedMultiplier * Time::GetDeltaSeconds() * (forward + right));
 	}
-}
-
-void CameraController::OnLateUpdate()
-{
-	
 }
 
 void CameraController::OnMouseScrolled(const glm::vec2 &delta)
@@ -59,19 +54,9 @@ void CameraController::OnMouseScrolled(const glm::vec2 &delta)
 
 void CameraController::OnMouseMoved(const glm::vec2 &position)
 {
-	if (!active)
-	{
-		initialMouseMove = true;
-		return;
-	}
+	if (!active) return;
 
 	// rotation
-	if (initialMouseMove)
-	{
-		lastMousePos = position;
-		initialMouseMove = false;
-	}
-	auto delta = position - lastMousePos;
-	lastMousePos = position;
-	camera->transform.SetRotation(camera->transform.GetRotation() + glm::vec3(delta.y, -delta.x, 0.f) * 0.05f);
+	auto delta = Input::GetMouseDelta();
+	camera->transform.SetRotation(camera->transform.GetRotation() + glm::vec3(-delta.y, delta.x, 0.f) * 0.05f);
 }

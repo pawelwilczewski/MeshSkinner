@@ -15,6 +15,8 @@ public:
 	static bool IsKeyPressed(int key);
 	static bool IsMouseButtonPressed(int button);
 	static glm::vec2 GetMousePosition();
+	static glm::vec2 GetMouseDelta();
+	//static glm::vec2 GetMouseDelta();
 
 	static void OnKeyPressedSubscribe(CallbackRef<int> callback) { onKeyPressed.Subscribe(callback); }
 	static void OnKeyReleasedSubscribe(CallbackRef<int> callback) { onKeyReleased.Subscribe(callback); }
@@ -38,6 +40,9 @@ private:
 	static void HandleMouseMovedCallback(GLFWwindow *window, double x, double y);
 	static void HandleMouseScrolledCallback(GLFWwindow *window, double offsetX, double offsetY);
 	static void HandleWindowResizedCallback(GLFWwindow *window, int width, int height);
+
+private:
+	static glm::vec2 mouseDelta;
 
 private:
 	static Event<int> onKeyPressed;

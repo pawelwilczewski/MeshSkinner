@@ -42,7 +42,8 @@ void Camera::RecalculateViewProjection()
 	switch (projectionMode)
 	{
 		case ProjectionMode::Perspective:
-			projection = glm::perspective(perspectiveVertFOV, aspectRatio, perspectiveNearClip, perspectiveFarClip);
+			// NOTE: the negative FOV because of rendering to the framebuffer - the image is flipped otherwise
+			projection = glm::perspective(-perspectiveVertFOV, aspectRatio, perspectiveNearClip, perspectiveFarClip);
 			break;
 		case ProjectionMode::Orthographic:
 			auto halfHeight = orthographicHeight * 0.5f;
@@ -63,5 +64,5 @@ void Camera::SetProjectionMode(ProjectionMode newMode)
 
 Camera::ProjectionMode Camera::GetViewProjectionMode() const
 {
-	return ProjectionMode();
+	return projectionMode;
 }
