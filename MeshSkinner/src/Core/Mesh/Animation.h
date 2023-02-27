@@ -8,7 +8,7 @@ class Animation
 	friend class MeshLibrary;
 
 public:
-	Animation();
+	Animation(bool loop = true);
 
 public:
 	glm::mat4 Evaluate(const char *boneName, float time);
@@ -18,4 +18,5 @@ private:
 
 public:
 	// TODO: interpolation mode
+	bool loop;
 };
