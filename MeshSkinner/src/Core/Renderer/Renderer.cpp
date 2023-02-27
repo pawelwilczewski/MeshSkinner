@@ -18,6 +18,7 @@ DrawCallInfo::DrawCallInfo() :
 }
 
 Ref<Camera> Renderer::activeCamera;
+int Renderer::activeBone = -1;
 
 DrawCalls Renderer::staticMeshDrawCallsStatic;
 DrawCalls Renderer::skeletalMeshDrawCallsStatic;
@@ -207,6 +208,7 @@ void Renderer::Render(const DrawCalls::iterator &it)
 
 	shader->Bind();
 	shader->UploadUniformMat4("u_ViewProjection", activeCamera->GetViewProjectionMatrix());
+	shader->UploadUniformInt("u_ActiveBone", activeBone);
 	// TODO: probably id shouldn't be necessary (similar to uploading uniforms)
 	shader->SetupStorageBuffer("ss_VertexInfo", info->vertexInfo->GetID());
 	shader->SetupStorageBuffer("ss_Transforms", info->transforms->GetID());

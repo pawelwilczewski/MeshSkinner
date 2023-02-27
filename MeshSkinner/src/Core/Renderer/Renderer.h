@@ -54,6 +54,7 @@ private:
 
 public:
 	static Ref<Camera> activeCamera;
+	static int activeBone;
 
 private:
 	static DrawCalls staticMeshDrawCallsStatic;

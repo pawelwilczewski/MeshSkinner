@@ -17,6 +17,7 @@ layout (std430, binding = 1) buffer ss_Transforms { mat4 transforms[]; };
 //layout (std430, binding = 2) buffer ss_Materials { restrict readonly Material Materials[]; };
 
 uniform mat4 u_ViewProjection;
+uniform int u_ActiveBone;
 
 out vec3 io_Color;
 
@@ -26,16 +27,14 @@ void main()
 	
 //	uint skeleton = vertexInfo[gl_VertexID].skeletonID;
 
-	uint activeBone = 1;
-
 	io_Color = vec3(0.0);
-	if (in_Bones[0] == activeBone)
+	if (in_Bones[0] == u_ActiveBone)
 		io_Color += vec3(in_Weights[0]);
-	else if (in_Bones[1] == activeBone)
+	else if (in_Bones[1] == u_ActiveBone)
 		io_Color += vec3(in_Weights[1]);
-	else if (in_Bones[2] == activeBone)
+	else if (in_Bones[2] == u_ActiveBone)
 		io_Color += vec3(in_Weights[2]);
-	else if (in_Bones[3] == activeBone)
+	else if (in_Bones[3] == u_ActiveBone)
 		io_Color += vec3(in_Weights[3]);
 
 	vec4 worldPosition = transforms[transformID] * vec4(in_Position, 1.0);
