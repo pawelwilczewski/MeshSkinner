@@ -136,6 +136,8 @@ void MainScene::OnUpdate()
     //skeletalEntity->transform.Translate(glm::vec3(0.f, -1.f, 0.f) * Time::GetDeltaSeconds());
     //skeletalEntity->transform.Rotate(glm::vec3(30.f, 0.f, 0.f) * Time::GetDeltaSeconds());
     staticEntity->transform.SetScale(glm::vec3(glm::sin(Time::GetTimeSeconds())));
+
+    editedMesh->skeleton->GetBoneByName("neck")->transform.Rotate(glm::vec3(0.f, 0.f, 10.f * Time::GetDeltaSeconds()));
 }
 
 void MainScene::OnUpdateUI()
