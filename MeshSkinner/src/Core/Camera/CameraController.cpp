@@ -48,6 +48,8 @@ void CameraController::OnUpdate()
 
 void CameraController::OnMouseScrolled(const glm::vec2 &delta)
 {
+	if (!active) return;
+
 	moveSpeedMultiplier += delta.y * moveSpeedMultiplierDelta * glm::pow(moveSpeedMultiplier, 1.01f);
 	moveSpeedMultiplier = glm::clamp(moveSpeedMultiplier, minSpeed, maxSpeed);
 }
@@ -58,5 +60,6 @@ void CameraController::OnMouseMoved(const glm::vec2 &position)
 
 	// rotation
 	auto delta = Input::GetMouseDelta();
-	camera->transform.SetRotation(camera->transform.GetRotation() + glm::vec3(-delta.y, delta.x, 0.f) * 0.05f);
+	auto newRotation = camera->transform.GetRotation() + glm::vec3(-delta.y, delta.x, 0.f) * mouseSensitivity;
+	camera->transform.SetRotation(glm::vec3(glm::clamp(newRotation.x, -90.f, 90.f), newRotation.y, newRotation.z));
 }

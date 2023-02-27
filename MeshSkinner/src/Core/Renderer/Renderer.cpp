@@ -151,7 +151,7 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMes
 		skeletonTransformOffset = transforms->GetLength();
 		skeletons.insert({ mesh->skeleton, skeletonTransformOffset });
 
-		for (auto &bone : mesh->skeleton->bones)
+		for (auto &bone : mesh->skeleton->GetBones())
 			Submit(bone);
 	}
 	else

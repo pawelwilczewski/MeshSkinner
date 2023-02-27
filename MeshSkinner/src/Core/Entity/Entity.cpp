@@ -12,8 +12,10 @@ Entity::Entity(const std::string &name, Transform transform) : name(name), trans
 
 Entity::~Entity()
 {
-	// TODO: this is causing read access violation upon exit
+	// cleanup dirty matrix callback
+	transform.OnMatrixDirtyUnsubscribe(onDirtyMatrixCallback);
 
+	// TODO: this is causing read access violation upon exit
 	// remove self from parent's children
 	if (parent)
 		parent->children.erase(Ref<Entity>(this));
@@ -21,9 +23,6 @@ Entity::~Entity()
 	// reset parent for all children
 	for (const auto &child : children)
 		child->parent.reset();
-
-	// cleanup dirty matrix callback
-	transform.OnMatrixDirtyUnsubscribe(onDirtyMatrixCallback);
 }
 
 void Entity::AddComponent(Ref<EntityComponent> component)

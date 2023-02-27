@@ -16,6 +16,7 @@ protected:
 
 public:
 	float moveSpeed;
+	float mouseSensitivity = 0.05f;
 
 protected:
 	Ref<Camera> camera;

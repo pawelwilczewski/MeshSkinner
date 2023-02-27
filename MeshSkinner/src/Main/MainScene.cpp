@@ -90,7 +90,7 @@ void MainScene::OnStart()
 
     // add bone meshes
     auto boneMat = MakeRef<Material>(ShaderLibrary::Get("Bone"));
-    for (auto &bone : skeletalMesh->skeleton->bones)
+    for (auto &bone : skeletalMesh->skeleton->GetBones())
     {
         // calculate the bone length with some default for tip bones
         auto boneLength = 50.f;
@@ -158,7 +158,21 @@ void MainScene::OnUpdateUI()
 
     // edited mesh
     ImGui::Begin("Edited Mesh");
-    ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->bones.size() - 1);
+    ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1);
+    ImGui::End();
+
+    // settings
+    ImGui::Begin("Settings");
+    ImGui::SliderFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.001f, 1.f);
+    ImGui::End();
+
+    // viewport
+    ImGui::Begin("Viewport Settings");
+    if (ImGui::Button("Reset camera"))
+    {
+        camera->transform.SetPosition(glm::vec3(0.f));
+        camera->transform.SetRotation(glm::vec3(0.f));
+    }
     ImGui::End();
 }
 
