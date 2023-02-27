@@ -12,8 +12,8 @@ protected:
 	void OnUpdate();
 	void OnLateUpdate();
 
-	void OnKeyPressed(int key);
 	void OnMouseScrolled(const glm::vec2 &delta);
+	void OnMouseMoved(const glm::vec2 &delta);
 
 public:
 	float moveSpeed;
@@ -22,6 +22,7 @@ protected:
 	Ref<Camera> camera;
 	glm::vec2 lastMousePos = glm::vec2(0.f);
 	bool active = false;
+	bool wasActive = false;
 	bool initialMouseMove = true;
 
 	float moveSpeedMultiplier;
@@ -32,6 +33,6 @@ protected:
 private:
 	CallbackNoArgRef onUpdateCallback;
 	CallbackNoArgRef onLateUpdateCallback;
-	CallbackRef<int> onKeyPressedCallback;
 	CallbackRef<glm::vec2> onMouseScrolledCallback;
+	CallbackRef<glm::vec2> onMouseMovedCallback;
 };
