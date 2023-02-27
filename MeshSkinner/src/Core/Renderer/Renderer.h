@@ -10,10 +10,11 @@
 
 struct VertexInfo
 {
-	VertexInfo(uint32_t transformID, uint32_t materialID);
+	VertexInfo(uint32_t transformID, uint32_t materialID, uint32_t skeletonID = -1);
 
 	uint32_t transformID;
 	uint32_t materialID;
+	uint32_t skeletonTransformsID;
 };
 
 struct DrawCallInfo
@@ -44,7 +45,7 @@ public:
 	static void FrameEnd();
 
 private:
-	static void SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<void(VertexArray<uint32_t> &)> fillVertexBufferFunction);
+	static void SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<void(VertexArray<uint32_t> &)> fillVertexBufferFunction, uint32_t skeletonID = -1);
 
 	static void SubmitMeshStatic(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh);
 	static void SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh);

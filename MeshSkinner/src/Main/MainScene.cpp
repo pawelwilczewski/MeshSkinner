@@ -29,6 +29,7 @@ MainScene::MainScene() : Scene()
     Renderer::activeCamera = camera;
 
     ShaderLibrary::Load("Bone", "assets/shaders/Bone.vert", "assets/shaders/Bone.frag", 1);
+    ShaderLibrary::Load("WeightPaint", "assets/shaders/WeightPaint.vert", "assets/shaders/WeightPaint.frag", 0);
 }
 
 MainScene::~MainScene()
@@ -63,6 +64,7 @@ void MainScene::OnStart()
     auto skeletalMesh = MakeRef<SkeletalMesh>();
     auto rootBone = Ref<Bone>();
     MeshLibrary::Get("assets/models/shark.gltf", skeletalMesh, rootBone);
+    skeletalMesh->material = MakeRef<Material>(ShaderLibrary::Get("WeightPaint"));
 
     noneEntity = MakeRef<Entity>("none");
 

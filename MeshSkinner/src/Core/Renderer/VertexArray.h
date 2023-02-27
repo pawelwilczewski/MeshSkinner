@@ -8,22 +8,26 @@ static GLenum ShaderTypeToGL(const ShaderDataType &type)
 {
 	switch (type)
 	{
-	case ShaderDataType::Float:		return GL_FLOAT;
-	case ShaderDataType::Float2:	return GL_FLOAT;
-	case ShaderDataType::Float3:	return GL_FLOAT;
-	case ShaderDataType::Float4:	return GL_FLOAT;
-	case ShaderDataType::Mat3:		return GL_FLOAT;
-	case ShaderDataType::Mat4:		return GL_FLOAT;
-	case ShaderDataType::Int:		return GL_INT;
-	case ShaderDataType::Int2:		return GL_INT;
-	case ShaderDataType::Int3:		return GL_INT;
-	case ShaderDataType::Int4:		return GL_INT;
-	case ShaderDataType::Short:		return GL_SHORT;
-	case ShaderDataType::Short2:	return GL_SHORT;
-	case ShaderDataType::Short3:	return GL_SHORT;
-	case ShaderDataType::Short4:	return GL_SHORT;
-	case ShaderDataType::Bool:		return GL_BOOL;
-	default:						assert(false); return 0;
+	case ShaderDataType::Float:				return GL_FLOAT;
+	case ShaderDataType::Float2:			return GL_FLOAT;
+	case ShaderDataType::Float3:			return GL_FLOAT;
+	case ShaderDataType::Float4:			return GL_FLOAT;
+	case ShaderDataType::Mat3:				return GL_FLOAT;
+	case ShaderDataType::Mat4:				return GL_FLOAT;
+	case ShaderDataType::Int:				return GL_INT;
+	case ShaderDataType::Int2:				return GL_INT;
+	case ShaderDataType::Int3:				return GL_INT;
+	case ShaderDataType::Int4:				return GL_INT;
+	case ShaderDataType::Short:				return GL_SHORT;
+	case ShaderDataType::Short2:			return GL_SHORT;
+	case ShaderDataType::Short3:			return GL_SHORT;
+	case ShaderDataType::Short4:			return GL_SHORT;
+	case ShaderDataType::UnsignedShort:		return GL_UNSIGNED_SHORT;
+	case ShaderDataType::UnsignedShort2:	return GL_UNSIGNED_SHORT;
+	case ShaderDataType::UnsignedShort3:	return GL_UNSIGNED_SHORT;
+	case ShaderDataType::UnsignedShort4:	return GL_UNSIGNED_SHORT;
+	case ShaderDataType::Bool:				return GL_BOOL;
+	default:								assert(false); return 0;
 	}
 }
 

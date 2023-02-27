@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Renderer.h"
 
-VertexInfo::VertexInfo(uint32_t transformID, uint32_t materialID) : transformID(transformID), materialID(materialID)
+VertexInfo::VertexInfo(uint32_t transformID, uint32_t materialID, uint32_t skeletonID) : transformID(transformID), materialID(materialID), skeletonTransformsID(skeletonID)
 {
 
 }
@@ -34,7 +34,7 @@ void Renderer::Init()
 	skeletalMeshDrawCallsDynamic = DrawCalls();
 }
 
-void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<void(VertexArray<uint32_t> &)> fillVertexBufferFunction)
+void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<void(VertexArray<uint32_t> &)> fillVertexBufferFunction, uint32_t skeletonID)
 {
 	// insert new shader if necessary
 	if (drawCalls.find(mesh->material->shader) == drawCalls.end())
@@ -98,7 +98,7 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 
 	// append the vertex info
 	auto materialID = materials->GetLength() - 1;
-	auto ids = std::vector<VertexInfo>(vao->GetVertexBuffer(0)->GetLength() - indexOffset, VertexInfo(transformID, materialID));
+	auto ids = std::vector<VertexInfo>(vao->GetVertexBuffer(0)->GetLength() - indexOffset, VertexInfo(transformID, materialID, skeletonID));
 	vertexInfo->AppendData(ids.data(), ids.size());
 }
 
@@ -123,6 +123,7 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<StaticMesh>
 
 void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh)
 {
+	// submit the mesh
 	SubmitMeshStatic(entity, mesh.get(), skeletalMeshDrawCallsStatic,
 		[&](VertexArray<uint32_t> &vao)
 		{
@@ -137,15 +138,16 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMes
 			// append the vertices to the vbo
 			auto vbo = TypedVB<SkeletalVertex>(vao.GetVertexBuffer(0).get());
 			vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
-		});
+		}, -1); // TODO: URGENT add the correct skeletonID here (offset to transforms for corresponding bone ids for animation)
 
 	auto &skeletons = skeletalMeshDrawCallsStatic[mesh->material->shader]->skeletons;
 	auto &transforms = skeletalMeshDrawCallsStatic[mesh->material->shader]->transforms;
 
 	// submit all bones
+	uint32_t skeletonTransformOffset;
 	if (skeletons.find(mesh->skeleton) == skeletons.end())
 	{
-		uint32_t skeletonTransformOffset = transforms->GetLength();
+		skeletonTransformOffset = transforms->GetLength();
 		skeletons.insert({ mesh->skeleton, skeletonTransformOffset });
 
 		for (auto &bone : mesh->skeleton->bones)
@@ -154,6 +156,7 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMes
 	else
 	{
 		Log::Error("Trying to render the same skeleton more than once!");
+		return;
 	}
 }
 
