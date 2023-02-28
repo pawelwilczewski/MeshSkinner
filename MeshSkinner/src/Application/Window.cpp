@@ -45,6 +45,7 @@ void Window::Init(const glm::ivec2 &windowSize, const char *title, int vsync)
 
     // gl setup - TODO: better move elsewhere
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
 
     // create the framebuffer and framebuffer texture
     glCreateFramebuffers(1, &fbo);
