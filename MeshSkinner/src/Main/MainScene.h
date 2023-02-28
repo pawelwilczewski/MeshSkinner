@@ -17,6 +17,7 @@ protected:
 	virtual void OnLateUpdate() override;
 	virtual void OnEnd() override;
 
+private:
 	void OnMouseButtonPressed(int button);
 
 private:

@@ -18,8 +18,6 @@ void Input::Init()
 	glfwSetMouseButtonCallback(Window::GetNativeWindow(), &HandleMouseButtonCallback);
 	glfwSetScrollCallback(Window::GetNativeWindow(), &HandleMouseScrolledCallback);
 	glfwSetWindowSizeCallback(Window::GetNativeWindow(), &HandleWindowResizedCallback);
-
-	//Application::OnUpdateSubscribe();
 }
 
 bool Input::IsKeyPressed(int key)

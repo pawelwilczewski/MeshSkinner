@@ -139,10 +139,6 @@ void MainScene::OnUpdate()
     //skeletalEntity->transform.Translate(glm::vec3(0.f, -1.f, 0.f) * Time::GetDeltaSeconds());
     //skeletalEntity->transform.Rotate(glm::vec3(30.f, 0.f, 0.f) * Time::GetDeltaSeconds());
     staticEntity->transform.SetScale(glm::vec3(glm::sin(Time::GetTimeSeconds())));
-
-    editedMesh->skeleton->GetBoneByName("neck")->transform.Rotate(glm::vec3(0.f, 0.f, 10.f * Time::GetDeltaSeconds()));
-
-    Log::Info("{}", camera->ProjectViewportToWorld(Input::GetMouseViewportPosition()).direction);
 }
 
 void MainScene::OnUpdateUI()
@@ -197,6 +193,42 @@ void MainScene::OnMouseButtonPressed(int button)
 {
     if (button == MOUSE_BUTTON_LEFT)
     {
-        camera->ProjectViewportToWorld(Input::GetMouseViewportPosition());
+        auto ray = camera->ProjectViewportToWorld(Input::GetMouseViewportPosition());
+
+        // debug dir show
+        for (int i = 0; i < 10; i++)
+        {
+            auto ent = MakeRef<Entity>("cube dir", Transform(ray.origin + ray.direction * (float)i * 2.f));
+            ent->AddComponent(MeshLibrary::GetCube());
+            Renderer::Submit(ent);
+        }
+
+        for (size_t i = 0; i < editedMesh->indices.size(); i += 3)
+        {
+            auto v0 = editedMesh->vertices[editedMesh->indices[i + 0]].position;
+            auto v1 = editedMesh->vertices[editedMesh->indices[i + 1]].position;
+            auto v2 = editedMesh->vertices[editedMesh->indices[i + 2]].position;
+
+            const auto &mat = editedMesh->skeleton->GetRootBone()->GetWorldMatrix();
+            v0 = glm::vec3(mat * glm::vec4(v0, 1.f));
+            v1 = glm::vec3(mat * glm::vec4(v1, 1.f));
+            v2 = glm::vec3(mat * glm::vec4(v2, 1.f));
+
+            
+
+            glm::vec3 intersect;
+            if (ray.IntersectsTriangle(v0, v1, v2, intersect))
+            {
+                Log::Info("Ray {} {}, Intersection: {}", ray.origin, ray.direction, intersect);
+
+                auto ent = MakeRef<Entity>("cube intersect", Transform(intersect));
+                auto mesh = MeshLibrary::GetCube();
+                mesh->material->shader = ShaderLibrary::GetDefaultOverlay();
+                ent->AddComponent(mesh);
+                Renderer::Submit(ent);
+
+                Log::Info("Intersect at {}", intersect);
+            }
+        }
     }
 }

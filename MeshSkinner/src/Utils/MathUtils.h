@@ -8,4 +8,7 @@ struct Ray
 
 	glm::vec3 origin;
 	glm::vec3 direction;
+
+public:
+	bool IntersectsTriangle(const glm::vec3 &v0, const glm::vec3 &v1, const glm::vec3 &v2, glm::vec3 &intersectionPoint) const;
 };
