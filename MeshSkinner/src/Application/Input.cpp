@@ -33,16 +33,26 @@ bool Input::IsMouseButtonPressed(int button)
 	return glfwGetMouseButton(Window::GetNativeWindow(), button) == GLFW_PRESS;
 }
 
-glm::vec2 Input::GetMousePosition()
+glm::vec2 Input::GetMouseWindowPosition()
 {
 	double x, y;
 	glfwGetCursorPos(Window::GetNativeWindow(), &x, &y);
 	return { (float)x, (float)y };
 }
 
+glm::vec2 Input::GetMouseScreenPosition()
+{
+	return glm::vec2(Window::GetWindowPosition()) + GetMouseWindowPosition();
+}
+
 glm::vec2 Input::GetMouseDelta()
 {
 	return mouseDelta;
+}
+
+glm::vec2 Input::GetMouseViewportPosition()
+{
+	return GetMouseScreenPosition() - glm::vec2(UserInterface::GetViewportScreenPosition());
 }
 
 void Input::HandleKeyCallback(GLFWwindow *window, int key, int, int action, int)

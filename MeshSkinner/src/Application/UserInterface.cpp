@@ -11,9 +11,15 @@
 #include "backends/imgui_impl_opengl3.h"
 
 glm::ivec2 UserInterface::viewportSize = glm::ivec2(1);
+glm::ivec2 UserInterface::viewportScreenPosition = glm::ivec2(0);
 
 glm::ivec2 UserInterface::GetViewportSize() { return viewportSize; }
 void UserInterface::UpdateViewportSize(const glm::ivec2 &newSize) { viewportSize = newSize; }
+
+glm::ivec2 UserInterface::GetViewportScreenPosition()
+{
+    return viewportScreenPosition;
+}
 
 void UserInterface::Init()
 {
@@ -41,7 +47,7 @@ void UserInterface::Init()
     ImGui_ImplOpenGL3_Init("#version 430");
 }
 
-static void SetupDockspaceViewport()
+void UserInterface::SetupDockspaceViewport()
 {
     // setup dockspace window
     ImGuiViewport *viewport = ImGui::GetMainViewport();
@@ -67,8 +73,16 @@ static void SetupDockspaceViewport()
     ImGui::PopStyleVar(2);
 
     ImGui::Begin("Viewport");
+    // update viewport screen position
+    auto regionMin = ImGui::GetWindowContentRegionMin();
+    auto winPos = ImGui::GetWindowPos();
+    viewportScreenPosition = glm::ivec2(regionMin.x + winPos.x, regionMin.y + winPos.y);
+
+    // update viewport size
     ImVec2 availableSize = ImGui::GetContentRegionAvail();
     UserInterface::UpdateViewportSize(glm::ivec2(glm::max(0, (int)availableSize.x), glm::max(0, (int)availableSize.y)));
+
+    // display the framebuffer
     ImGui::Image((void *)(intptr_t)Window::GetFramebufferTexture(), availableSize);
     ImGui::End();
 }

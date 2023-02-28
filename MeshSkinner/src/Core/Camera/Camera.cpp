@@ -66,3 +66,15 @@ Camera::ProjectionMode Camera::GetViewProjectionMode() const
 {
 	return projectionMode;
 }
+
+Ray Camera::ProjectViewportToWorld(const glm::vec2 &viewportPos)
+{
+	// convert mouse pos to [-1, 1] space
+	auto mouseCoords = viewportPos / (glm::vec2(UserInterface::GetViewportSize()) * 0.5f) - 1.f;
+
+	glm::vec4 screenPos = glm::vec4(mouseCoords.x, -mouseCoords.y, 1.0f, 1.0f);
+	glm::vec4 worldPos = glm::inverse(GetViewProjectionMatrix()) * screenPos;
+	glm::vec3 dir = glm::normalize(glm::vec3(worldPos));
+
+	return Ray(transform.GetPosition(), dir);
+}

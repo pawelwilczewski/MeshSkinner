@@ -2,6 +2,7 @@
 
 #include "Application/Core.h"
 #include "Core/Entity/Transform.h"
+#include "Utils/MathUtils.h"
 
 class Camera
 {
@@ -19,6 +20,9 @@ public:
 
 	void SetProjectionMode(ProjectionMode newMode);
 	ProjectionMode GetViewProjectionMode() const;
+
+public:
+	Ray ProjectViewportToWorld(const glm::vec2 &viewportPos);
 
 protected:
 	virtual void OnWindowResized(const glm::ivec2 &newSize);

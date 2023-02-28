@@ -32,11 +32,14 @@ MainScene::MainScene() : Scene()
 
     ShaderLibrary::Load("Bone", "assets/shaders/Bone.vert", "assets/shaders/Bone.frag", 1);
     ShaderLibrary::Load("WeightPaint", "assets/shaders/WeightPaint.vert", "assets/shaders/WeightPaint.frag", 0);
+
+    onMouseButtonPressedCallback = MakeCallbackRef<int>([&](int button) { OnMouseButtonPressed(button); });
+    Input::OnMouseButtonPressedSubscribe(onMouseButtonPressedCallback);
 }
 
 MainScene::~MainScene()
 {
-    
+    Input::OnMouseButtonPressedUnsubscribe(onMouseButtonPressedCallback);
 }
 
 void MainScene::OnStart()
@@ -138,6 +141,8 @@ void MainScene::OnUpdate()
     staticEntity->transform.SetScale(glm::vec3(glm::sin(Time::GetTimeSeconds())));
 
     editedMesh->skeleton->GetBoneByName("neck")->transform.Rotate(glm::vec3(0.f, 0.f, 10.f * Time::GetDeltaSeconds()));
+
+    Log::Info("{}", camera->ProjectViewportToWorld(Input::GetMouseViewportPosition()).direction);
 }
 
 void MainScene::OnUpdateUI()
@@ -186,4 +191,12 @@ void MainScene::OnLateUpdate()
 void MainScene::OnEnd()
 {
 
+}
+
+void MainScene::OnMouseButtonPressed(int button)
+{
+    if (button == MOUSE_BUTTON_LEFT)
+    {
+        camera->ProjectViewportToWorld(Input::GetMouseViewportPosition());
+    }
 }

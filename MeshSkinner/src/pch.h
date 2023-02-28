@@ -55,7 +55,9 @@
 #include "Core/Mesh/Mesh.h"
 #include "Core/Mesh/Skeleton.h"
 #include "Core/Mesh/MeshLibrary.h"
+
 #include "Utils/FileUtils.h"
+#include "Utils/MathUtils.h"
 
 // platform-variable
 #ifdef PLATFORM_WINDOWS

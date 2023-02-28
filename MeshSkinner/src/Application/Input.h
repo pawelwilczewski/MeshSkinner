@@ -14,9 +14,10 @@ private:
 public:
 	static bool IsKeyPressed(int key);
 	static bool IsMouseButtonPressed(int button);
-	static glm::vec2 GetMousePosition();
+	static glm::vec2 GetMouseWindowPosition();
+	static glm::vec2 GetMouseScreenPosition();
+	static glm::vec2 GetMouseViewportPosition();
 	static glm::vec2 GetMouseDelta();
-	//static glm::vec2 GetMouseDelta();
 
 	static void OnKeyPressedSubscribe(CallbackRef<int> callback) { onKeyPressed.Subscribe(callback); }
 	static void OnKeyReleasedSubscribe(CallbackRef<int> callback) { onKeyReleased.Subscribe(callback); }
