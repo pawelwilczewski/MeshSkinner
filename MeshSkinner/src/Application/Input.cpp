@@ -45,14 +45,14 @@ glm::vec2 Input::GetMouseScreenPosition()
 	return glm::vec2(Window::GetWindowPosition()) + GetMouseWindowPosition();
 }
 
-glm::vec2 Input::GetMouseDelta()
-{
-	return mouseDelta;
-}
-
 glm::vec2 Input::GetMouseViewportPosition()
 {
 	return GetMouseScreenPosition() - glm::vec2(UserInterface::GetViewportScreenPosition());
+}
+
+glm::vec2 Input::GetMouseDelta()
+{
+	return mouseDelta;
 }
 
 void Input::HandleKeyCallback(GLFWwindow *window, int key, int, int action, int)
