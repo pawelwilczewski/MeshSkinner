@@ -25,6 +25,8 @@ namespace MathUtils
         auto offset = layout["position"].offset;
 
         const auto &matrix = mesh->GetEntity().lock()->GetWorldMatrix();
+        auto invMatrix = glm::inverse(matrix);
+        auto localRay = Ray(glm::vec3(invMatrix * glm::vec4(ray.origin, 1.f)), glm::mat3(invMatrix) * ray.direction);
 
         auto vertBytes = (uint8_t *)mesh->GetVertices();
         for (size_t i = 0; i < mesh->indices.size(); i += 3)
@@ -33,26 +35,22 @@ namespace MathUtils
             auto v1 = *(glm::vec3 *)(vertBytes + mesh->indices[i + 1] * stride + offset);
             auto v2 = *(glm::vec3 *)(vertBytes + mesh->indices[i + 2] * stride + offset);
 
-            v0 = glm::vec3(matrix * glm::vec4(v0, 1.f));
-            v1 = glm::vec3(matrix * glm::vec4(v1, 1.f));
-            v2 = glm::vec3(matrix * glm::vec4(v2, 1.f));
-
             // intersection check and update closest intersection
-            glm::vec3 intersection;
-            if (ray.IntersectsTriangle(v0, v1, v2, intersection))
+            glm::vec3 localIntersection;
+            if (localRay.IntersectsTriangle(v0, v1, v2, localIntersection))
             {
-                auto distance = glm::distance(intersection, ray.origin);
+                auto distance = glm::distance(localRay.origin, localIntersection);
                 if (smallestDistance >= 0.f)
                 {
                     if (distance < smallestDistance)
                     {
-                        closestIntersection = intersection;
+                        closestIntersection = glm::vec3(matrix * glm::vec4(localIntersection, 1.f));
                         smallestDistance = distance;
                     }
                 }
                 else
                 {
-                    closestIntersection = intersection;
+                    closestIntersection = glm::vec3(matrix * glm::vec4(localIntersection, 1.f));
                     smallestDistance = distance;
                 }
             }
