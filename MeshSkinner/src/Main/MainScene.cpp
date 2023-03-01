@@ -23,6 +23,10 @@ static Ref<Entity> staticSkeletalEntity;
 
 static Ref<SkeletalMesh> editedMesh;
 
+static float brushRadius = 10.f;
+
+static bool isInteractingWithImGui = false;
+
 MainScene::MainScene() : Scene()
 {
     camera = MakeRef<Camera>("MainCamera");
@@ -33,13 +37,13 @@ MainScene::MainScene() : Scene()
     ShaderLibrary::Load("Bone", "assets/shaders/Bone.vert", "assets/shaders/Bone.frag", 1);
     ShaderLibrary::Load("WeightPaint", "assets/shaders/WeightPaint.vert", "assets/shaders/WeightPaint.frag", 0);
 
-    onMouseButtonPressedCallback = MakeCallbackRef<int>([&](int button) { OnMouseButtonPressed(button); });
-    Input::OnMouseButtonPressedSubscribe(onMouseButtonPressedCallback);
+    onMouseMovedCallback = MakeCallbackRef<glm::vec2>([&](const glm::vec2 &position) { OnMouseMoved(position); });
+    Input::OnMouseMovedSubscribe(onMouseMovedCallback);
 }
 
 MainScene::~MainScene()
 {
-    Input::OnMouseButtonPressedUnsubscribe(onMouseButtonPressedCallback);
+    Input::OnMouseMovedUnsubscribe(onMouseMovedCallback);
 }
 
 void MainScene::OnStart()
@@ -151,6 +155,8 @@ void MainScene::OnUpdateUI()
     frameTimes += Time::GetDeltaSeconds();
     fps += Time::GetFPS();
 
+    isInteractingWithImGui = false;
+
     // scene stats
     ImGui::Begin("Scene Stats");
     ImGui::Text("FPS:            %f", Time::GetFPS());
@@ -161,18 +167,24 @@ void MainScene::OnUpdateUI()
 
     // edited mesh
     ImGui::Begin("Edited Mesh");
-    ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1);
+    isInteractingWithImGui |= ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1);
     ImGui::End();
 
     // settings
     ImGui::Begin("Settings");
-    ImGui::SliderFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.001f, 1.f);
+    isInteractingWithImGui |= ImGui::DragFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.0001f, 0.0f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
+    ImGui::End();
+
+    // tool
+    ImGui::Begin("Tool");
+    isInteractingWithImGui |= ImGui::DragFloat("Brush radius", &brushRadius, 0.1f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic);
     ImGui::End();
 
     // viewport
     ImGui::Begin("Viewport Settings");
     if (ImGui::Button("Reset camera"))
     {
+        isInteractingWithImGui = true;
         camera->transform.SetPosition(glm::vec3(0.f));
         camera->transform.SetRotation(glm::vec3(0.f));
     }
@@ -189,34 +201,33 @@ void MainScene::OnEnd()
 
 }
 
-void MainScene::OnMouseButtonPressed(int button)
+void MainScene::OnMouseMoved(const glm::vec2 &)
 {
-    if (button == MOUSE_BUTTON_LEFT)
+    if (!Input::IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || !Input::IsMouseInViewport() || isInteractingWithImGui) return;
+    
+    auto ray = camera->ProjectViewportToWorld(Input::GetMouseViewportPosition());
+    Log::Info("Interaction");
+    const auto &mat = skeletalEntity->GetWorldMatrix();
+    glm::vec3 intersect;
+    for (size_t i = 0; i < editedMesh->indices.size(); i += 3)
     {
-        auto ray = camera->ProjectViewportToWorld(Input::GetMouseViewportPosition());
+        auto v0 = editedMesh->vertices[editedMesh->indices[i + 0]].position;
+        auto v1 = editedMesh->vertices[editedMesh->indices[i + 1]].position;
+        auto v2 = editedMesh->vertices[editedMesh->indices[i + 2]].position;
 
-        const auto &mat = skeletalEntity->GetWorldMatrix();
-        glm::vec3 intersect;
-        for (size_t i = 0; i < editedMesh->indices.size(); i += 3)
+        v0 = glm::vec3(mat * glm::vec4(v0, 1.f));
+        v1 = glm::vec3(mat * glm::vec4(v1, 1.f));
+        v2 = glm::vec3(mat * glm::vec4(v2, 1.f));
+
+        if (ray.IntersectsTriangle(v0, v1, v2, intersect))
         {
-            auto v0 = editedMesh->vertices[editedMesh->indices[i + 0]].position;
-            auto v1 = editedMesh->vertices[editedMesh->indices[i + 1]].position;
-            auto v2 = editedMesh->vertices[editedMesh->indices[i + 2]].position;
+            Log::Info("Ray {} {}, Intersection: {}", ray.origin, ray.direction, intersect);
 
-            v0 = glm::vec3(mat * glm::vec4(v0, 1.f));
-            v1 = glm::vec3(mat * glm::vec4(v1, 1.f));
-            v2 = glm::vec3(mat * glm::vec4(v2, 1.f));
-
-            if (ray.IntersectsTriangle(v0, v1, v2, intersect))
-            {
-                Log::Info("Ray {} {}, Intersection: {}", ray.origin, ray.direction, intersect);
-
-                auto ent = MakeRef<Entity>("cube intersect", Transform(intersect));
-                auto mesh = MeshLibrary::GetCube();
-                mesh->material->shader = ShaderLibrary::GetDefaultOverlay();
-                ent->AddComponent(mesh);
-                Renderer::Submit(ent);
-            }
+            auto ent = MakeRef<Entity>("cube intersect", Transform(intersect));
+            auto mesh = MeshLibrary::GetCube();
+            mesh->material->shader = ShaderLibrary::GetDefaultOverlay();
+            ent->AddComponent(mesh);
+            Renderer::Submit(ent);
         }
     }
 }

@@ -19,6 +19,8 @@ public:
 	static glm::vec2 GetMouseViewportPosition();
 	static glm::vec2 GetMouseDelta();
 
+	static bool IsMouseInViewport();
+
 	static void OnKeyPressedSubscribe(CallbackRef<int> callback) { onKeyPressed.Subscribe(callback); }
 	static void OnKeyReleasedSubscribe(CallbackRef<int> callback) { onKeyReleased.Subscribe(callback); }
 	static void OnMouseButtonPressedSubscribe(CallbackRef<int> callback) { onMouseButtonPressed.Subscribe(callback); }

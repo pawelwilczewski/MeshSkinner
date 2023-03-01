@@ -18,8 +18,8 @@ protected:
 	virtual void OnEnd() override;
 
 private:
-	void OnMouseButtonPressed(int button);
+	void OnMouseMoved(const glm::vec2 &);
 
 private:
-	CallbackRef<int> onMouseButtonPressedCallback;
+	CallbackRef<glm::vec2> onMouseMovedCallback;
 };

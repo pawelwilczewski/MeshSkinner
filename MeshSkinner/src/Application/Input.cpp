@@ -53,6 +53,13 @@ glm::vec2 Input::GetMouseDelta()
 	return mouseDelta;
 }
 
+bool Input::IsMouseInViewport()
+{
+	auto pos = GetMouseViewportPosition();
+	auto viewportSize = UserInterface::GetViewportSize();
+	return pos.x >= 0 && pos.x < viewportSize.x && pos.y >= 0 && pos.y <= viewportSize.y;
+}
+
 void Input::HandleKeyCallback(GLFWwindow *window, int key, int, int action, int)
 {
 	if (action == GLFW_PRESS) onKeyPressed.Invoke(key);
