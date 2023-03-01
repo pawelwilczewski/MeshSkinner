@@ -26,6 +26,7 @@ struct DrawCallInfo
 	std::unordered_map<Ref<Entity>, const uint32_t> entities; // TODO: use weak ptrs for entities
 	// key: skeleton already rendered, value: transform id to use for bones (start)
 	std::unordered_map<Ref<Skeleton>, const uint32_t> skeletons; // TODO: use weak ptrs for skeletons
+	std::unordered_map<const Mesh *, const uint32_t> meshes; // TODO: use weak ptrs for meshes
 	Unique<StorageBuffer<glm::mat4>> transforms;
 	Unique<StorageBuffer<MaterialGPU>> materials;
 	Unique<StorageBuffer<VertexInfo>> vertexInfo;
@@ -50,6 +51,9 @@ private:
 	static void SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh);
 
 	static void Render(const DrawCalls::iterator &it);
+
+public:
+	static void UpdateMeshVertices(const Mesh *mesh);
 
 public:
 	static Ref<Camera> activeCamera;

@@ -218,13 +218,13 @@ void MainScene::OnMouseMoved(const glm::vec2 &)
             const auto &mat = editedMesh->GetEntity().lock()->GetWorldMatrix();
             for (const auto &vert : verts)
             {
-                auto ent = MakeRef<Entity>("CubeIntersection",
-                    Transform(glm::vec3(mat * glm::vec4(editedMesh->vertices[vert].position, 1.f))));
-                auto mesh = MeshLibrary::GetCube();
-                mesh->material->shader = ShaderLibrary::GetDefaultOverlay();
-                ent->AddComponent(mesh);
-                Renderer::Submit(ent);
+                auto bones = editedMesh->vertices[vert].bones;
+                for (size_t i = 0; i < bones.length(); i++)
+                    if (bones[i] == Renderer::activeBone)
+                        editedMesh->vertices[vert].weights[i] += 0.1f;
             }
+
+            Renderer::UpdateMeshVertices(editedMesh.get());
         }
     }
 }

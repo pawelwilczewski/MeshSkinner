@@ -10,9 +10,7 @@ DrawCallInfo::DrawCallInfo() :
 	vao(MakeUnique<VertexArray<uint32_t>>()),
 	transforms(MakeUnique<StorageBuffer<glm::mat4>>()),
 	materials(MakeUnique<StorageBuffer<MaterialGPU>>()),
-	vertexInfo(MakeUnique<StorageBuffer<VertexInfo>>()),
-	entities(std::unordered_map<Ref<Entity>, const uint32_t>()),
-	skeletons(std::unordered_map<Ref<Skeleton>, const uint32_t>())
+	vertexInfo(MakeUnique<StorageBuffer<VertexInfo>>())
 {
 
 }
@@ -80,6 +78,7 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 	auto &vertexInfo = drawCalls[mesh->material->shader]->vertexInfo;
 	auto &transforms = drawCalls[mesh->material->shader]->transforms;
 	auto &materials = drawCalls[mesh->material->shader]->materials;
+	auto &meshes = drawCalls[mesh->material->shader]->meshes;
 
 	// get the transform id
 	uint32_t transformID;
@@ -102,7 +101,13 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 
 	// append the vertices to the vbo
 	auto vbo = dynamic_cast<GenericBuffer *>(vao->GetVertexBuffer(0).get());
+	auto vboOffsetLength = vbo->GetSizeBytes() / mesh->GetVertexBufferLayout().GetStride();
 	vbo->SetData(mesh->GetVertices(), (GLuint)(mesh->GetVerticesLength() * mesh->GetVertexBufferLayout().GetStride()), vbo->GetSizeBytes());
+
+	if (meshes.find(mesh) == meshes.end())
+	//	assert(false); // duplicate mesh added
+	//else
+		meshes.insert({ mesh, vboOffsetLength });
 
 	// offset the indices appropriately
 	std::vector<uint32_t> indicesOffset = mesh->indices;
@@ -210,6 +215,28 @@ void Renderer::Render(const DrawCalls::iterator &it)
 
 	info->vao->Bind();
 	glDrawElements(GL_TRIANGLES, info->vao->GetIndexBuffer()->GetLength(), GL_UNSIGNED_INT, nullptr);
+}
+
+void Renderer::UpdateMeshVertices(const Mesh *mesh)
+{
+	DrawCalls drawCalls;
+	switch (mesh->GetVertexType())
+	{
+	case Mesh::VertexType::Static:
+		drawCalls = staticMeshDrawCallsStatic;
+		break;
+	case Mesh::VertexType::Skeletal:
+		drawCalls = skeletalMeshDrawCallsStatic;
+		break;
+	}
+
+	auto &meshes = drawCalls[mesh->material->shader]->meshes;
+	auto &vao = drawCalls[mesh->material->shader]->vao;
+	
+	// append the vertices to the vbo
+	auto vbo = dynamic_cast<GenericBuffer *>(vao->GetVertexBuffer(0).get());
+	auto stride = mesh->GetVertexBufferLayout().GetStride();
+	vbo->SetData(mesh->GetVertices(), (GLuint)(mesh->GetVerticesLength() * stride), meshes[mesh] * stride);
 }
 
 void Renderer::FrameEnd()
