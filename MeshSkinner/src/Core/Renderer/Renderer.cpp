@@ -48,6 +48,7 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 		drawCallInfo->vao->SetIndexBuffer(ibo);
 
 		// initialize the vbo
+		// TODO: probably no need to switch here, instead, i.e. adjust the code and instantiate GenericVertexBuffer
 		Ref<GenericVertexBuffer> vbo;
 		switch (mesh->GetVertexType())
 		{

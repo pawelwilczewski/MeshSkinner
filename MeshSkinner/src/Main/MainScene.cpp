@@ -213,11 +213,16 @@ void MainScene::OnMouseMoved(const glm::vec2 &)
         glm::vec3 intersection;
         if (MathUtils::RayMeshIntersection(camera->ProjectViewportToWorld(Input::GetMouseViewportPosition()), editedMesh, intersection))
         {
-            auto ent = MakeRef<Entity>("CubeIntersection", Transform(intersection));
-            auto mesh = MeshLibrary::GetCube();
-            mesh->material->shader = ShaderLibrary::GetDefaultOverlay();
-            ent->AddComponent(mesh);
-            Renderer::Submit(ent);
+            auto verts = MathUtils::GetVerticesInRadius(editedMesh, intersection, brushRadius);
+
+            for (const auto &vert : verts)
+            {
+                auto ent = MakeRef<Entity>("CubeIntersection", Transform(vert));
+                auto mesh = MeshLibrary::GetCube();
+                mesh->material->shader = ShaderLibrary::GetDefaultOverlay();
+                ent->AddComponent(mesh);
+                Renderer::Submit(ent);
+            }
         }
     }
 }

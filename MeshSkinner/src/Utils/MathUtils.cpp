@@ -70,4 +70,37 @@ namespace MathUtils
     {
         return RayMeshIntersection(ray, mesh.get(), intersection);
     }
+
+    std::vector<glm::vec3> GetVerticesInRadius(const Mesh *mesh, const glm::vec3 &point, float radius)
+    {
+        std::vector<glm::vec3> result;
+        
+        const auto &layout = mesh->GetVertexBufferLayout();
+        auto stride = layout.GetStride();
+        auto offset = layout["position"].offset;
+
+        const auto &matrix = mesh->GetEntity().lock()->GetWorldMatrix();
+
+        auto vertBytes = (uint8_t *)mesh->GetVertices();
+        for (size_t i = 0; i < mesh->GetVerticesLength(); i++)
+        {
+            auto v = *(glm::vec3 *)(vertBytes + mesh->indices[i + 0] * stride + offset);
+            v = glm::vec3(matrix * glm::vec4(v, 1.f));
+
+            if (glm::distance(point, v) <= radius)
+                result.push_back(v);
+        }
+
+        return result;
+    }
+
+    std::vector<glm::vec3> GetVerticesInRadius(const Ref<SkeletalMesh> &mesh, const glm::vec3 &point, float radius)
+    {
+        return GetVerticesInRadius(mesh.get(), point, radius);
+    }
+
+    std::vector<glm::vec3> GetVerticesInRadius(const Ref<StaticMesh> &mesh, const glm::vec3 &point, float radius)
+    {
+        return GetVerticesInRadius(mesh.get(), point, radius);
+    }
 }
