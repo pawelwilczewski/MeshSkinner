@@ -94,7 +94,7 @@ void MainScene::OnStart()
     skeletalEntity = MakeRef<Entity>("skeletal", Transform(glm::vec3(15.f, 0.f, 2.f)));
     skeletalEntity->AddComponent(skeletalMesh);
     //skeletalEntity->transform.SetScale(glm::vec3(0.01f));
-    skeletalEntity->SetParent(rootBone);
+    skeletalEntity->SetParent(rootBone); // TODO: URGENT: it should be the other way around - make sure to use relative transformations in the shader (has to be fixed for animation nevertheless)
     //rootBone->transform.SetScale(glm::vec3(0.01f));
     rootBone->transform.Translate(glm::vec3(-200.f, 0.f, 0.f));
     //rootBone->transform.Translate(glm::vec3(-500.f, 0.f, 0.f));
