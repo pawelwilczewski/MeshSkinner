@@ -79,3 +79,12 @@ std::vector<BufferElement>::iterator BufferLayout::begin() { return elements.beg
 std::vector<BufferElement>::iterator BufferLayout::end() { return elements.end(); }
 std::vector<BufferElement>::const_iterator BufferLayout::begin() const { return elements.begin(); }
 std::vector<BufferElement>::const_iterator BufferLayout::end() const { return elements.end(); }
+
+const BufferElement &BufferLayout::operator[](const std::string &elementName) const
+{
+	for (const auto &element : elements)
+		if (element.name == elementName)
+			return element;
+
+	assert(false);
+}

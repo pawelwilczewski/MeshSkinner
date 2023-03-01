@@ -210,30 +210,14 @@ void MainScene::OnMouseMoved(const glm::vec2 &)
 {
     if (Input::IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && clickedInViewport)
     {
-        auto ray = camera->ProjectViewportToWorld(Input::GetMouseViewportPosition());
-
-        const auto &mat = skeletalEntity->GetWorldMatrix();
-        glm::vec3 intersect;
-        for (size_t i = 0; i < editedMesh->indices.size(); i += 3)
+        glm::vec3 intersection;
+        if (MathUtils::RayMeshIntersection(camera->ProjectViewportToWorld(Input::GetMouseViewportPosition()), skeletalEntity->GetWorldMatrix(), editedMesh, intersection))
         {
-            auto v0 = editedMesh->vertices[editedMesh->indices[i + 0]].position;
-            auto v1 = editedMesh->vertices[editedMesh->indices[i + 1]].position;
-            auto v2 = editedMesh->vertices[editedMesh->indices[i + 2]].position;
-
-            v0 = glm::vec3(mat * glm::vec4(v0, 1.f));
-            v1 = glm::vec3(mat * glm::vec4(v1, 1.f));
-            v2 = glm::vec3(mat * glm::vec4(v2, 1.f));
-
-            if (ray.IntersectsTriangle(v0, v1, v2, intersect))
-            {
-                Log::Info("Ray {} {}, Intersection: {}", ray.origin, ray.direction, intersect);
-
-                auto ent = MakeRef<Entity>("CubeIntersection", Transform(intersect));
-                auto mesh = MeshLibrary::GetCube();
-                mesh->material->shader = ShaderLibrary::GetDefaultOverlay();
-                ent->AddComponent(mesh);
-                Renderer::Submit(ent);
-            }
+            auto ent = MakeRef<Entity>("CubeIntersection", Transform(intersection));
+            auto mesh = MeshLibrary::GetCube();
+            mesh->material->shader = ShaderLibrary::GetDefaultOverlay();
+            ent->AddComponent(mesh);
+            Renderer::Submit(ent);
         }
     }
 }

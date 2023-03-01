@@ -22,7 +22,7 @@ public:
 	ProjectionMode GetViewProjectionMode() const;
 
 public:
-	Ray ProjectViewportToWorld(const glm::vec2 &viewportPos);
+	MathUtils::Ray ProjectViewportToWorld(const glm::vec2 &viewportPos);
 
 protected:
 	virtual void OnWindowResized(const glm::ivec2 &newSize);

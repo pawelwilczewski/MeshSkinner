@@ -67,7 +67,7 @@ Camera::ProjectionMode Camera::GetViewProjectionMode() const
 	return projectionMode;
 }
 
-Ray Camera::ProjectViewportToWorld(const glm::vec2 &viewportPos)
+MathUtils::Ray Camera::ProjectViewportToWorld(const glm::vec2 &viewportPos)
 {
 	auto viewportSize = UserInterface::GetViewportSize();
 
@@ -87,5 +87,5 @@ Ray Camera::ProjectViewportToWorld(const glm::vec2 &viewportPos)
 
 	glm::vec3 dir = glm::vec3(farResult - nearResult);
 
-	return Ray(transform.GetPosition(), normalize(dir));
+	return MathUtils::Ray(transform.GetPosition(), normalize(dir));
 }
