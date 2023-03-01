@@ -19,7 +19,9 @@ protected:
 
 private:
 	void OnMouseMoved(const glm::vec2 &);
+	void OnMouseButtonPressed(int button);
 
 private:
 	CallbackRef<glm::vec2> onMouseMovedCallback;
+	CallbackRef<int> onMouseButtonPressedCallback;
 };

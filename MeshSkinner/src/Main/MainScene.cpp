@@ -26,6 +26,7 @@ static Ref<SkeletalMesh> editedMesh;
 static float brushRadius = 10.f;
 
 static bool isInteractingWithImGui = false;
+static bool clickedInViewport = false;
 
 MainScene::MainScene() : Scene()
 {
@@ -38,12 +39,16 @@ MainScene::MainScene() : Scene()
     ShaderLibrary::Load("WeightPaint", "assets/shaders/WeightPaint.vert", "assets/shaders/WeightPaint.frag", 0);
 
     onMouseMovedCallback = MakeCallbackRef<glm::vec2>([&](const glm::vec2 &position) { OnMouseMoved(position); });
+    onMouseButtonPressedCallback = MakeCallbackRef<int>([&](int button) { OnMouseButtonPressed(button); });
+
     Input::OnMouseMovedSubscribe(onMouseMovedCallback);
+    Input::OnMouseButtonPressedSubscribe(onMouseButtonPressedCallback);
 }
 
 MainScene::~MainScene()
 {
     Input::OnMouseMovedUnsubscribe(onMouseMovedCallback);
+    Input::OnMouseButtonPressedUnsubscribe(onMouseButtonPressedCallback);
 }
 
 void MainScene::OnStart()
@@ -203,31 +208,40 @@ void MainScene::OnEnd()
 
 void MainScene::OnMouseMoved(const glm::vec2 &)
 {
-    if (!Input::IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || !Input::IsMouseInViewport() || isInteractingWithImGui) return;
-    
-    auto ray = camera->ProjectViewportToWorld(Input::GetMouseViewportPosition());
-    Log::Info("Interaction");
-    const auto &mat = skeletalEntity->GetWorldMatrix();
-    glm::vec3 intersect;
-    for (size_t i = 0; i < editedMesh->indices.size(); i += 3)
+    if (Input::IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && clickedInViewport)
     {
-        auto v0 = editedMesh->vertices[editedMesh->indices[i + 0]].position;
-        auto v1 = editedMesh->vertices[editedMesh->indices[i + 1]].position;
-        auto v2 = editedMesh->vertices[editedMesh->indices[i + 2]].position;
+        auto ray = camera->ProjectViewportToWorld(Input::GetMouseViewportPosition());
 
-        v0 = glm::vec3(mat * glm::vec4(v0, 1.f));
-        v1 = glm::vec3(mat * glm::vec4(v1, 1.f));
-        v2 = glm::vec3(mat * glm::vec4(v2, 1.f));
-
-        if (ray.IntersectsTriangle(v0, v1, v2, intersect))
+        const auto &mat = skeletalEntity->GetWorldMatrix();
+        glm::vec3 intersect;
+        for (size_t i = 0; i < editedMesh->indices.size(); i += 3)
         {
-            Log::Info("Ray {} {}, Intersection: {}", ray.origin, ray.direction, intersect);
+            auto v0 = editedMesh->vertices[editedMesh->indices[i + 0]].position;
+            auto v1 = editedMesh->vertices[editedMesh->indices[i + 1]].position;
+            auto v2 = editedMesh->vertices[editedMesh->indices[i + 2]].position;
 
-            auto ent = MakeRef<Entity>("cube intersect", Transform(intersect));
-            auto mesh = MeshLibrary::GetCube();
-            mesh->material->shader = ShaderLibrary::GetDefaultOverlay();
-            ent->AddComponent(mesh);
-            Renderer::Submit(ent);
+            v0 = glm::vec3(mat * glm::vec4(v0, 1.f));
+            v1 = glm::vec3(mat * glm::vec4(v1, 1.f));
+            v2 = glm::vec3(mat * glm::vec4(v2, 1.f));
+
+            if (ray.IntersectsTriangle(v0, v1, v2, intersect))
+            {
+                Log::Info("Ray {} {}, Intersection: {}", ray.origin, ray.direction, intersect);
+
+                auto ent = MakeRef<Entity>("CubeIntersection", Transform(intersect));
+                auto mesh = MeshLibrary::GetCube();
+                mesh->material->shader = ShaderLibrary::GetDefaultOverlay();
+                ent->AddComponent(mesh);
+                Renderer::Submit(ent);
+            }
         }
+    }
+}
+
+void MainScene::OnMouseButtonPressed(int button)
+{
+    if (button == MOUSE_BUTTON_LEFT)
+    {
+        clickedInViewport = Input::IsMouseInViewport() && !isInteractingWithImGui;
     }
 }
