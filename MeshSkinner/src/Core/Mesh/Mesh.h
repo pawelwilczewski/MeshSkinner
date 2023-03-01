@@ -18,6 +18,7 @@ public:
 
 public:
 	virtual const void *GetVertices() const = 0;
+	virtual size_t GetVerticesLength() const = 0;
 	virtual VertexType GetVertexType() const = 0;
 	const BufferLayout &GetVertexBufferLayout() const;
 
@@ -35,6 +36,7 @@ public:
 
 public:
 	virtual const void *GetVertices() const override;
+	virtual size_t GetVerticesLength() const override;
 	virtual VertexType GetVertexType() const override;
 
 public:
@@ -49,6 +51,7 @@ public:
 
 public:
 	virtual const void *GetVertices() const override;
+	virtual size_t GetVerticesLength() const override;
 	virtual VertexType GetVertexType() const override;
 
 public:

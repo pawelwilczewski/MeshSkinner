@@ -39,14 +39,13 @@ public:
 	static void Init();
 
 	static void Submit(const Ref<Entity> &entity);
-	// TODO: add Remove which should be called upon destruction of Mesh owning entity
+	// TODO: add Remove which should be called upon destruction of Mesh owning entity - shouldn't just use weak_ptrs instead and clean the up accordingly?
 
 	static void FrameBegin();
 	static void FrameEnd();
 
 private:
-	static void SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<void(VertexArray<uint32_t> &)> fillVertexBufferFunction, uint32_t skeletonID = -1);
-
+	static void SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, uint32_t skeletonID = -1);
 	static void SubmitMeshStatic(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh);
 	static void SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh);
 

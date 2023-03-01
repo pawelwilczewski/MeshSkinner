@@ -34,6 +34,11 @@ Mesh::VertexType StaticMesh::GetVertexType() const
     return Static;
 }
 
+size_t StaticMesh::GetVerticesLength() const
+{
+    return vertices.size();
+}
+
 SkeletalMesh::SkeletalMesh(const std::vector<SkeletalVertex> &vertices, const std::vector<uint32_t> &indices, Ref<Material> material, bool isStatic) : Mesh(indices, material, isStatic), vertices(vertices)
 {
 
@@ -47,4 +52,9 @@ const void *SkeletalMesh::GetVertices() const
 Mesh::VertexType SkeletalMesh::GetVertexType() const
 {
     return Skeletal;
+}
+
+size_t SkeletalMesh::GetVerticesLength() const
+{
+    return vertices.size();
 }

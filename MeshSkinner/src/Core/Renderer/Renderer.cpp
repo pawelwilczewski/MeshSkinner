@@ -35,7 +35,7 @@ void Renderer::Init()
 	skeletalMeshDrawCallsDynamic = DrawCalls();
 }
 
-void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<void(VertexArray<uint32_t> &)> fillVertexBufferFunction, uint32_t skeletonID)
+void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, uint32_t skeletonID)
 {
 	// insert new shader if necessary
 	if (drawCalls.find(mesh->material->shader) == drawCalls.end())
@@ -43,7 +43,24 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 		// new shader - create an appropriate vao
 		auto drawCallInfo = MakeRef<DrawCallInfo>();
 
-		vaoInitFunction(*drawCallInfo->vao.get());
+		// initialize the ibo
+		auto ibo = MakeRef<IndexBuffer<uint32_t>>();
+		drawCallInfo->vao->SetIndexBuffer(ibo);
+
+		// initialize the vbo
+		Ref<GenericVertexBuffer> vbo;
+		switch (mesh->GetVertexType())
+		{
+		case Mesh::VertexType::Static:
+			vbo = MakeRef<VertexBuffer<StaticVertex>>(mesh->GetVertexBufferLayout());
+			break;
+		case Mesh::VertexType::Skeletal:
+			vbo = MakeRef<VertexBuffer<SkeletalVertex>>(mesh->GetVertexBufferLayout());
+			break;
+		default:
+			assert(false);
+		}
+		drawCallInfo->vao->SetVertexBuffer(vbo, 0);
 
 		// calculate the insert index by comparing the depth value of each shader
 		auto insertIndex = drawCalls.begin();
@@ -81,7 +98,10 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 
 	// fet the index offset, fill in the vbo
 	uint32_t indexOffset = vao->GetVertexBuffer(0)->GetLength();
-	fillVertexBufferFunction(*vao.get());
+
+	// append the vertices to the vbo
+	auto vbo = dynamic_cast<GenericBuffer *>(vao->GetVertexBuffer(0).get());
+	vbo->SetData(mesh->GetVertices(), (GLuint)(mesh->GetVerticesLength() * mesh->GetVertexBufferLayout().GetStride()), vbo->GetSizeBytes());
 
 	// offset the indices appropriately
 	std::vector<uint32_t> indicesOffset = mesh->indices;
@@ -106,41 +126,13 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh)
 {
 	// TODO: URGENT: refactor submission to not have these lambdas
-	SubmitMeshStatic(entity, mesh.get(), staticMeshDrawCallsStatic,
-		[&](VertexArray<uint32_t> &vao)
-		{
-			// initialize the ibo and vbo
-			auto ibo = MakeRef<IndexBuffer<uint32_t>>();
-			auto vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
-			vao.SetVertexBuffer(vbo, 0);
-			vao.SetIndexBuffer(ibo);
-		},
-		[&](VertexArray<uint32_t> &vao)
-		{
-			// append the vertices to the vbo
-			auto vbo = TypedVB<StaticVertex>(vao.GetVertexBuffer(0).get());
-			vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
-		});
+	SubmitMeshStatic(entity, mesh.get(), staticMeshDrawCallsStatic);
 }
 
 void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh)
 {
 	// submit the mesh
-	SubmitMeshStatic(entity, mesh.get(), skeletalMeshDrawCallsStatic,
-		[&](VertexArray<uint32_t> &vao)
-		{
-			// initialize the ibo and vbo
-			auto ibo = MakeRef<IndexBuffer<uint32_t>>();
-			auto vbo = MakeRef<VertexBuffer<SkeletalVertex>>(SkeletalVertex::layout);
-			vao.SetVertexBuffer(vbo, 0);
-			vao.SetIndexBuffer(ibo);
-		},
-		[&](VertexArray<uint32_t> &vao)
-		{
-			// append the vertices to the vbo
-			auto vbo = TypedVB<SkeletalVertex>(vao.GetVertexBuffer(0).get());
-			vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
-		}, -1); // TODO: URGENT add the correct skeletonID here (offset to transforms for corresponding bone ids for animation)
+	SubmitMeshStatic(entity, mesh.get(), skeletalMeshDrawCallsStatic, -1); // TODO: URGENT add the correct skeletonID here (offset to transforms for corresponding bone ids for animation)
 
 	auto &skeletons = skeletalMeshDrawCallsStatic[mesh->material->shader]->skeletons;
 	auto &transforms = skeletalMeshDrawCallsStatic[mesh->material->shader]->transforms;
