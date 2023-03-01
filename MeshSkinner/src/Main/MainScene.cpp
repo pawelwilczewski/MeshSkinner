@@ -182,7 +182,7 @@ void MainScene::OnUpdateUI()
 
     // tool
     ImGui::Begin("Tool");
-    isInteractingWithImGui |= ImGui::DragFloat("Brush radius", &brushRadius, 0.1f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic);
+    isInteractingWithImGui |= ImGui::DragFloat("Brush radius", &brushRadius, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic);
     ImGui::End();
 
     // viewport
