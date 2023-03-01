@@ -21,9 +21,9 @@ namespace MathUtils
 
 	bool RayMeshIntersection(const Ray &ray, const Ref<StaticMesh> &mesh, glm::vec3 &intersection);
 
-	std::vector<glm::vec3> GetVerticesInRadius(const Mesh *mesh, const glm::vec3 &point, float radius);
+	std::vector<uint32_t> GetVerticesInRadius(const Mesh *mesh, const glm::vec3 &point, float radius);
 
-	std::vector<glm::vec3> GetVerticesInRadius(const Ref<SkeletalMesh> &mesh, const glm::vec3 &point, float radius);
+	std::vector<uint32_t> GetVerticesInRadius(const Ref<SkeletalMesh> &mesh, const glm::vec3 &point, float radius);
 
-	std::vector<glm::vec3> GetVerticesInRadius(const Ref<StaticMesh> &mesh, const glm::vec3 &point, float radius);
+	std::vector<uint32_t> GetVerticesInRadius(const Ref<StaticMesh> &mesh, const glm::vec3 &point, float radius);
 }

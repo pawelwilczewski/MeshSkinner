@@ -215,9 +215,11 @@ void MainScene::OnMouseMoved(const glm::vec2 &)
         {
             auto verts = MathUtils::GetVerticesInRadius(editedMesh, intersection, brushRadius);
 
+            const auto &mat = editedMesh->GetEntity().lock()->GetWorldMatrix();
             for (const auto &vert : verts)
             {
-                auto ent = MakeRef<Entity>("CubeIntersection", Transform(vert));
+                auto ent = MakeRef<Entity>("CubeIntersection",
+                    Transform(glm::vec3(mat * glm::vec4(editedMesh->vertices[vert].position, 1.f))));
                 auto mesh = MeshLibrary::GetCube();
                 mesh->material->shader = ShaderLibrary::GetDefaultOverlay();
                 ent->AddComponent(mesh);

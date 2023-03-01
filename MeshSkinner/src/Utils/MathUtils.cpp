@@ -71,35 +71,35 @@ namespace MathUtils
         return RayMeshIntersection(ray, mesh.get(), intersection);
     }
 
-    std::vector<glm::vec3> GetVerticesInRadius(const Mesh *mesh, const glm::vec3 &point, float radius)
+    std::vector<uint32_t> GetVerticesInRadius(const Mesh *mesh, const glm::vec3 &point, float radius)
     {
-        std::vector<glm::vec3> result;
+        std::vector<uint32_t> result;
         
         const auto &layout = mesh->GetVertexBufferLayout();
         auto stride = layout.GetStride();
         auto offset = layout["position"].offset;
 
-        const auto &matrix = mesh->GetEntity().lock()->GetWorldMatrix();
+        const auto &invMatrix = glm::inverse(mesh->GetEntity().lock()->GetWorldMatrix());
+        auto pointLocalSpace = glm::vec3(invMatrix * glm::vec4(point, 1.f));
 
         auto vertBytes = (uint8_t *)mesh->GetVertices();
         for (size_t i = 0; i < mesh->GetVerticesLength(); i++)
         {
-            auto v = *(glm::vec3 *)(vertBytes + mesh->indices[i + 0] * stride + offset);
-            v = glm::vec3(matrix * glm::vec4(v, 1.f));
+            auto v = *(glm::vec3 *)(vertBytes + i * stride + offset);
 
-            if (glm::distance(point, v) <= radius)
-                result.push_back(v);
+            if (glm::distance(pointLocalSpace, v) <= radius)
+                result.push_back((uint32_t) i);
         }
 
         return result;
     }
 
-    std::vector<glm::vec3> GetVerticesInRadius(const Ref<SkeletalMesh> &mesh, const glm::vec3 &point, float radius)
+    std::vector<uint32_t> GetVerticesInRadius(const Ref<SkeletalMesh> &mesh, const glm::vec3 &point, float radius)
     {
         return GetVerticesInRadius(mesh.get(), point, radius);
     }
 
-    std::vector<glm::vec3> GetVerticesInRadius(const Ref<StaticMesh> &mesh, const glm::vec3 &point, float radius)
+    std::vector<uint32_t> GetVerticesInRadius(const Ref<StaticMesh> &mesh, const glm::vec3 &point, float radius)
     {
         return GetVerticesInRadius(mesh.get(), point, radius);
     }
