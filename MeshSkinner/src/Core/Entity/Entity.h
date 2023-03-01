@@ -4,7 +4,7 @@
 #include "EntityComponent.h"
 #include "Core/Entity/Transform.h"
 
-class Entity
+class Entity : public std::enable_shared_from_this<Entity>
 {
 public:
 	Entity(const std::string &name = "entity", Transform transform = Transform());
@@ -44,9 +44,7 @@ private:
 	void DirtyWorldMatrix();
 
 private:
-	// TODO: map of unordered sets as the component storing method - then it's trivial to get all components of type (also more performant)
-	//  we would add everything to the set of EntityComponents and then to the set of T if T != EntityComponent and have T default to EntityComponent
-	std::unordered_set<Ref<EntityComponent>> components;
+	std::unordered_set<Ref<EntityComponent>> components; // TODO: components need to be unique ptrs
 
 	std::unordered_set<Ref<Entity>> children;
 

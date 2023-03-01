@@ -18,8 +18,8 @@ static Ref<Entity> staticEntity;
 static Ref<Entity> staticEntity2;
 static Ref<Entity> staticEntity3;
 static Ref<Entity> skeletalEntity;
-static Ref<Entity> skeletalEntity2;
-static Ref<Entity> staticSkeletalEntity;
+//static Ref<Entity> skeletalEntity2;
+//static Ref<Entity> staticSkeletalEntity;
 
 static Ref<SkeletalMesh> editedMesh;
 
@@ -115,13 +115,13 @@ void MainScene::OnStart()
         bone->AddComponent(boneMesh);
     }
 
-    skeletalEntity2 = MakeRef<Entity>("skeletal 2", Transform(glm::vec3(-2.f, 0.f, 0.f)));
-    skeletalEntity2->AddComponent(skeletalMesh);
+    //skeletalEntity2 = MakeRef<Entity>("skeletal 2", Transform(glm::vec3(-2.f, 0.f, 0.f)));
+    //skeletalEntity2->AddComponent(skeletalMesh);
 
-    staticSkeletalEntity = MakeRef<Entity>("static skeletal");
-    staticSkeletalEntity->transform.SetPosition({ -2.f, 2.f, 0.f });
-    staticSkeletalEntity->AddComponent(staticMesh);
-    staticSkeletalEntity->AddComponent(skeletalMesh);
+    //staticSkeletalEntity = MakeRef<Entity>("static skeletal");
+    //staticSkeletalEntity->transform.SetPosition({ -2.f, 2.f, 0.f });
+    //staticSkeletalEntity->AddComponent(staticMesh);
+    //staticSkeletalEntity->AddComponent(skeletalMesh);
 
     Renderer::Submit(noneEntity);
     Renderer::Submit(staticEntity);
@@ -211,7 +211,7 @@ void MainScene::OnMouseMoved(const glm::vec2 &)
     if (Input::IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && clickedInViewport)
     {
         glm::vec3 intersection;
-        if (MathUtils::RayMeshIntersection(camera->ProjectViewportToWorld(Input::GetMouseViewportPosition()), skeletalEntity->GetWorldMatrix(), editedMesh, intersection))
+        if (MathUtils::RayMeshIntersection(camera->ProjectViewportToWorld(Input::GetMouseViewportPosition()), editedMesh, intersection))
         {
             auto ent = MakeRef<Entity>("CubeIntersection", Transform(intersection));
             auto mesh = MeshLibrary::GetCube();

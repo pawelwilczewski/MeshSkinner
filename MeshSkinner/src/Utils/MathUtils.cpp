@@ -16,20 +16,26 @@ namespace MathUtils
         return hit;
     }
 
-    bool RayMeshIntersection(const Ray &ray, const glm::mat4 &transformMatrix, const void *verts, uint32_t stride, uint32_t offset, const std::vector<uint32_t> &indices, glm::vec3 &closestIntersection)
+    bool MathUtils::RayMeshIntersection(const Ray &ray, const Mesh *mesh, glm::vec3 &closestIntersection)
     {
         float smallestDistance = -1.f;
 
-        auto vertBytes = (uint8_t *)verts;
-        for (size_t i = 0; i < indices.size(); i += 3)
-        {
-            auto v0 = *(glm::vec3 *)(vertBytes + indices[i + 0] * stride + offset);
-            auto v1 = *(glm::vec3 *)(vertBytes + indices[i + 1] * stride + offset);
-            auto v2 = *(glm::vec3 *)(vertBytes + indices[i + 2] * stride + offset);
+        const auto &layout = mesh->GetVertexBufferLayout();
+        auto stride = layout.GetStride();
+        auto offset = layout["position"].offset;
 
-            v0 = glm::vec3(transformMatrix * glm::vec4(v0, 1.f));
-            v1 = glm::vec3(transformMatrix * glm::vec4(v1, 1.f));
-            v2 = glm::vec3(transformMatrix * glm::vec4(v2, 1.f));
+        const auto &matrix = mesh->GetEntity().lock()->GetWorldMatrix();
+
+        auto vertBytes = (uint8_t *)mesh->GetVertices();
+        for (size_t i = 0; i < mesh->indices.size(); i += 3)
+        {
+            auto v0 = *(glm::vec3 *)(vertBytes + mesh->indices[i + 0] * stride + offset);
+            auto v1 = *(glm::vec3 *)(vertBytes + mesh->indices[i + 1] * stride + offset);
+            auto v2 = *(glm::vec3 *)(vertBytes + mesh->indices[i + 2] * stride + offset);
+
+            v0 = glm::vec3(matrix * glm::vec4(v0, 1.f));
+            v1 = glm::vec3(matrix * glm::vec4(v1, 1.f));
+            v2 = glm::vec3(matrix * glm::vec4(v2, 1.f));
 
             // intersection check and update closest intersection
             glm::vec3 intersection;
@@ -55,13 +61,13 @@ namespace MathUtils
         return smallestDistance >= 0.f;
     }
 
-    bool RayMeshIntersection(const Ray &ray, const glm::mat4 &transformMatrix, const Ref<SkeletalMesh> &mesh, glm::vec3 &intersection)
+    bool MathUtils::RayMeshIntersection(const Ray &ray, const Ref<SkeletalMesh> &mesh, glm::vec3 &intersection)
     {
-        return RayMeshIntersection(ray, transformMatrix, mesh->vertices.data(), SkeletalVertex::layout.GetStride(), SkeletalVertex::layout["position"].offset, mesh->indices, intersection);
+        return RayMeshIntersection(ray, mesh.get(), intersection);
     }
 
-    bool RayMeshIntersection(const Ray &ray, const glm::mat4 &transformMatrix, const Ref<StaticMesh> &mesh, glm::vec3 &intersection)
+    bool MathUtils::RayMeshIntersection(const Ray &ray, const Ref<StaticMesh> &mesh, glm::vec3 &intersection)
     {
-        return RayMeshIntersection(ray, transformMatrix, mesh->vertices.data(), StaticVertex::layout.GetStride(), StaticVertex::layout["position"].offset, mesh->indices, intersection);
+        return RayMeshIntersection(ray, mesh.get(), intersection);
     }
 }

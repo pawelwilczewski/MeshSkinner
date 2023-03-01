@@ -105,6 +105,7 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 
 void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh)
 {
+	// TODO: URGENT: refactor submission to not have these lambdas
 	SubmitMeshStatic(entity, mesh.get(), staticMeshDrawCallsStatic,
 		[&](VertexArray<uint32_t> &vao)
 		{
