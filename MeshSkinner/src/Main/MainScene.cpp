@@ -23,9 +23,11 @@ static Ref<Entity> skeletalEntity;
 
 static Ref<SkeletalMesh> editedMesh;
 
+static int brushBlendMode = static_cast<int>(MathUtils::BlendMode::Add);
 static float brushWeight = 1.f;
 static float brushRadius = 10.f;
 static float brushFalloff = 1.f;
+static float brushStrength = 1.f;
 // TODO: falloff radius
 
 // TODO: URGENT: stroke params for when to place another "dot" etc.
@@ -184,7 +186,12 @@ void MainScene::OnUpdateUI()
 
     // tool
     ImGui::Begin("Tool");
+    const char *items[] = { "Linear", "Add", "Multiply", "Gaussian", "Mix" }; // TODO: obviously do not have it fixed here like that
+    isInteractingWithImGui |= ImGui::ListBox("Brush blend mode", &brushBlendMode, items, 5);
+
     isInteractingWithImGui |= ImGui::SliderFloat("Brush weight", &brushWeight, 0.f, 1.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
+    isInteractingWithImGui |= ImGui::SliderFloat("Brush strength", &brushStrength, 0.f, 1.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
+
     isInteractingWithImGui |= ImGui::DragFloat("Brush radius", &brushRadius, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic);
     isInteractingWithImGui |= ImGui::DragFloat("Brush falloff", &brushFalloff, 0.01f, 0.f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
     ImGui::End();
@@ -254,7 +261,7 @@ void MainScene::OnLateUpdate()
                 }
 
                 // update the weight
-                (*toUpdate) = MathUtils::Blend(*toUpdate, goalWeight, MathUtils::BlendMode::Add, 0.5f);
+                (*toUpdate) = MathUtils::Blend(*toUpdate, goalWeight, static_cast<MathUtils::BlendMode>(brushBlendMode), brushStrength);
 
                 // the components of the result must add up to one
                 auto sum = 0.f;

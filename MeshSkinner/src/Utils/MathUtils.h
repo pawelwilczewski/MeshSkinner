@@ -23,7 +23,7 @@ namespace MathUtils
 
 	enum class BlendMode
 	{
-		Linear, Add, Multiply, Gaussian, Mix
+		Linear = 0, Add, Multiply, Gaussian, Mix
 	};
 
 	float Blend(float oldWeight, float newWeight, BlendMode method, float strength = 1.f);

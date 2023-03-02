@@ -102,7 +102,7 @@ namespace MathUtils
         switch (method)
         {
         case BlendMode::Mix:
-            assert(false); // somewhat wrong
+            assert(false); // TODO: this one is somewhat wrong? unless too frequent updates make it appear so
             return (1.0f - strength) * oldWeight + strength * (newWeight - oldWeight);
         case BlendMode::Linear:
             return glm::mix(oldWeight, newWeight, strength);
@@ -111,7 +111,7 @@ namespace MathUtils
         case BlendMode::Multiply:
             return oldWeight * newWeight;
         case BlendMode::Gaussian:
-            assert(false);
+            assert(false); // TODO: implement
             return 0.f;
         default:
             assert(false);
