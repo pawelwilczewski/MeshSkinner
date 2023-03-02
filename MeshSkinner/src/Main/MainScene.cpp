@@ -23,7 +23,9 @@ static Ref<Entity> skeletalEntity;
 
 static Ref<SkeletalMesh> editedMesh;
 
+static float brushWeight = 1.f;
 static float brushRadius = 10.f;
+static float brushFalloff = 1.f;
 
 static bool isInteractingWithImGui = false;
 static bool clickedInViewport = false;
@@ -182,7 +184,9 @@ void MainScene::OnUpdateUI()
 
     // tool
     ImGui::Begin("Tool");
+    isInteractingWithImGui |= ImGui::SliderFloat("Brush weight", &brushWeight, 0.f, 1.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
     isInteractingWithImGui |= ImGui::DragFloat("Brush radius", &brushRadius, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic);
+    isInteractingWithImGui |= ImGui::DragFloat("Brush falloff", &brushFalloff, 0.01f, 0.f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
     ImGui::End();
 
     // viewport
@@ -210,18 +214,60 @@ void MainScene::OnMouseMoved(const glm::vec2 &)
 {
     if (Input::IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && clickedInViewport)
     {
-        glm::vec3 intersection;
-        if (MathUtils::RayMeshIntersection(camera->ProjectViewportToWorld(Input::GetMouseViewportPosition()), editedMesh, intersection))
+        glm::vec3 localIntersection;
+        if (MathUtils::RayMeshIntersectionLocalSpace(camera->ProjectViewportToWorld(Input::GetMouseViewportPosition()), editedMesh.get(), localIntersection))
         {
-            auto verts = MathUtils::GetVerticesInRadius(editedMesh, intersection, brushRadius);
+            auto verts = MathUtils::GetVerticesInRadiusLocalSpace(editedMesh.get(), localIntersection, brushRadius);
 
-            const auto &mat = editedMesh->GetEntity().lock()->GetWorldMatrix();
-            for (const auto &vert : verts)
+            //const auto &mat = editedMesh->GetEntity().lock()->GetWorldMatrix();
+            for (const auto &vIndex : verts)
             {
-                auto bones = editedMesh->vertices[vert].bones;
-                for (size_t i = 0; i < bones.length(); i++)
-                    if (bones[i] == Renderer::activeBone)
-                        editedMesh->vertices[vert].weights[i] += 0.1f;
+                auto &v = editedMesh->vertices[vIndex];
+
+                // calculate the goalWeight
+                auto alpha = 1.f - glm::distance(localIntersection, v.position) / brushRadius;
+                auto goalWeight = brushWeight * glm::pow(alpha, brushFalloff);
+
+                // try to update an already existing weight
+                bool updated = false;
+                for (size_t i = 0; i < v.bones.length(); i++)
+                {
+                    // the bone is one of the 
+                    if (v.bones[i] == Renderer::activeBone)
+                    {
+                        v.weights[i] = 0.5f * (goalWeight + v.weights[i]);
+                        updated = true;
+                        break;
+                    }
+                }
+
+                // no such existing weight yet - replace the smallest influence
+                //  bone with our active one
+                if (!updated)
+                {
+                    auto minWeightBone = 0;
+                    auto minWeight = v.weights[0];
+
+                    for (int i = 1; i < v.weights.length(); i++)
+                    {
+                        if (v.weights[i] < minWeight)
+                        {
+                            minWeight = v.weights[i];
+                            minWeightBone = i;
+                        }
+                    }
+
+                    // update the weights
+                    v.bones[minWeightBone] = Renderer::activeBone;
+                    // half because the original weight was 0 and averageing
+                    v.weights[minWeightBone] = 0.5f * goalWeight;
+
+                    // the components of the result must add up to one
+                    auto sum = 0.f;
+                    for (int i = 0; i < v.weights.length(); i++)
+                        sum += v.weights[i];
+                    v.weights /= sum;
+                }
             }
 
             Renderer::UpdateMeshVertices(editedMesh.get());
