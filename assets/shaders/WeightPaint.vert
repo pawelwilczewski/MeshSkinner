@@ -38,16 +38,21 @@ void main()
 		weight += in_Weights[3];
 
 	vec3 blue = vec3(0.0, 0.0, 1.0);
+	vec3 cyan = vec3(0.0, 1.0, 1.0);
 	vec3 green = vec3(0.0, 1.0, 0.0);
 	vec3 yellow = vec3(1.0, 1.0, 0.0);
 	vec3 red = vec3(1.0, 0.0, 0.0);
 
-	if (weight < 0.33333)
-		io_Color = mix(blue, green, (weight - 0.0) / 0.33333);
-	else if (weight < 0.66667)
-		io_Color = mix(green, yellow, (weight - 0.33333) / 0.33333);
+	float transitionSize = 1.0 / 4;
+
+	if (weight < transitionSize)
+		io_Color = mix(blue, cyan, (weight - 0.0 * transitionSize) / transitionSize);
+	else if (weight < 2.0 * transitionSize)
+		io_Color = mix(cyan, green, (weight - 1.0 * transitionSize) / transitionSize);
+	else if (weight < 3.0 * transitionSize)
+		io_Color = mix(green, yellow, (weight - 2.0 * transitionSize) / transitionSize);
 	else
-		io_Color = mix(yellow, red, (weight - 0.66667) / 0.33333);
+		io_Color = mix(yellow, red, (weight - 3.0 * transitionSize) / transitionSize);
 
 	vec4 worldPosition = transforms[transformID] * vec4(in_Position, 1.0);
 	gl_Position = u_ViewProjection * worldPosition;
