@@ -96,4 +96,25 @@ namespace MathUtils
 
         return GetVerticesInRadiusLocalSpace(mesh, pointLocalSpace, radius);
     }
+
+    float MathUtils::Blend(float oldWeight, float newWeight, BlendMode method, float strength)
+    {
+        switch (method)
+        {
+        case BlendMode::Mix:
+            assert(false); // somewhat wrong
+            return (1.0f - strength) * oldWeight + strength * (newWeight - oldWeight);
+        case BlendMode::Linear:
+            return glm::mix(oldWeight, newWeight, strength);
+        case BlendMode::Add:
+            return glm::max(oldWeight, newWeight);
+        case BlendMode::Multiply:
+            return oldWeight * newWeight;
+        case BlendMode::Gaussian:
+            assert(false);
+            return 0.f;
+        default:
+            assert(false);
+        }
+    }
 }

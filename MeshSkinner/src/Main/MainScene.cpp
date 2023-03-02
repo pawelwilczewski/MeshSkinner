@@ -26,6 +26,9 @@ static Ref<SkeletalMesh> editedMesh;
 static float brushWeight = 1.f;
 static float brushRadius = 10.f;
 static float brushFalloff = 1.f;
+// TODO: falloff radius
+
+// TODO: URGENT: stroke params for when to place another "dot" etc.
 
 static bool isInteractingWithImGui = false;
 static bool clickedInViewport = false;
@@ -40,16 +43,13 @@ MainScene::MainScene() : Scene()
     ShaderLibrary::Load("Bone", "assets/shaders/Bone.vert", "assets/shaders/Bone.frag", 1);
     ShaderLibrary::Load("WeightPaint", "assets/shaders/WeightPaint.vert", "assets/shaders/WeightPaint.frag", 0);
 
-    onMouseMovedCallback = MakeCallbackRef<glm::vec2>([&](const glm::vec2 &position) { OnMouseMoved(position); });
     onMouseButtonPressedCallback = MakeCallbackRef<int>([&](int button) { OnMouseButtonPressed(button); });
 
-    Input::OnMouseMovedSubscribe(onMouseMovedCallback);
     Input::OnMouseButtonPressedSubscribe(onMouseButtonPressedCallback);
 }
 
 MainScene::~MainScene()
 {
-    Input::OnMouseMovedUnsubscribe(onMouseMovedCallback);
     Input::OnMouseButtonPressedUnsubscribe(onMouseButtonPressedCallback);
 }
 
@@ -202,16 +202,6 @@ void MainScene::OnUpdateUI()
 
 void MainScene::OnLateUpdate()
 {
-
-}
-
-void MainScene::OnEnd()
-{
-
-}
-
-void MainScene::OnMouseMoved(const glm::vec2 &)
-{
     if (Input::IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && clickedInViewport)
     {
         glm::vec3 localIntersection;
@@ -219,7 +209,6 @@ void MainScene::OnMouseMoved(const glm::vec2 &)
         {
             auto verts = MathUtils::GetVerticesInRadiusLocalSpace(editedMesh.get(), localIntersection, brushRadius);
 
-            //const auto &mat = editedMesh->GetEntity().lock()->GetWorldMatrix();
             for (const auto &vIndex : verts)
             {
                 auto &v = editedMesh->vertices[vIndex];
@@ -229,13 +218,14 @@ void MainScene::OnMouseMoved(const glm::vec2 &)
                 auto goalWeight = brushWeight * glm::pow(alpha, brushFalloff);
 
                 // try to update an already existing weight
+                float *toUpdate;
                 bool updated = false;
                 for (size_t i = 0; i < v.bones.length(); i++)
                 {
                     // the bone is one of the 
                     if (v.bones[i] == Renderer::activeBone)
                     {
-                        v.weights[i] = 0.5f * (goalWeight + v.weights[i]);
+                        toUpdate = &v.weights[i];
                         updated = true;
                         break;
                     }
@@ -259,20 +249,28 @@ void MainScene::OnMouseMoved(const glm::vec2 &)
 
                     // update the weights
                     v.bones[minWeightBone] = Renderer::activeBone;
-                    // half because the original weight was 0 and averageing
-                    v.weights[minWeightBone] = 0.5f * goalWeight;
-
-                    // the components of the result must add up to one
-                    auto sum = 0.f;
-                    for (int i = 0; i < v.weights.length(); i++)
-                        sum += v.weights[i];
-                    v.weights /= sum;
+                    v.weights[minWeightBone] = 0.f;
+                    toUpdate = &v.weights[minWeightBone];
                 }
+
+                // update the weight
+                (*toUpdate) = MathUtils::Blend(*toUpdate, goalWeight, MathUtils::BlendMode::Add, 0.5f);
+
+                // the components of the result must add up to one
+                auto sum = 0.f;
+                for (int i = 0; i < v.weights.length(); i++)
+                    sum += v.weights[i];
+                v.weights /= sum;
             }
 
             Renderer::UpdateMeshVertices(editedMesh.get());
         }
     }
+}
+
+void MainScene::OnEnd()
+{
+
 }
 
 void MainScene::OnMouseButtonPressed(int button)
