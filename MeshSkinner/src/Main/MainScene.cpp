@@ -18,22 +18,41 @@ static Ref<Entity> staticEntity;
 static Ref<Entity> staticEntity2;
 static Ref<Entity> staticEntity3;
 static Ref<Entity> skeletalEntity;
-static Ref<Entity> skeletalEntity2;
-static Ref<Entity> staticSkeletalEntity;
+//static Ref<Entity> skeletalEntity2;
+//static Ref<Entity> staticSkeletalEntity;
+
+static Ref<SkeletalMesh> editedMesh;
+
+static int brushBlendMode = static_cast<int>(MathUtils::BlendMode::Add);
+static float brushWeight = 1.f;
+static float brushRadius = 10.f;
+static float brushFalloff = 1.f;
+static float brushStrength = 1.f;
+// TODO: falloff radius
+
+// TODO: URGENT: stroke params for when to place another "dot" etc.
+
+static bool isInteractingWithImGui = false;
+static bool clickedInViewport = false;
 
 MainScene::MainScene() : Scene()
 {
-    camera = MakeRef<Camera>();
+    camera = MakeRef<Camera>("MainCamera");
     cameraController = MakeRef<CameraController>(camera, 10.f);
 
     Renderer::activeCamera = camera;
 
     ShaderLibrary::Load("Bone", "assets/shaders/Bone.vert", "assets/shaders/Bone.frag", 1);
+    ShaderLibrary::Load("WeightPaint", "assets/shaders/WeightPaint.vert", "assets/shaders/WeightPaint.frag", 0);
+
+    onMouseButtonPressedCallback = MakeCallbackRef<int>([&](int button) { OnMouseButtonPressed(button); });
+
+    Input::OnMouseButtonPressedSubscribe(onMouseButtonPressedCallback);
 }
 
 MainScene::~MainScene()
 {
-    
+    Input::OnMouseButtonPressedUnsubscribe(onMouseButtonPressedCallback);
 }
 
 void MainScene::OnStart()
@@ -63,6 +82,7 @@ void MainScene::OnStart()
     auto skeletalMesh = MakeRef<SkeletalMesh>();
     auto rootBone = Ref<Bone>();
     MeshLibrary::Get("assets/models/shark.gltf", skeletalMesh, rootBone);
+    skeletalMesh->material = MakeRef<Material>(ShaderLibrary::Get("WeightPaint"));
 
     noneEntity = MakeRef<Entity>("none");
 
@@ -78,7 +98,7 @@ void MainScene::OnStart()
     skeletalEntity = MakeRef<Entity>("skeletal", Transform(glm::vec3(15.f, 0.f, 2.f)));
     skeletalEntity->AddComponent(skeletalMesh);
     //skeletalEntity->transform.SetScale(glm::vec3(0.01f));
-    skeletalEntity->SetParent(rootBone);
+    skeletalEntity->SetParent(rootBone); // TODO: URGENT: it should be the other way around - make sure to use relative transformations in the shader (has to be fixed for animation nevertheless)
     //rootBone->transform.SetScale(glm::vec3(0.01f));
     rootBone->transform.Translate(glm::vec3(-200.f, 0.f, 0.f));
     //rootBone->transform.Translate(glm::vec3(-500.f, 0.f, 0.f));
@@ -86,7 +106,7 @@ void MainScene::OnStart()
 
     // add bone meshes
     auto boneMat = MakeRef<Material>(ShaderLibrary::Get("Bone"));
-    for (auto &bone : skeletalMesh->skeleton->bones)
+    for (auto &bone : skeletalMesh->skeleton->GetBones())
     {
         // calculate the bone length with some default for tip bones
         auto boneLength = 50.f;
@@ -99,13 +119,13 @@ void MainScene::OnStart()
         bone->AddComponent(boneMesh);
     }
 
-    skeletalEntity2 = MakeRef<Entity>("skeletal 2", Transform(glm::vec3(-2.f, 0.f, 0.f)));
-    skeletalEntity2->AddComponent(skeletalMesh);
+    //skeletalEntity2 = MakeRef<Entity>("skeletal 2", Transform(glm::vec3(-2.f, 0.f, 0.f)));
+    //skeletalEntity2->AddComponent(skeletalMesh);
 
-    staticSkeletalEntity = MakeRef<Entity>("static skeletal");
-    staticSkeletalEntity->transform.SetPosition({ -2.f, 2.f, 0.f });
-    staticSkeletalEntity->AddComponent(staticMesh);
-    staticSkeletalEntity->AddComponent(skeletalMesh);
+    //staticSkeletalEntity = MakeRef<Entity>("static skeletal");
+    //staticSkeletalEntity->transform.SetPosition({ -2.f, 2.f, 0.f });
+    //staticSkeletalEntity->AddComponent(staticMesh);
+    //staticSkeletalEntity->AddComponent(skeletalMesh);
 
     Renderer::Submit(noneEntity);
     Renderer::Submit(staticEntity);
@@ -114,6 +134,8 @@ void MainScene::OnStart()
     Renderer::Submit(skeletalEntity);
     //Renderer::Submit(skeletalEntity2);
     //Renderer::Submit(staticSkeletalEntity);
+
+    editedMesh = skeletalMesh;
 }
 
 void MainScene::OnEarlyUpdate()
@@ -142,28 +164,126 @@ void MainScene::OnUpdateUI()
     frameTimes += Time::GetDeltaSeconds();
     fps += Time::GetFPS();
 
-    // debug panel
-    ImGui::Begin("Debug info");
-    ImGui::Text("Scene info:");
+    isInteractingWithImGui = false;
+
+    // scene stats
+    ImGui::Begin("Scene Stats");
     ImGui::Text("FPS:            %f", Time::GetFPS());
     ImGui::Text("Frame time:     %f ms", Time::GetDeltaSeconds() * 1000.f);
     ImGui::Text("Avg FPS:        %f", fps / updates);
     ImGui::Text("Avg frame time: %f ms", frameTimes / updates * 1000.f);
     ImGui::End();
 
-    // debug panel 2
-    ImGui::Begin("Hello info");
-    ImGui::Text("Scene info 2:");
-    ImGui::Text("FPS:            %f", Time::GetFPS());
+    // edited mesh
+    ImGui::Begin("Edited Mesh");
+    isInteractingWithImGui |= ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1);
+    ImGui::End();
+
+    // settings
+    ImGui::Begin("Settings");
+    isInteractingWithImGui |= ImGui::DragFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.0001f, 0.0f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
+    ImGui::End();
+
+    // tool
+    ImGui::Begin("Tool");
+    const char *items[] = { "Linear", "Add", "Multiply", "Gaussian", "Mix" }; // TODO: obviously do not have it fixed here like that
+    isInteractingWithImGui |= ImGui::ListBox("Brush blend mode", &brushBlendMode, items, 5);
+
+    isInteractingWithImGui |= ImGui::SliderFloat("Brush weight", &brushWeight, 0.f, 1.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
+    isInteractingWithImGui |= ImGui::SliderFloat("Brush strength", &brushStrength, 0.f, 1.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
+
+    isInteractingWithImGui |= ImGui::DragFloat("Brush radius", &brushRadius, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic);
+    isInteractingWithImGui |= ImGui::DragFloat("Brush falloff", &brushFalloff, 0.01f, 0.f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
+    ImGui::End();
+
+    // viewport
+    ImGui::Begin("Viewport Settings");
+    if (ImGui::Button("Reset camera"))
+    {
+        isInteractingWithImGui = true;
+        camera->transform.SetPosition(glm::vec3(0.f));
+        camera->transform.SetRotation(glm::vec3(0.f));
+    }
     ImGui::End();
 }
 
 void MainScene::OnLateUpdate()
 {
+    if (Input::IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && clickedInViewport)
+    {
+        glm::vec3 localIntersection;
+        if (MathUtils::RayMeshIntersectionLocalSpace(camera->ProjectViewportToWorld(Input::GetMouseViewportPosition()), editedMesh.get(), localIntersection))
+        {
+            auto verts = MathUtils::GetVerticesInRadiusLocalSpace(editedMesh.get(), localIntersection, brushRadius);
 
+            for (const auto &vIndex : verts)
+            {
+                auto &v = editedMesh->vertices[vIndex];
+
+                // calculate the goalWeight
+                auto alpha = 1.f - glm::distance(localIntersection, v.position) / brushRadius;
+                auto goalWeight = brushWeight * glm::pow(alpha, brushFalloff);
+
+                // try to update an already existing weight
+                float *toUpdate;
+                bool updated = false;
+                for (size_t i = 0; i < v.bones.length(); i++)
+                {
+                    // the bone is one of the 
+                    if (v.bones[i] == Renderer::activeBone)
+                    {
+                        toUpdate = &v.weights[i];
+                        updated = true;
+                        break;
+                    }
+                }
+
+                // no such existing weight yet - replace the smallest influence
+                //  bone with our active one
+                if (!updated)
+                {
+                    auto minWeightBone = 0;
+                    auto minWeight = v.weights[0];
+
+                    for (int i = 1; i < v.weights.length(); i++)
+                    {
+                        if (v.weights[i] < minWeight)
+                        {
+                            minWeight = v.weights[i];
+                            minWeightBone = i;
+                        }
+                    }
+
+                    // update the weights
+                    v.bones[minWeightBone] = Renderer::activeBone;
+                    v.weights[minWeightBone] = 0.f;
+                    toUpdate = &v.weights[minWeightBone];
+                }
+
+                // update the weight
+                (*toUpdate) = MathUtils::Blend(*toUpdate, goalWeight, static_cast<MathUtils::BlendMode>(brushBlendMode), brushStrength);
+
+                // the components of the result must add up to one
+                auto sum = 0.f;
+                for (int i = 0; i < v.weights.length(); i++)
+                    sum += v.weights[i];
+                v.weights /= sum;
+            }
+
+            Renderer::UpdateMeshVertices(editedMesh.get());
+        }
+    }
 }
 
 void MainScene::OnEnd()
 {
 
+}
+
+void MainScene::OnMouseButtonPressed(int button)
+{
+    if (button == MOUSE_BUTTON_LEFT)
+    {
+        clickedInViewport = Input::IsMouseInViewport() && !isInteractingWithImGui;
+    }
 }

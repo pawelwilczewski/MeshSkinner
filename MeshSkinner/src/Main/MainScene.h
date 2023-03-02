@@ -16,4 +16,10 @@ protected:
 	virtual void OnUpdateUI() override;
 	virtual void OnLateUpdate() override;
 	virtual void OnEnd() override;
+
+private:
+	void OnMouseButtonPressed(int button);
+
+private:
+	CallbackRef<int> onMouseButtonPressedCallback;
 };

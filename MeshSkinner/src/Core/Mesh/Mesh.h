@@ -10,8 +10,17 @@
 class Mesh : public EntityComponent
 {
 public:
+	enum VertexType { Static, Skeletal};
+
+public:
 	Mesh(const std::vector<uint32_t> &indices = {}, Ref<Material> material = MaterialLibrary::GetDefault(), bool isStatic = true);
 	virtual ~Mesh() = default;
+
+public:
+	virtual const void *GetVertices() const = 0;
+	virtual size_t GetVerticesLength() const = 0;
+	virtual VertexType GetVertexType() const = 0;
+	const BufferLayout &GetVertexBufferLayout() const;
 
 public:
 	std::vector<uint32_t> indices;
@@ -26,6 +35,11 @@ public:
 	virtual ~StaticMesh() = default;
 
 public:
+	virtual const void *GetVertices() const override;
+	virtual size_t GetVerticesLength() const override;
+	virtual VertexType GetVertexType() const override;
+
+public:
 	std::vector<StaticVertex> vertices;
 };
 
@@ -34,6 +48,11 @@ class SkeletalMesh : public Mesh
 public:
 	SkeletalMesh(const std::vector<SkeletalVertex> &vertices = {}, const std::vector<uint32_t> &indices = {}, Ref<Material> material = MaterialLibrary::GetDefault(), bool isStatic = true);
 	virtual ~SkeletalMesh() = default;
+
+public:
+	virtual const void *GetVertices() const override;
+	virtual size_t GetVerticesLength() const override;
+	virtual VertexType GetVertexType() const override;
 
 public:
 	Ref<Skeleton> skeleton;

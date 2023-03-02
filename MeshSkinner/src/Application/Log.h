@@ -103,3 +103,23 @@ template <> struct fmt::formatter<glm::mat4>
 		);
 	}
 };
+
+template <> struct fmt::formatter<glm::mat3>
+{
+	constexpr auto parse(format_parse_context &ctx) -> decltype(ctx.begin()) { return ctx.end(); }
+
+	template <typename FormatContext>
+	auto format(const glm::mat3 &in, FormatContext &ctx) const -> decltype(ctx.out())
+	{
+		return fmt::format_to(
+			ctx.out(),
+			"mat3\n"
+			"\t{:.3f}\t{:.3f}\t{:.3f}\n"
+			"\t{:.3f}\t{:.3f}\t{:.3f}\n"
+			"\t{:.3f}\t{:.3f}\t{:.3f}",
+			in[0][0], in[1][0], in[2][0],
+			in[0][1], in[1][1], in[2][1],
+			in[0][2], in[1][2], in[2][2]
+		);
+	}
+};

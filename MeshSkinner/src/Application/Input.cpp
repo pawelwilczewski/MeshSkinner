@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Input.h"
 
+glm::vec2 Input::mouseDelta = glm::vec2(0.f);
+
 Event<int> Input::onKeyPressed;
 Event<int> Input::onKeyReleased;
 Event<int> Input::onMouseButtonPressed;
@@ -29,11 +31,33 @@ bool Input::IsMouseButtonPressed(int button)
 	return glfwGetMouseButton(Window::GetNativeWindow(), button) == GLFW_PRESS;
 }
 
-glm::vec2 Input::GetMousePosition()
+glm::vec2 Input::GetMouseWindowPosition()
 {
 	double x, y;
 	glfwGetCursorPos(Window::GetNativeWindow(), &x, &y);
 	return { (float)x, (float)y };
+}
+
+glm::vec2 Input::GetMouseScreenPosition()
+{
+	return glm::vec2(Window::GetWindowPosition()) + GetMouseWindowPosition();
+}
+
+glm::vec2 Input::GetMouseViewportPosition()
+{
+	return GetMouseScreenPosition() - glm::vec2(UserInterface::GetViewportScreenPosition());
+}
+
+glm::vec2 Input::GetMouseDelta()
+{
+	return mouseDelta;
+}
+
+bool Input::IsMouseInViewport()
+{
+	auto pos = GetMouseViewportPosition();
+	auto viewportSize = UserInterface::GetViewportSize();
+	return pos.x >= 0 && pos.x < viewportSize.x && pos.y >= 0 && pos.y <= viewportSize.y;
 }
 
 void Input::HandleKeyCallback(GLFWwindow *window, int key, int, int action, int)
@@ -50,7 +74,28 @@ void Input::HandleMouseButtonCallback(GLFWwindow *window, int button, int action
 
 void Input::HandleMouseMovedCallback(GLFWwindow *window, double x, double y)
 {
-	onMouseMoved.Invoke({ (float)x, (float)y });
+	// having two frames of buffer before registering the input of the input ensures no sudden cursor jumps
+	static int inputModeOneFrameAgo = GLFW_CURSOR_NORMAL;
+	static int inputModeTwoFramesAgo = GLFW_CURSOR_NORMAL;
+	static glm::vec2 lastMousePosition;
+
+	// update the pos and input mode
+	auto pos = glm::vec2(x, y);
+	auto inputMode = glfwGetInputMode(window, GLFW_CURSOR);
+
+	// calculate the delta
+	if (inputMode != inputModeOneFrameAgo || inputMode != inputModeTwoFramesAgo)
+		mouseDelta = glm::vec2(0.f);
+	else
+		mouseDelta = pos - lastMousePosition;
+
+	// event invocation
+	onMouseMoved.Invoke(pos);
+
+	// update "last" variables
+	lastMousePosition = pos;
+	inputModeTwoFramesAgo = inputModeOneFrameAgo;
+	inputModeOneFrameAgo = inputMode;
 }
 
 void Input::HandleMouseScrolledCallback(GLFWwindow *window, double offsetX, double offsetY)

@@ -316,10 +316,25 @@ bool MeshLibrary::Get(const std::string &path, Ref<SkeletalMesh> &outMesh, Ref<B
 			data = GetAttributeData(primitive, "JOINTS_0");
 			if (data)
 			{
-				// TODO: joints can also be unsigned bytes https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#meshes
-				auto *buffer = static_cast<const glm::vec<4, uint16_t> *>(data);
-				for (int i = 0; i < vertCount; i++)
-					outMesh->vertices[i].bones = buffer[i];
+				switch (model.accessors[primitive.attributes.at("JOINTS_0")].componentType)
+				{
+				case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+				{
+					auto *buffer = static_cast<const glm::vec<4, uint8_t> *>(data);
+					for (int i = 0; i < vertCount; i++)
+						outMesh->vertices[i].bones = buffer[i];
+					break;
+				}
+				case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+				{
+					auto *buffer = static_cast<const glm::vec<4, uint16_t> *>(data);
+					for (int i = 0; i < vertCount; i++)
+						outMesh->vertices[i].bones = buffer[i];
+					break;
+				}
+				default:
+					assert(false);
+				}
 			}
 
 			data = GetAttributeData(primitive, "WEIGHTS_0");

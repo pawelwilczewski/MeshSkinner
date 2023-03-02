@@ -4,7 +4,7 @@
 
 enum class ShaderDataType
 {
-	None = 0, Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4, Short, Short2, Short3, Short4, Bool
+	None = 0, Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4, Short, Short2, Short3, Short4, UnsignedShort, UnsignedShort2, UnsignedShort3, UnsignedShort4, Bool
 };
 
 class BufferElement
@@ -38,6 +38,8 @@ public:
 	std::vector<BufferElement>::iterator end();
 	std::vector<BufferElement>::const_iterator begin() const;
 	std::vector<BufferElement>::const_iterator end() const;
+
+	const BufferElement &operator[](const std::string &elementName) const;
 
 private:
 	std::vector<BufferElement> elements;

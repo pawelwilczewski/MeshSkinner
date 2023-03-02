@@ -32,6 +32,7 @@
 #include <glm/vec3.hpp>
 #include <glm/vec2.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/intersect.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -55,7 +56,9 @@
 #include "Core/Mesh/Mesh.h"
 #include "Core/Mesh/Skeleton.h"
 #include "Core/Mesh/MeshLibrary.h"
+
 #include "Utils/FileUtils.h"
+#include "Utils/MathUtils.h"
 
 // platform-variable
 #ifdef PLATFORM_WINDOWS

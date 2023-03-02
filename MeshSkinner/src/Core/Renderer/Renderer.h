@@ -10,10 +10,11 @@
 
 struct VertexInfo
 {
-	VertexInfo(uint32_t transformID, uint32_t materialID);
+	VertexInfo(uint32_t transformID, uint32_t materialID, uint32_t skeletonID = -1);
 
 	uint32_t transformID;
 	uint32_t materialID;
+	uint32_t skeletonTransformsID;
 };
 
 struct DrawCallInfo
@@ -22,9 +23,10 @@ struct DrawCallInfo
 
 	Unique<VertexArray<uint32_t>> vao;
 	// key: entity already rendered, value: transform id to use for mesh
-	std::unordered_map<Ref<Entity>, const uint32_t> entities;
+	std::unordered_map<Ref<Entity>, const uint32_t> entities; // TODO: use weak ptrs for entities
 	// key: skeleton already rendered, value: transform id to use for bones (start)
-	std::unordered_map<Ref<Skeleton>, const uint32_t> skeletons;
+	std::unordered_map<Ref<Skeleton>, const uint32_t> skeletons; // TODO: use weak ptrs for skeletons
+	std::unordered_map<const Mesh *, const uint32_t> meshes; // TODO: use weak ptrs for meshes
 	Unique<StorageBuffer<glm::mat4>> transforms;
 	Unique<StorageBuffer<MaterialGPU>> materials;
 	Unique<StorageBuffer<VertexInfo>> vertexInfo;
@@ -38,21 +40,24 @@ public:
 	static void Init();
 
 	static void Submit(const Ref<Entity> &entity);
-	// TODO: add Remove which should be called upon destruction of Mesh owning entity
+	// TODO: add Remove which should be called upon destruction of Mesh owning entity - shouldn't just use weak_ptrs instead and clean the up accordingly?
 
 	static void FrameBegin();
 	static void FrameEnd();
 
 private:
-	static void SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<void(VertexArray<uint32_t> &)> fillVertexBufferFunction);
-
+	static void SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, uint32_t skeletonID = -1);
 	static void SubmitMeshStatic(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh);
 	static void SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh);
 
 	static void Render(const DrawCalls::iterator &it);
 
 public:
+	static void UpdateMeshVertices(const Mesh *mesh);
+
+public:
 	static Ref<Camera> activeCamera;
+	static int activeBone;
 
 private:
 	static DrawCalls staticMeshDrawCallsStatic;

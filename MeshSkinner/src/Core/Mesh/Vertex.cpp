@@ -19,7 +19,7 @@ const BufferLayout &SkeletalVertex::layout = BufferLayout({
 	{ "tangent", ShaderDataType::Float4 },
 	{ "texCoord", ShaderDataType::Float2 },
 	{ "color", ShaderDataType::Float3 },
-	{ "bones", ShaderDataType::Short4 },
+	{ "bones", ShaderDataType::UnsignedShort4 },
 	{ "weights", ShaderDataType::Float4 }
 });
 

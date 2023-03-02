@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Renderer.h"
 
-VertexInfo::VertexInfo(uint32_t transformID, uint32_t materialID) : transformID(transformID), materialID(materialID)
+VertexInfo::VertexInfo(uint32_t transformID, uint32_t materialID, uint32_t skeletonID) : transformID(transformID), materialID(materialID), skeletonTransformsID(skeletonID)
 {
 
 }
@@ -10,14 +10,13 @@ DrawCallInfo::DrawCallInfo() :
 	vao(MakeUnique<VertexArray<uint32_t>>()),
 	transforms(MakeUnique<StorageBuffer<glm::mat4>>()),
 	materials(MakeUnique<StorageBuffer<MaterialGPU>>()),
-	vertexInfo(MakeUnique<StorageBuffer<VertexInfo>>()),
-	entities(std::unordered_map<Ref<Entity>, const uint32_t>()),
-	skeletons(std::unordered_map<Ref<Skeleton>, const uint32_t>())
+	vertexInfo(MakeUnique<StorageBuffer<VertexInfo>>())
 {
 
 }
 
 Ref<Camera> Renderer::activeCamera;
+int Renderer::activeBone = 0;
 
 DrawCalls Renderer::staticMeshDrawCallsStatic;
 DrawCalls Renderer::skeletalMeshDrawCallsStatic;
@@ -34,7 +33,7 @@ void Renderer::Init()
 	skeletalMeshDrawCallsDynamic = DrawCalls();
 }
 
-void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, std::function<void(VertexArray<uint32_t> &)> vaoInitFunction, std::function<void(VertexArray<uint32_t> &)> fillVertexBufferFunction)
+void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, uint32_t skeletonID)
 {
 	// insert new shader if necessary
 	if (drawCalls.find(mesh->material->shader) == drawCalls.end())
@@ -42,7 +41,25 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 		// new shader - create an appropriate vao
 		auto drawCallInfo = MakeRef<DrawCallInfo>();
 
-		vaoInitFunction(*drawCallInfo->vao.get());
+		// initialize the ibo
+		auto ibo = MakeRef<IndexBuffer<uint32_t>>();
+		drawCallInfo->vao->SetIndexBuffer(ibo);
+
+		// initialize the vbo
+		// TODO: probably no need to switch here, instead, i.e. adjust the code and instantiate GenericVertexBuffer
+		Ref<GenericVertexBuffer> vbo;
+		switch (mesh->GetVertexType())
+		{
+		case Mesh::VertexType::Static:
+			vbo = MakeRef<VertexBuffer<StaticVertex>>(mesh->GetVertexBufferLayout());
+			break;
+		case Mesh::VertexType::Skeletal:
+			vbo = MakeRef<VertexBuffer<SkeletalVertex>>(mesh->GetVertexBufferLayout());
+			break;
+		default:
+			assert(false);
+		}
+		drawCallInfo->vao->SetVertexBuffer(vbo, 0);
 
 		// calculate the insert index by comparing the depth value of each shader
 		auto insertIndex = drawCalls.begin();
@@ -61,6 +78,7 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 	auto &vertexInfo = drawCalls[mesh->material->shader]->vertexInfo;
 	auto &transforms = drawCalls[mesh->material->shader]->transforms;
 	auto &materials = drawCalls[mesh->material->shader]->materials;
+	auto &meshes = drawCalls[mesh->material->shader]->meshes;
 
 	// get the transform id
 	uint32_t transformID;
@@ -80,7 +98,16 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 
 	// fet the index offset, fill in the vbo
 	uint32_t indexOffset = vao->GetVertexBuffer(0)->GetLength();
-	fillVertexBufferFunction(*vao.get());
+
+	// append the vertices to the vbo
+	auto vbo = dynamic_cast<GenericBuffer *>(vao->GetVertexBuffer(0).get());
+	auto vboOffsetLength = vbo->GetSizeBytes() / mesh->GetVertexBufferLayout().GetStride();
+	vbo->SetData(mesh->GetVertices(), (GLuint)(mesh->GetVerticesLength() * mesh->GetVertexBufferLayout().GetStride()), vbo->GetSizeBytes());
+
+	if (meshes.find(mesh) == meshes.end())
+	//	assert(false); // duplicate mesh added
+	//else
+		meshes.insert({ mesh, vboOffsetLength });
 
 	// offset the indices appropriately
 	std::vector<uint32_t> indicesOffset = mesh->indices;
@@ -98,62 +125,38 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 
 	// append the vertex info
 	auto materialID = materials->GetLength() - 1;
-	auto ids = std::vector<VertexInfo>(vao->GetVertexBuffer(0)->GetLength() - indexOffset, VertexInfo(transformID, materialID));
+	auto ids = std::vector<VertexInfo>(vao->GetVertexBuffer(0)->GetLength() - indexOffset, VertexInfo(transformID, materialID, skeletonID));
 	vertexInfo->AppendData(ids.data(), ids.size());
 }
 
 void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh)
 {
-	SubmitMeshStatic(entity, mesh.get(), staticMeshDrawCallsStatic,
-		[&](VertexArray<uint32_t> &vao)
-		{
-			// initialize the ibo and vbo
-			auto ibo = MakeRef<IndexBuffer<uint32_t>>();
-			auto vbo = MakeRef<VertexBuffer<StaticVertex>>(StaticVertex::layout);
-			vao.SetVertexBuffer(vbo, 0);
-			vao.SetIndexBuffer(ibo);
-		},
-		[&](VertexArray<uint32_t> &vao)
-		{
-			// append the vertices to the vbo
-			auto vbo = TypedVB<StaticVertex>(vao.GetVertexBuffer(0).get());
-			vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
-		});
+	// TODO: URGENT: refactor submission to not have these lambdas
+	SubmitMeshStatic(entity, mesh.get(), staticMeshDrawCallsStatic);
 }
 
 void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh)
 {
-	SubmitMeshStatic(entity, mesh.get(), skeletalMeshDrawCallsStatic,
-		[&](VertexArray<uint32_t> &vao)
-		{
-			// initialize the ibo and vbo
-			auto ibo = MakeRef<IndexBuffer<uint32_t>>();
-			auto vbo = MakeRef<VertexBuffer<SkeletalVertex>>(SkeletalVertex::layout);
-			vao.SetVertexBuffer(vbo, 0);
-			vao.SetIndexBuffer(ibo);
-		},
-		[&](VertexArray<uint32_t> &vao)
-		{
-			// append the vertices to the vbo
-			auto vbo = TypedVB<SkeletalVertex>(vao.GetVertexBuffer(0).get());
-			vbo->SetData(mesh->vertices.data(), mesh->vertices.size(), vbo->GetLength());
-		});
+	// submit the mesh
+	SubmitMeshStatic(entity, mesh.get(), skeletalMeshDrawCallsStatic, -1); // TODO: URGENT add the correct skeletonID here (offset to transforms for corresponding bone ids for animation)
 
 	auto &skeletons = skeletalMeshDrawCallsStatic[mesh->material->shader]->skeletons;
 	auto &transforms = skeletalMeshDrawCallsStatic[mesh->material->shader]->transforms;
 
 	// submit all bones
+	uint32_t skeletonTransformOffset;
 	if (skeletons.find(mesh->skeleton) == skeletons.end())
 	{
-		uint32_t skeletonTransformOffset = transforms->GetLength();
+		skeletonTransformOffset = transforms->GetLength();
 		skeletons.insert({ mesh->skeleton, skeletonTransformOffset });
 
-		for (auto &bone : mesh->skeleton->bones)
+		for (auto &bone : mesh->skeleton->GetBones())
 			Submit(bone);
 	}
 	else
 	{
 		Log::Error("Trying to render the same skeleton more than once!");
+		return;
 	}
 }
 
@@ -204,6 +207,7 @@ void Renderer::Render(const DrawCalls::iterator &it)
 
 	shader->Bind();
 	shader->UploadUniformMat4("u_ViewProjection", activeCamera->GetViewProjectionMatrix());
+	shader->UploadUniformInt("u_ActiveBone", activeBone);
 	// TODO: probably id shouldn't be necessary (similar to uploading uniforms)
 	shader->SetupStorageBuffer("ss_VertexInfo", info->vertexInfo->GetID());
 	shader->SetupStorageBuffer("ss_Transforms", info->transforms->GetID());
@@ -211,6 +215,28 @@ void Renderer::Render(const DrawCalls::iterator &it)
 
 	info->vao->Bind();
 	glDrawElements(GL_TRIANGLES, info->vao->GetIndexBuffer()->GetLength(), GL_UNSIGNED_INT, nullptr);
+}
+
+void Renderer::UpdateMeshVertices(const Mesh *mesh)
+{
+	DrawCalls drawCalls;
+	switch (mesh->GetVertexType())
+	{
+	case Mesh::VertexType::Static:
+		drawCalls = staticMeshDrawCallsStatic;
+		break;
+	case Mesh::VertexType::Skeletal:
+		drawCalls = skeletalMeshDrawCallsStatic;
+		break;
+	}
+
+	auto &meshes = drawCalls[mesh->material->shader]->meshes;
+	auto &vao = drawCalls[mesh->material->shader]->vao;
+	
+	// append the vertices to the vbo
+	auto vbo = dynamic_cast<GenericBuffer *>(vao->GetVertexBuffer(0).get());
+	auto stride = mesh->GetVertexBufferLayout().GetStride();
+	vbo->SetData(mesh->GetVertices(), (GLuint)(mesh->GetVerticesLength() * stride), meshes[mesh] * stride);
 }
 
 void Renderer::FrameEnd()

@@ -4,26 +4,28 @@
 CameraController::CameraController(const Ref<Camera> &camera, float moveSpeed, float moveSpeedMultiplier, float moveSpeedMultiplierDelta, float maxSpeed, float minSpeed) : camera(camera), moveSpeed(moveSpeed), moveSpeedMultiplier(moveSpeedMultiplier), moveSpeedMultiplierDelta(moveSpeedMultiplierDelta), maxSpeed(maxSpeed), minSpeed(minSpeed)
 {
 	onUpdateCallback = MakeCallbackNoArgRef([&]() { OnUpdate(); });
-	onLateUpdateCallback = MakeCallbackNoArgRef([&]() { OnLateUpdate(); });
-	onKeyPressedCallback = MakeCallbackRef<int>([&](int key) { OnKeyPressed(key); });
 	onMouseScrolledCallback = MakeCallbackRef<glm::vec2>([&](const glm::vec2 &delta) { OnMouseScrolled(delta); });
+	onMouseMovedCallback = MakeCallbackRef<glm::vec2>([&](const glm::vec2 &delta) { OnMouseMoved(delta); });
 
 	Application::OnUpdateSubscribe(onUpdateCallback);
-	Application::OnLateUpdateSubscribe(onLateUpdateCallback);
-	Input::OnKeyPressedSubscribe(onKeyPressedCallback);
 	Input::OnMouseScrolledSubscribe(onMouseScrolledCallback);
+	Input::OnMouseMovedSubscribe(onMouseMovedCallback);
+
+	// TODO: investigate why setting this rotation resolves initial camera jump on mouse move
+	camera->transform.SetRotation(glm::vec3(0.f));
 }
 
 CameraController::~CameraController()
 {
 	Application::OnUpdateUnsubscribe(onUpdateCallback);
-	Application::OnLateUpdateUnsubscribe(onLateUpdateCallback);
-	Input::OnKeyPressedUnsubscribe(onKeyPressedCallback);
 	Input::OnMouseScrolledUnsubscribe(onMouseScrolledCallback);
+	Input::OnMouseMovedUnsubscribe(onMouseMovedCallback);
 }
 
 void CameraController::OnUpdate()
 {
+	active = Input::IsMouseButtonPressed(MOUSE_BUTTON_RIGHT);
+	Window::SetCursorVisibility(!active);
 	if (!active) return;
 
 	auto input = glm::vec2(0.f);
@@ -37,42 +39,27 @@ void CameraController::OnUpdate()
 		input = glm::normalize(input);
 
 		// camera has messed up right and forward vectors in this coordinate system
-		auto forward = input.y * -camera->transform.GetRightVector();
-		auto right = input.x * camera->transform.GetForwardVector();
+		auto forward = -input.y * camera->transform.GetRightVector();
+		auto right = -input.x * camera->transform.GetForwardVector();
 
 		camera->transform.SetPosition(camera->transform.GetPosition() + moveSpeed * moveSpeedMultiplier * Time::GetDeltaSeconds() * (forward + right));
-	}
-
-	// rotation
-	auto pos = Input::GetMousePosition();
-	if (initialMouseMove)
-	{
-		lastMousePos = pos;
-		initialMouseMove = false;
-	}
-	auto delta = pos - lastMousePos;
-	lastMousePos = pos;
-	camera->transform.SetRotation(camera->transform.GetRotation() + glm::vec3(delta.y, -delta.x, 0.f) * 0.05f);
-}
-
-void CameraController::OnLateUpdate()
-{
-	
-}
-
-void CameraController::OnKeyPressed(int key)
-{
-	if (key == KEY_SPACE)
-	{
-		active = !active;
-		Window::SetCursorVisibility(!active);
-		if (active)
-			initialMouseMove = true;
 	}
 }
 
 void CameraController::OnMouseScrolled(const glm::vec2 &delta)
 {
+	if (!active) return;
+
 	moveSpeedMultiplier += delta.y * moveSpeedMultiplierDelta * glm::pow(moveSpeedMultiplier, 1.01f);
 	moveSpeedMultiplier = glm::clamp(moveSpeedMultiplier, minSpeed, maxSpeed);
+}
+
+void CameraController::OnMouseMoved(const glm::vec2 &position)
+{
+	if (!active) return;
+
+	// rotation
+	auto delta = Input::GetMouseDelta();
+	auto newRotation = camera->transform.GetRotation() + glm::vec3(-delta.y, delta.x, 0.f) * mouseSensitivity;
+	camera->transform.SetRotation(glm::vec3(glm::clamp(newRotation.x, -90.f, 90.f), newRotation.y, newRotation.z));
 }

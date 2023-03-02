@@ -16,6 +16,8 @@ public:
 public:
 	static GLFWwindow *GetNativeWindow();
 	static glm::ivec2 GetFramebufferSize();
+	// returns the position of the content
+	static glm::ivec2 GetWindowPosition();
 	static GLuint GetFramebufferTexture();
 	static bool IsPendingClose();
 

@@ -4,7 +4,7 @@
 static CallbackRef<glm::ivec2> onWindowResizedCallback;
 static CallbackNoArgRef onStartCallback;
 
-Camera::Camera(Transform transform, ProjectionMode projectionMode, float perspectiveVertFOV, float perspectiveNearClip, float perspectiveFarClip, float orthographicHeight) : transform(transform), projectionMode(projectionMode), perspectiveVertFOV(perspectiveVertFOV), perspectiveNearClip(perspectiveNearClip), perspectiveFarClip(perspectiveFarClip), orthographicHeight(orthographicHeight)
+Camera::Camera(const std::string &name, Transform transform, ProjectionMode projectionMode, float perspectiveVertFOV, float perspectiveNearClip, float perspectiveFarClip, float orthographicHeight) : Entity(name, transform), projectionMode(projectionMode), perspectiveVertFOV(perspectiveVertFOV), perspectiveNearClip(perspectiveNearClip), perspectiveFarClip(perspectiveFarClip), orthographicHeight(orthographicHeight)
 {
 	// setup callbacks
 	onWindowResizedCallback = MakeCallbackRef<glm::ivec2>([&](const glm::ivec2 &newSize) { OnWindowResized(newSize); });
@@ -23,7 +23,7 @@ Camera::~Camera()
 
 const glm::mat4 &Camera::GetViewProjectionMatrix()
 {
-	if (!isViewProjectionUpdated || !transform.IsMatrixUpdated())
+	if (!isViewProjectionUpdated || !GetIsWorldMatrixUpdated())
 		RecalculateViewProjection();
 
 	return viewProjectionMatrix;
@@ -42,7 +42,8 @@ void Camera::RecalculateViewProjection()
 	switch (projectionMode)
 	{
 		case ProjectionMode::Perspective:
-			projection = glm::perspective(perspectiveVertFOV, aspectRatio, perspectiveNearClip, perspectiveFarClip);
+			// NOTE: the negative FOV because of rendering to the framebuffer - the image is flipped otherwise
+			projection = glm::perspective(-perspectiveVertFOV, aspectRatio, perspectiveNearClip, perspectiveFarClip);
 			break;
 		case ProjectionMode::Orthographic:
 			auto halfHeight = orthographicHeight * 0.5f;
@@ -63,5 +64,28 @@ void Camera::SetProjectionMode(ProjectionMode newMode)
 
 Camera::ProjectionMode Camera::GetViewProjectionMode() const
 {
-	return ProjectionMode();
+	return projectionMode;
+}
+
+MathUtils::Ray Camera::ProjectViewportToWorld(const glm::vec2 &viewportPos)
+{
+	auto viewportSize = UserInterface::GetViewportSize();
+
+	glm::vec4 nearPos = glm::vec4(
+		(viewportPos.x - viewportSize.x * 0.5f) / (viewportSize.x * 0.5f),
+		(viewportPos.y - viewportSize.y * 0.5f) / (viewportSize.y * 0.5f), -1.f, 1.f);
+
+	glm::vec4 farPos = glm::vec4(
+		(viewportPos.x - viewportSize.x * 0.5f) / (viewportSize.x * 0.5f),
+		(viewportPos.y - viewportSize.y * 0.5f) / (viewportSize.y * 0.5f), 1.f, 1.f);
+
+	glm::mat4 invMat = glm::inverse(GetViewProjectionMatrix());
+	glm::vec4 nearResult = invMat * nearPos;
+	glm::vec4 farResult = invMat * farPos;
+	nearResult /= nearResult.w;
+	farResult /= farResult.w;
+
+	glm::vec3 dir = glm::vec3(farResult - nearResult);
+
+	return MathUtils::Ray(transform.GetPosition(), normalize(dir));
 }

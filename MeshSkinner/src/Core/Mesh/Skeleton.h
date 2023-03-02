@@ -14,12 +14,19 @@ public:
 
 class Skeleton
 {
+	friend class MeshLibrary;
+
 public:
 	Skeleton();
 
-	// TODO: [] operator which gives the bone by string name
-
 public:
+	const Ref<Bone> &operator[](const char *boneName) const;
+	const Ref<Bone> &GetBoneByName(const char *boneName) const;
+	const Ref<Bone> &GetRootBone() const;
+
+	const std::vector<Ref<Bone>> &GetBones() const;
+
+private:
 	std::vector<Ref<Bone>> bones;
 	uint16_t root = -1;
 };

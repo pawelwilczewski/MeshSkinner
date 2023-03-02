@@ -12,35 +12,45 @@ Entity::Entity(const std::string &name, Transform transform) : name(name), trans
 
 Entity::~Entity()
 {
-	for (const auto &child : children)
-		child->parent = nullptr;
-
 	// cleanup dirty matrix callback
 	transform.OnMatrixDirtyUnsubscribe(onDirtyMatrixCallback);
+
+	// TODO: this is causing read access violation upon exit (obviously)
+	// remove self from parent's children
+	if (parent)
+		parent->children.erase(shared_from_this());
+
+	// reset parent for all children
+	for (const auto &child : children)
+		child->parent.reset();
 }
 
 void Entity::AddComponent(Ref<EntityComponent> component)
 {
 	components.insert(component);
+
+	component->entity = weak_from_this();
 }
 
 void Entity::RemoveComponent(Ref<EntityComponent> component)
 {
 	components.erase(component);
+
+	component->entity.reset();
 }
 
 void Entity::SetParent(const Ref<Entity> &parent)
 {
 	// remove this from parent's children
 	if (this->parent)
-		this->parent->children.erase(Ref<Entity>(this));
+		this->parent->children.erase(shared_from_this());
 
 	// update the parent, dirty world matrix
 	this->parent = parent;
 
 	// add to new parent's children
 	if (this->parent)
-		parent->children.insert(Ref<Entity>(this));
+		parent->children.insert(shared_from_this());
 
 	// dirty world matrix for this entity
 	DirtyWorldMatrix();

@@ -45,6 +45,7 @@ void Window::Init(const glm::ivec2 &windowSize, const char *title, int vsync)
 
     // gl setup - TODO: better move elsewhere
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
 
     // create the framebuffer and framebuffer texture
     glCreateFramebuffers(1, &fbo);
@@ -108,13 +109,23 @@ void Window::RegenFramebuffer(const glm::ivec2 bufferSize)
 }
 
 GLFWwindow *Window::GetNativeWindow() { return window; }
+
 glm::ivec2 Window::GetFramebufferSize()
 {
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
     return { width, height };
 }
+
+glm::ivec2 Window::GetWindowPosition()
+{
+    int xpos, ypos;
+    glfwGetWindowPos(window, &xpos, &ypos);
+    return glm::ivec2(xpos, ypos);
+}
+
 GLuint Window::GetFramebufferTexture() { return framebufferTexture; }
+
 bool Window::IsPendingClose() { return glfwWindowShouldClose(window); }
 
 void Window::SetCursorVisibility(bool visible)

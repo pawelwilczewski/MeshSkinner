@@ -2,28 +2,53 @@
 
 //#include "include/Material.glsl"
 #include "include/VertexInfo.glsl"
-#include "include/Bone.glsl"
+#include "include/Random.glsl"
 
 layout(location = 0) in vec3 in_Position;
 layout(location = 1) in vec3 in_Normal;
 layout(location = 2) in vec4 in_Tangent;
 layout(location = 3) in vec2 in_TexCoord;
 layout(location = 4) in vec3 in_Color;
-layout(location = 5) in uvec4 in_Bones;
+layout(location = 5) in vec4 in_Bones;
 layout(location = 6) in vec4 in_Weights;
 
 layout (std430, binding = 0) buffer ss_VertexInfo { VertexInfo vertexInfo[]; };
 layout (std430, binding = 1) buffer ss_Transforms { mat4 transforms[]; };
-layout (std430, binding = 2) buffer ss_Bones { Bone bones[]; };
 //layout (std430, binding = 2) buffer ss_Materials { restrict readonly Material Materials[]; };
 
 uniform mat4 u_ViewProjection;
+uniform int u_ActiveBone;
 
 out vec3 io_Color;
 
 void main()
 {
-	io_Color = in_Color;
-	vec4 worldPosition = transforms[vertexInfo[gl_VertexID].transformID] * vec4(in_Position, 1.0);
+	uint transformID = vertexInfo[gl_VertexID].transformID;
+	
+//	uint skeleton = vertexInfo[gl_VertexID].skeletonID;
+
+	float weight = 0.0;
+	if (in_Bones[0] == u_ActiveBone)
+		weight += in_Weights[0];
+	else if (in_Bones[1] == u_ActiveBone)
+		weight += in_Weights[1];
+	else if (in_Bones[2] == u_ActiveBone)
+		weight += in_Weights[2];
+	else if (in_Bones[3] == u_ActiveBone)
+		weight += in_Weights[3];
+
+	vec3 blue = vec3(0.0, 0.0, 1.0);
+	vec3 green = vec3(0.0, 1.0, 0.0);
+	vec3 yellow = vec3(1.0, 1.0, 0.0);
+	vec3 red = vec3(1.0, 0.0, 0.0);
+
+	if (weight < 0.33333)
+		io_Color = mix(blue, green, (weight - 0.0) / 0.33333);
+	else if (weight < 0.66667)
+		io_Color = mix(green, yellow, (weight - 0.33333) / 0.33333);
+	else
+		io_Color = mix(yellow, red, (weight - 0.66667) / 0.33333);
+
+	vec4 worldPosition = transforms[transformID] * vec4(in_Position, 1.0);
 	gl_Position = u_ViewProjection * worldPosition;
 }
