@@ -350,3 +350,8 @@ bool MeshLibrary::Get(const std::string &path, Ref<SkeletalMesh> &outMesh, Ref<B
 
 	return true;
 }
+
+void MeshLibrary::ExportUpdatedWeights(const std::string &source, const std::string &target, const Ref<SkeletalMesh> &mesh)
+{
+	Log::Info("{}", FileUtils::ReadFile(source));
+}

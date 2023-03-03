@@ -11,4 +11,7 @@ public:
 public:
 	static bool Get(const std::string &path, Ref<StaticMesh> &outMesh);
 	static bool Get(const std::string &path, Ref<SkeletalMesh> &outMesh, Ref<Bone> &outRoot);
+
+public:
+	static void ExportUpdatedWeights(const std::string &source, const std::string &target, const Ref<SkeletalMesh> &mesh);
 };

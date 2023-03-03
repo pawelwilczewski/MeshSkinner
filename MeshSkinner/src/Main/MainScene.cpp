@@ -23,6 +23,8 @@ static Ref<Entity> skeletalEntity;
 
 static Ref<SkeletalMesh> editedMesh;
 
+static std::string sourceFile;
+
 static int brushBlendMode = static_cast<int>(MathUtils::BlendMode::Add);
 static float brushWeight = 1.f;
 static float brushRadius = 10.f;
@@ -177,6 +179,7 @@ void MainScene::OnUpdateUI()
     // edited mesh
     ImGui::Begin("Edited Mesh");
     isInteractingWithImGui |= ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1);
+    isInteractingWithImGui |= ImGui::InputText("Working file path", &sourceFile);
     ImGui::End();
 
     // settings
