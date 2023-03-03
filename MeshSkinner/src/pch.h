@@ -22,6 +22,7 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include "imgui.h"
+#include "misc/cpp/imgui_stdlib.h"
 
 // glm
 #include <glm/glm.hpp>

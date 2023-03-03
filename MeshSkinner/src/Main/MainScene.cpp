@@ -23,6 +23,9 @@ static Ref<Entity> skeletalEntity;
 
 static Ref<SkeletalMesh> editedMesh;
 
+static std::string sourceFile;
+static std::string targetFile;
+
 static int brushBlendMode = static_cast<int>(MathUtils::BlendMode::Add);
 static float brushWeight = 1.f;
 static float brushRadius = 10.f;
@@ -177,6 +180,24 @@ void MainScene::OnUpdateUI()
     // edited mesh
     ImGui::Begin("Edited Mesh");
     isInteractingWithImGui |= ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1);
+    isInteractingWithImGui |= ImGui::InputText("Input file path", &sourceFile);
+    if (ImGui::Button("Import file"))
+    {
+        isInteractingWithImGui = true;
+        Log::Info("TODO: IMPLEMENT Importing file {}", sourceFile);
+
+
+    }
+    isInteractingWithImGui |= ImGui::InputText("Export file path", &targetFile);
+    if (ImGui::Button("Export file"))
+    {
+        isInteractingWithImGui = true;
+        Log::Info("Exporting updated mesh from {} to {}", sourceFile, targetFile);
+
+        MeshLibrary::ExportUpdated(sourceFile, targetFile, editedMesh);
+
+        Log::Info("Exporting finished");
+    }
     ImGui::End();
 
     // settings

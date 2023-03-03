@@ -22,6 +22,19 @@ namespace FileUtils
         return result;
     }
 
+    bool FileUtils::WriteFile(const std::string &filepath, const std::string &text)
+    {
+        std::fstream file(filepath, std::ios::out | std::ios::binary);
+        if (!file)
+        {
+            Log::Critical("Error when writing to file: {}\n", filepath);
+            return false;
+        }
+
+        file << text;
+        return true;
+    }
+
     std::string FileUtils::FileParentPath(const std::string &path)
     {
         std::filesystem::path p(path);
