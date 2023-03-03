@@ -269,7 +269,7 @@ void MainScene::OnLateUpdate()
                 }
 
                 // update the weight
-                (*toUpdate) = MathUtils::Blend(*toUpdate, goalWeight, static_cast<MathUtils::BlendMode>(brush->blendMode), brush->strength);
+                (*toUpdate) = brush->Blend(*toUpdate, goalWeight);
 
                 // the components of the result must add up to one
                 auto sum = 0.f;

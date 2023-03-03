@@ -20,11 +20,4 @@ namespace MathUtils
 
 	std::vector<uint32_t> GetVerticesInRadiusLocalSpace(const Mesh *mesh, const glm::vec3 &point, float radius);
 	std::vector<uint32_t> GetVerticesInRadius(const Mesh *mesh, const glm::vec3 &point, float radius);
-
-	enum class BlendMode
-	{
-		Linear = 0, Add, Multiply, Gaussian, Mix
-	};
-
-	float Blend(float oldWeight, float newWeight, BlendMode method, float strength = 1.f);
 }
