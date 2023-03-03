@@ -18,6 +18,9 @@ protected:
 	virtual void OnEnd() override;
 
 private:
+	Ref<class Brush> brush;
+
+private:
 	void OnMouseButtonPressed(int button);
 
 private:

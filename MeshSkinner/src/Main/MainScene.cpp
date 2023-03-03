@@ -6,6 +6,8 @@
 #include "Core/Camera/Camera.h"
 #include "Core/Camera/CameraController.h"
 
+#include "MeshSkinner/Brush.h"
+
 static Ref<Camera> camera;
 static Ref<CameraController> cameraController;
 static Ref<VertexArray<uint32_t>> vao;
@@ -26,13 +28,6 @@ static Ref<SkeletalMesh> editedMesh;
 static std::string sourceFile;
 static std::string targetFile;
 
-static int brushBlendMode = static_cast<int>(MathUtils::BlendMode::Add);
-static float brushWeight = 1.f;
-static float brushRadius = 10.f;
-static float brushFalloff = 1.f;
-static float brushStrength = 1.f;
-// TODO: falloff radius
-
 // TODO: URGENT: stroke params for when to place another "dot" etc.
 
 static bool isInteractingWithImGui = false;
@@ -44,6 +39,8 @@ MainScene::MainScene() : Scene()
     cameraController = MakeRef<CameraController>(camera, 10.f);
 
     Renderer::activeCamera = camera;
+
+    brush = MakeRef<Brush>();
 
     ShaderLibrary::Load("Bone", "assets/shaders/Bone.vert", "assets/shaders/Bone.frag", 1);
     ShaderLibrary::Load("WeightPaint", "assets/shaders/WeightPaint.vert", "assets/shaders/WeightPaint.frag", 0);
@@ -205,17 +202,7 @@ void MainScene::OnUpdateUI()
     isInteractingWithImGui |= ImGui::DragFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.0001f, 0.0f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
     ImGui::End();
 
-    // tool
-    ImGui::Begin("Tool");
-    const char *items[] = { "Linear", "Add", "Multiply", "Gaussian", "Mix" }; // TODO: obviously do not have it fixed here like that
-    isInteractingWithImGui |= ImGui::ListBox("Brush blend mode", &brushBlendMode, items, 5);
-
-    isInteractingWithImGui |= ImGui::SliderFloat("Brush weight", &brushWeight, 0.f, 1.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
-    isInteractingWithImGui |= ImGui::SliderFloat("Brush strength", &brushStrength, 0.f, 1.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
-
-    isInteractingWithImGui |= ImGui::DragFloat("Brush radius", &brushRadius, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic);
-    isInteractingWithImGui |= ImGui::DragFloat("Brush falloff", &brushFalloff, 0.01f, 0.f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
-    ImGui::End();
+    brush->DisplayUI("Brush");
 
     // viewport
     ImGui::Begin("Viewport Settings");
@@ -235,15 +222,15 @@ void MainScene::OnLateUpdate()
         glm::vec3 localIntersection;
         if (MathUtils::RayMeshIntersectionLocalSpace(camera->ProjectViewportToWorld(Input::GetMouseViewportPosition()), editedMesh.get(), localIntersection))
         {
-            auto verts = MathUtils::GetVerticesInRadiusLocalSpace(editedMesh.get(), localIntersection, brushRadius);
+            auto verts = MathUtils::GetVerticesInRadiusLocalSpace(editedMesh.get(), localIntersection, brush->radius);
 
             for (const auto &vIndex : verts)
             {
                 auto &v = editedMesh->vertices[vIndex];
 
                 // calculate the goalWeight
-                auto alpha = 1.f - glm::distance(localIntersection, v.position) / brushRadius;
-                auto goalWeight = brushWeight * glm::pow(alpha, brushFalloff);
+                auto alpha = 1.f - glm::distance(localIntersection, v.position) / brush->radius;
+                auto goalWeight = brush->weight * glm::pow(alpha, brush->falloff);
 
                 // try to update an already existing weight
                 float *toUpdate;
@@ -282,7 +269,7 @@ void MainScene::OnLateUpdate()
                 }
 
                 // update the weight
-                (*toUpdate) = MathUtils::Blend(*toUpdate, goalWeight, static_cast<MathUtils::BlendMode>(brushBlendMode), brushStrength);
+                (*toUpdate) = MathUtils::Blend(*toUpdate, goalWeight, static_cast<MathUtils::BlendMode>(brush->blendMode), brush->strength);
 
                 // the components of the result must add up to one
                 auto sum = 0.f;
