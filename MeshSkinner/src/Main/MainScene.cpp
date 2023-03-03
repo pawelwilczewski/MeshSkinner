@@ -177,7 +177,7 @@ void MainScene::OnUpdateUI()
     // edited mesh
     ImGui::Begin("Edited Mesh");
     isInteractingWithImGui |= ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1);
-    isInteractingWithImGui |= ImGui::InputText("Input file path", &sourceFile);
+    isInteractingWithImGui |= ImGui::InputText("Input file path", &sourceFile); // TODO: for text inputs: unfocus if clicked in the viewport
     if (ImGui::Button("Import file"))
     {
         isInteractingWithImGui = true;
