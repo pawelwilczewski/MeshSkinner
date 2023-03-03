@@ -33,3 +33,5 @@ private:
 
 	static bool interacting;
 };
+
+constexpr auto InteractiveWidget = UserInterface::UpdateUserInteraction;

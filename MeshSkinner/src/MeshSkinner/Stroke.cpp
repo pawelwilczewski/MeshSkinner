@@ -38,9 +38,9 @@ void Stroke::OnUpdateUI()
 	ImGui::Begin(toolWindowName.c_str());
 
 	const char *items[] = { "PixelDistance", "WorldDistance", "EachFrame", "FixedDeltaTime" }; // TODO: obviously do not have it fixed here like that
-	UserInterface::UpdateUserInteraction(ImGui::ListBox("Stroke update type", (int *)(&type), items, 4));
+	InteractiveWidget(ImGui::ListBox("Stroke update type", (int *)(&type), items, 4));
 
-	//UserInterface::UpdateUserInteraction(ImGui::SliderFloat("Brush weight", &weight, 0.f, 1.f, "%.3f", ImGuiSliderFlags_ClampOnInput));
+	//InteractiveWidget(ImGui::SliderFloat("Brush weight", &weight, 0.f, 1.f, "%.3f", ImGuiSliderFlags_ClampOnInput));
 	switch (type)
 	{
 	case Type::PixelDistance:

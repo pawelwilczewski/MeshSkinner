@@ -173,8 +173,8 @@ void MainScene::OnUpdateUI()
 
     // edited mesh
     ImGui::Begin("Edited Mesh");
-    UserInterface::UpdateUserInteraction(ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1));
-    UserInterface::UpdateUserInteraction(ImGui::InputText("Input file path", &sourceFile)); // TODO: for text inputs: unfocus if clicked in the viewport
+    InteractiveWidget(ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1));
+    InteractiveWidget(ImGui::InputText("Input file path", &sourceFile)); // TODO: for text inputs: unfocus if clicked in the viewport
     if (ImGui::Button("Import file"))
     {
         UserInterface::UpdateUserInteraction(true);
@@ -182,7 +182,7 @@ void MainScene::OnUpdateUI()
 
 
     }
-    UserInterface::UpdateUserInteraction(ImGui::InputText("Export file path", &targetFile));
+    InteractiveWidget(ImGui::InputText("Export file path", &targetFile));
     if (ImGui::Button("Export file"))
     {
         UserInterface::UpdateUserInteraction(true);
@@ -196,7 +196,7 @@ void MainScene::OnUpdateUI()
 
     // settings
     ImGui::Begin("Settings");
-    UserInterface::UpdateUserInteraction(ImGui::DragFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.0001f, 0.0f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput));
+    InteractiveWidget(ImGui::DragFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.0001f, 0.0f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput));
     ImGui::End();
 
     // viewport
