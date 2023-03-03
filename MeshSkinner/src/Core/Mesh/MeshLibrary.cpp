@@ -66,7 +66,7 @@ static bool LoadFromFile(const std::string &path)
 	return true;
 }
 
-static const void *GetAttributeData(const tinygltf::Primitive &primitive, const std::string &attribute)
+static void *GetAttributeData(const tinygltf::Primitive &primitive, const std::string &attribute)
 {
 	if (primitive.attributes.find(attribute) != primitive.attributes.end())
 	{
@@ -351,7 +351,51 @@ bool MeshLibrary::Get(const std::string &path, Ref<SkeletalMesh> &outMesh, Ref<B
 	return true;
 }
 
-void MeshLibrary::ExportUpdatedWeights(const std::string &source, const std::string &target, const Ref<SkeletalMesh> &mesh)
+void MeshLibrary::ExportUpdated(const std::string &source, const std::string &target, const Ref<SkeletalMesh> &inMesh)
 {
-	Log::Info("{}", FileUtils::ReadFile(source));
+	LoadGLTF(source);
+
+	// import the mesh
+	for (const auto &mesh : model.meshes)
+	{
+		for (const auto &primitive : mesh.primitives)
+		{
+			// update joints and weights attributes for each vertex
+			auto vertCount = inMesh->GetVerticesLength();
+			auto data = GetAttributeData(primitive, "JOINTS_0");
+			if (data)
+			{
+				switch (model.accessors[primitive.attributes.at("JOINTS_0")].componentType)
+				{
+				case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+				{
+					auto *buffer = static_cast<glm::vec<4, uint8_t> *>(data);
+					for (int i = 0; i < vertCount; i++)
+						buffer[i] = static_cast<glm::vec<4, uint8_t>>(inMesh->vertices[i].bones);
+					break;
+				}
+				case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+				{
+					auto *buffer = static_cast<glm::vec<4, uint16_t> *>(data);
+					for (int i = 0; i < vertCount; i++)
+						buffer[i] = inMesh->vertices[i].bones;
+					break;
+				}
+				default:
+					assert(false);
+				}
+			}
+
+			data = GetAttributeData(primitive, "WEIGHTS_0");
+			if (data)
+			{
+				// TODO: weights is not necessarily floats https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#meshes
+				auto *buffer = static_cast<glm::vec4 *>(data);
+				for (int i = 0; i < vertCount; i++)
+					buffer[i] = inMesh->vertices[i].weights;
+			}
+		}
+	}
+
+	loader.WriteGltfSceneToFile(&model, target, true, true, true, FileUtils::FileExtension(target) == ".glb");
 }
