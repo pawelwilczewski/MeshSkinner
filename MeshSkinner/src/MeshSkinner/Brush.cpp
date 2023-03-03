@@ -16,7 +16,8 @@ bool Brush::DisplayUI(const char *windowName)
     interacting |= ImGui::ListBox("Brush blend mode", (int *)(&blendMode), items, 5);
 
     interacting |= ImGui::SliderFloat("Brush weight", &weight, 0.f, 1.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
-    interacting |= ImGui::SliderFloat("Brush strength", &strength, 0.f, 1.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
+    if (blendMode == BlendMode::Mix || blendMode == BlendMode::Linear)
+        interacting |= ImGui::SliderFloat("Brush strength", &strength, 0.f, 1.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
 
     interacting |= ImGui::DragFloat("Brush radius", &radius, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic);
     interacting |= ImGui::DragFloat("Brush falloff", &falloff, 0.01f, 0.f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
