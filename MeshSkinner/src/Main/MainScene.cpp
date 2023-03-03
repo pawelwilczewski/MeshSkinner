@@ -7,9 +7,8 @@
 #include "Core/Camera/CameraController.h"
 
 #include "MeshSkinner/Brush.h"
+#include "MeshSkinner/Stroke.h"
 
-static Ref<Camera> camera;
-static Ref<CameraController> cameraController;
 static Ref<VertexArray<uint32_t>> vao;
 static Ref<VertexBuffer<StaticVertex>> vbo;
 static Ref<IndexBuffer<uint32_t>> ibo;
@@ -30,17 +29,17 @@ static std::string targetFile;
 
 // TODO: URGENT: stroke params for when to place another "dot" etc.
 
-static bool isInteractingWithImGui = false;
 static bool clickedInViewport = false;
 
 MainScene::MainScene() : Scene()
 {
     camera = MakeRef<Camera>("MainCamera");
-    cameraController = MakeRef<CameraController>(camera, 10.f);
+    cameraController = MakeUnique<CameraController>(camera, 10.f);
 
     Renderer::activeCamera = camera;
 
-    brush = MakeRef<Brush>();
+    brush = MakeUnique<Brush>("Brush Parameters");
+    stroke = MakeUnique<Stroke>("Stroke Parameters");
 
     ShaderLibrary::Load("Bone", "assets/shaders/Bone.vert", "assets/shaders/Bone.frag", 1);
     ShaderLibrary::Load("WeightPaint", "assets/shaders/WeightPaint.vert", "assets/shaders/WeightPaint.frag", 0);
@@ -164,8 +163,6 @@ void MainScene::OnUpdateUI()
     frameTimes += Time::GetDeltaSeconds();
     fps += Time::GetFPS();
 
-    isInteractingWithImGui = false;
-
     // scene stats
     ImGui::Begin("Scene Stats");
     ImGui::Text("FPS:            %f", Time::GetFPS());
@@ -176,19 +173,19 @@ void MainScene::OnUpdateUI()
 
     // edited mesh
     ImGui::Begin("Edited Mesh");
-    isInteractingWithImGui |= ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1);
-    isInteractingWithImGui |= ImGui::InputText("Input file path", &sourceFile); // TODO: for text inputs: unfocus if clicked in the viewport
+    UserInterface::UpdateUserInteraction(ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1));
+    UserInterface::UpdateUserInteraction(ImGui::InputText("Input file path", &sourceFile)); // TODO: for text inputs: unfocus if clicked in the viewport
     if (ImGui::Button("Import file"))
     {
-        isInteractingWithImGui = true;
+        UserInterface::UpdateUserInteraction(true);
         Log::Info("TODO: IMPLEMENT Importing file {}", sourceFile);
 
 
     }
-    isInteractingWithImGui |= ImGui::InputText("Export file path", &targetFile);
+    UserInterface::UpdateUserInteraction(ImGui::InputText("Export file path", &targetFile));
     if (ImGui::Button("Export file"))
     {
-        isInteractingWithImGui = true;
+        UserInterface::UpdateUserInteraction(true);
         Log::Info("Exporting updated mesh from {} to {}", sourceFile, targetFile);
 
         MeshLibrary::ExportUpdated(sourceFile, targetFile, editedMesh);
@@ -199,16 +196,14 @@ void MainScene::OnUpdateUI()
 
     // settings
     ImGui::Begin("Settings");
-    isInteractingWithImGui |= ImGui::DragFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.0001f, 0.0f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
+    UserInterface::UpdateUserInteraction(ImGui::DragFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.0001f, 0.0f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput));
     ImGui::End();
-
-    brush->DisplayUI("Brush");
 
     // viewport
     ImGui::Begin("Viewport Settings");
     if (ImGui::Button("Reset camera"))
     {
-        isInteractingWithImGui = true;
+        UserInterface::UpdateUserInteraction(true);
         camera->transform.SetPosition(glm::vec3(0.f));
         camera->transform.SetRotation(glm::vec3(0.f));
     }
@@ -292,6 +287,6 @@ void MainScene::OnMouseButtonPressed(int button)
 {
     if (button == MOUSE_BUTTON_LEFT)
     {
-        clickedInViewport = Input::IsMouseInViewport() && !isInteractingWithImGui;
+        clickedInViewport = Input::IsMouseInViewport() && !UserInterface::GetUserInteracting();
     }
 }

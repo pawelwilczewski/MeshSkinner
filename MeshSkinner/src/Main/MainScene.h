@@ -18,11 +18,16 @@ protected:
 	virtual void OnEnd() override;
 
 private:
-	Ref<class Brush> brush;
-
-private:
 	void OnMouseButtonPressed(int button);
 
 private:
+	Unique<class Brush> brush;
+	Unique<class Stroke> stroke;
+
+	Ref<class Camera> camera; // TODO: make unique and use weak in renderer? that wont work though? figure it out..
+	Unique<class CameraController> cameraController;
+
+private:
 	CallbackRef<int> onMouseButtonPressedCallback;
+	CallbackRef <class StrokeQueryInfo > onStrokeQueryCallback;
 };

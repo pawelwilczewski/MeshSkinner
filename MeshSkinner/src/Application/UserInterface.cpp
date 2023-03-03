@@ -12,6 +12,7 @@
 
 glm::ivec2 UserInterface::viewportSize = glm::ivec2(1);
 glm::ivec2 UserInterface::viewportScreenPosition = glm::ivec2(0);
+bool UserInterface::interacting = false;
 
 glm::ivec2 UserInterface::GetViewportSize() { return viewportSize; }
 void UserInterface::UpdateViewportSize(const glm::ivec2 &newSize) { viewportSize = newSize; }
@@ -19,6 +20,21 @@ void UserInterface::UpdateViewportSize(const glm::ivec2 &newSize) { viewportSize
 glm::ivec2 UserInterface::GetViewportScreenPosition()
 {
     return viewportScreenPosition;
+}
+
+void UserInterface::UpdateUserInteraction(bool interacting)
+{
+    UserInterface::interacting |= interacting;
+}
+
+bool UserInterface::GetUserInteracting()
+{
+    return interacting;
+}
+
+void UserInterface::ResetUserInteracting()
+{
+    interacting = false;
 }
 
 void UserInterface::Init()

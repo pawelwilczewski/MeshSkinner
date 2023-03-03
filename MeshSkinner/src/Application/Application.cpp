@@ -37,6 +37,7 @@ void Application::Run()
 
         EarlyUpdate();
         Update();
+        UserInterface::ResetUserInteracting();
         UpdateUI();
         LateUpdate();
 
