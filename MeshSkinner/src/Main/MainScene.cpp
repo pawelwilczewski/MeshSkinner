@@ -40,7 +40,7 @@ MainScene::MainScene() : Scene()
 
     brush = MakeUnique<Brush>("Brush Parameters");
     stroke = MakeUnique<Stroke>("Stroke Parameters", [&](StrokeQueryInfo &info) {
-        info.hitTarget = Input::IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && MathUtils::RayMeshIntersectionLocalSpace(camera->ProjectViewportToWorld(info.viewportPosition), editedMesh.get(), info.worldPosition);
+        info.hitTarget = MathUtils::RayMeshIntersectionLocalSpace(camera->ProjectViewportToWorld(info.viewportPosition), editedMesh.get(), info.worldPosition);
         });
 
     ShaderLibrary::Load("Bone", "assets/shaders/Bone.vert", "assets/shaders/Bone.frag", 1);

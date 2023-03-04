@@ -27,6 +27,9 @@ Stroke::~Stroke()
 
 void Stroke::OnStrokeUpdate()
 {
+	if (!Input::IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || !UserInterface::GetClickedInViewport())
+		return;
+
 	auto query = StrokeQueryInfo();
 	query.viewportPosition = Input::GetMouseViewportPosition();
 
@@ -86,7 +89,6 @@ void Stroke::OnMouseButtonUp(int button)
 
 void Stroke::UpdateSubscribe() const
 {
-	// this causes crashing
 	switch (type)
 	{
 	case Type::EachFrame:

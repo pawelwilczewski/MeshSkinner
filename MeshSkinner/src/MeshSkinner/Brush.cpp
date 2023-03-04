@@ -29,7 +29,6 @@ float Brush::Blend(float oldWeight, float newWeight)
     switch (blendMode)
     {
     case BlendMode::Mix:
-        assert(false); // TODO: this one is somewhat wrong? unless too frequent updates make it appear so
         return (1.0f - strength) * oldWeight + strength * (newWeight - oldWeight);
     case BlendMode::Linear:
         return glm::mix(oldWeight, newWeight, strength);
