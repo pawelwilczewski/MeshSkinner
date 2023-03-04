@@ -3,6 +3,8 @@
 #include "Application/Core.h"
 #include "Application/Scene.h"
 
+#include "MeshSkinner/Stroke.h"
+
 class MainScene : public Scene
 {
 public:
@@ -18,7 +20,7 @@ protected:
 	virtual void OnEnd() override;
 
 private:
-	void OnMouseButtonPressed(int button);
+	void OnStrokeEmplace(const StrokeQueryInfo &info);
 
 private:
 	Unique<class Brush> brush;
@@ -28,6 +30,7 @@ private:
 	Unique<class CameraController> cameraController;
 
 private:
-	CallbackRef<int> onMouseButtonPressedCallback;
-	CallbackRef <class StrokeQueryInfo > onStrokeQueryCallback;
+	CallbackRef<StrokeQueryInfo> onStrokeQueryCallback;
+
+	CallbackRef<StrokeQueryInfo> onStrokeEmplaceCallback;
 };

@@ -17,19 +17,28 @@ bool UserInterface::interacting = false;
 glm::ivec2 UserInterface::GetViewportSize() { return viewportSize; }
 void UserInterface::UpdateViewportSize(const glm::ivec2 &newSize) { viewportSize = newSize; }
 
+CallbackRef<int> UserInterface::onMouseButtonDownCallback;
+bool UserInterface::clickedInViewport = false;
+
 glm::ivec2 UserInterface::GetViewportScreenPosition()
 {
     return viewportScreenPosition;
 }
 
-void UserInterface::UpdateUserInteraction(bool interacting)
+bool UserInterface::UpdateUserInteraction(bool interacting)
 {
     UserInterface::interacting |= interacting;
+    return interacting;
 }
 
 bool UserInterface::GetUserInteracting()
 {
     return interacting;
+}
+
+bool UserInterface::GetClickedInViewport()
+{
+    return clickedInViewport;
 }
 
 void UserInterface::ResetUserInteracting()
@@ -61,6 +70,10 @@ void UserInterface::Init()
     // Setup Platform/Renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(Window::GetNativeWindow(), true);
     ImGui_ImplOpenGL3_Init("#version 430");
+
+    // events
+    onMouseButtonDownCallback = MakeCallbackRef<int>([&](int button) { OnMouseButtonDown(button); });
+    Input::OnMouseButtonPressedSubscribe(onMouseButtonDownCallback);
 }
 
 void UserInterface::SetupDockspaceViewport()
@@ -101,6 +114,12 @@ void UserInterface::SetupDockspaceViewport()
     // display the framebuffer
     ImGui::Image((void *)(intptr_t)Window::GetFramebufferTexture(), availableSize);
     ImGui::End();
+}
+
+void UserInterface::OnMouseButtonDown(int button)
+{
+    if (button == MOUSE_BUTTON_LEFT)
+        clickedInViewport = Input::IsMouseInViewport() && !GetUserInteracting();
 }
 
 void UserInterface::FrameBegin()
