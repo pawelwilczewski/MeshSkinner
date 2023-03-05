@@ -6,8 +6,9 @@
 #include "Core/Camera/Camera.h"
 #include "Core/Camera/CameraController.h"
 
-static Ref<Camera> camera;
-static Ref<CameraController> cameraController;
+#include "MeshSkinner/Brush.h"
+#include "MeshSkinner/Stroke.h"
+
 static Ref<VertexArray<uint32_t>> vao;
 static Ref<VertexBuffer<StaticVertex>> vbo;
 static Ref<IndexBuffer<uint32_t>> ibo;
@@ -26,36 +27,33 @@ static Ref<SkeletalMesh> editedMesh;
 static std::string sourceFile;
 static std::string targetFile;
 
-static int brushBlendMode = static_cast<int>(MathUtils::BlendMode::Add);
-static float brushWeight = 1.f;
-static float brushRadius = 10.f;
-static float brushFalloff = 1.f;
-static float brushStrength = 1.f;
-// TODO: falloff radius
-
 // TODO: URGENT: stroke params for when to place another "dot" etc.
 
-static bool isInteractingWithImGui = false;
 static bool clickedInViewport = false;
 
 MainScene::MainScene() : Scene()
 {
     camera = MakeRef<Camera>("MainCamera");
-    cameraController = MakeRef<CameraController>(camera, 10.f);
+    cameraController = MakeUnique<CameraController>(camera, 10.f);
 
     Renderer::activeCamera = camera;
+
+    brush = MakeUnique<Brush>("Brush Parameters");
+    stroke = MakeUnique<Stroke>("Stroke Parameters", [&](StrokeQueryInfo &info) {
+        info.hitTarget = MathUtils::RayMeshIntersectionLocalSpace(camera->ProjectViewportToWorld(info.viewportPosition), editedMesh.get(), info.worldPosition);
+        });
 
     ShaderLibrary::Load("Bone", "assets/shaders/Bone.vert", "assets/shaders/Bone.frag", 1);
     ShaderLibrary::Load("WeightPaint", "assets/shaders/WeightPaint.vert", "assets/shaders/WeightPaint.frag", 0);
 
-    onMouseButtonPressedCallback = MakeCallbackRef<int>([&](int button) { OnMouseButtonPressed(button); });
+    onStrokeEmplaceCallback = MakeCallbackRef<StrokeQueryInfo>([&](const StrokeQueryInfo &info) { OnStrokeEmplace(info); });
 
-    Input::OnMouseButtonPressedSubscribe(onMouseButtonPressedCallback);
+    stroke->OnStrokeEmplaceSubscribe(onStrokeEmplaceCallback);
 }
 
 MainScene::~MainScene()
 {
-    Input::OnMouseButtonPressedUnsubscribe(onMouseButtonPressedCallback);
+    stroke->OnStrokeEmplaceUnsubscribe(onStrokeEmplaceCallback);
 }
 
 void MainScene::OnStart()
@@ -167,7 +165,7 @@ void MainScene::OnUpdateUI()
     frameTimes += Time::GetDeltaSeconds();
     fps += Time::GetFPS();
 
-    isInteractingWithImGui = false;
+    // TODO: all of these can be Tools - make that happen
 
     // scene stats
     ImGui::Begin("Scene Stats");
@@ -179,19 +177,19 @@ void MainScene::OnUpdateUI()
 
     // edited mesh
     ImGui::Begin("Edited Mesh");
-    isInteractingWithImGui |= ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1);
-    isInteractingWithImGui |= ImGui::InputText("Input file path", &sourceFile);
+    InteractiveWidget(ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1));
+    InteractiveWidget(ImGui::InputText("Input file path", &sourceFile)); // TODO: for text inputs: unfocus if clicked in the viewport
     if (ImGui::Button("Import file"))
     {
-        isInteractingWithImGui = true;
+        UserInterface::UpdateUserInteraction(true);
         Log::Info("TODO: IMPLEMENT Importing file {}", sourceFile);
 
 
     }
-    isInteractingWithImGui |= ImGui::InputText("Export file path", &targetFile);
+    InteractiveWidget(ImGui::InputText("Export file path", &targetFile));
     if (ImGui::Button("Export file"))
     {
-        isInteractingWithImGui = true;
+        UserInterface::UpdateUserInteraction(true);
         Log::Info("Exporting updated mesh from {} to {}", sourceFile, targetFile);
 
         MeshLibrary::ExportUpdated(sourceFile, targetFile, editedMesh);
@@ -202,26 +200,14 @@ void MainScene::OnUpdateUI()
 
     // settings
     ImGui::Begin("Settings");
-    isInteractingWithImGui |= ImGui::DragFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.0001f, 0.0f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
-    ImGui::End();
-
-    // tool
-    ImGui::Begin("Tool");
-    const char *items[] = { "Linear", "Add", "Multiply", "Gaussian", "Mix" }; // TODO: obviously do not have it fixed here like that
-    isInteractingWithImGui |= ImGui::ListBox("Brush blend mode", &brushBlendMode, items, 5);
-
-    isInteractingWithImGui |= ImGui::SliderFloat("Brush weight", &brushWeight, 0.f, 1.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
-    isInteractingWithImGui |= ImGui::SliderFloat("Brush strength", &brushStrength, 0.f, 1.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
-
-    isInteractingWithImGui |= ImGui::DragFloat("Brush radius", &brushRadius, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic);
-    isInteractingWithImGui |= ImGui::DragFloat("Brush falloff", &brushFalloff, 0.01f, 0.f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput);
+    InteractiveWidget(ImGui::DragFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.0001f, 0.0f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput));
     ImGui::End();
 
     // viewport
     ImGui::Begin("Viewport Settings");
     if (ImGui::Button("Reset camera"))
     {
-        isInteractingWithImGui = true;
+        UserInterface::UpdateUserInteraction(true);
         camera->transform.SetPosition(glm::vec3(0.f));
         camera->transform.SetRotation(glm::vec3(0.f));
     }
@@ -230,70 +216,7 @@ void MainScene::OnUpdateUI()
 
 void MainScene::OnLateUpdate()
 {
-    if (Input::IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && clickedInViewport)
-    {
-        glm::vec3 localIntersection;
-        if (MathUtils::RayMeshIntersectionLocalSpace(camera->ProjectViewportToWorld(Input::GetMouseViewportPosition()), editedMesh.get(), localIntersection))
-        {
-            auto verts = MathUtils::GetVerticesInRadiusLocalSpace(editedMesh.get(), localIntersection, brushRadius);
 
-            for (const auto &vIndex : verts)
-            {
-                auto &v = editedMesh->vertices[vIndex];
-
-                // calculate the goalWeight
-                auto alpha = 1.f - glm::distance(localIntersection, v.position) / brushRadius;
-                auto goalWeight = brushWeight * glm::pow(alpha, brushFalloff);
-
-                // try to update an already existing weight
-                float *toUpdate;
-                bool updated = false;
-                for (size_t i = 0; i < v.bones.length(); i++)
-                {
-                    // the bone is one of the 
-                    if (v.bones[i] == Renderer::activeBone)
-                    {
-                        toUpdate = &v.weights[i];
-                        updated = true;
-                        break;
-                    }
-                }
-
-                // no such existing weight yet - replace the smallest influence
-                //  bone with our active one
-                if (!updated)
-                {
-                    auto minWeightBone = 0;
-                    auto minWeight = v.weights[0];
-
-                    for (int i = 1; i < v.weights.length(); i++)
-                    {
-                        if (v.weights[i] < minWeight)
-                        {
-                            minWeight = v.weights[i];
-                            minWeightBone = i;
-                        }
-                    }
-
-                    // update the weights
-                    v.bones[minWeightBone] = Renderer::activeBone;
-                    v.weights[minWeightBone] = 0.f;
-                    toUpdate = &v.weights[minWeightBone];
-                }
-
-                // update the weight
-                (*toUpdate) = MathUtils::Blend(*toUpdate, goalWeight, static_cast<MathUtils::BlendMode>(brushBlendMode), brushStrength);
-
-                // the components of the result must add up to one
-                auto sum = 0.f;
-                for (int i = 0; i < v.weights.length(); i++)
-                    sum += v.weights[i];
-                v.weights /= sum;
-            }
-
-            Renderer::UpdateMeshVertices(editedMesh.get());
-        }
-    }
 }
 
 void MainScene::OnEnd()
@@ -301,10 +224,59 @@ void MainScene::OnEnd()
 
 }
 
-void MainScene::OnMouseButtonPressed(int button)
+void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
 {
-    if (button == MOUSE_BUTTON_LEFT)
+    auto verts = MathUtils::GetVerticesInRadiusLocalSpace(editedMesh.get(), info.worldPosition, brush->radius);
+
+    for (const auto &vIndex : verts)
     {
-        clickedInViewport = Input::IsMouseInViewport() && !isInteractingWithImGui;
+        auto &v = editedMesh->vertices[vIndex];
+
+        // try to update an already existing weight
+        float *toUpdate;
+        bool updated = false;
+        for (size_t i = 0; i < v.bones.length(); i++)
+        {
+            // the bone is one of the 
+            if (v.bones[i] == Renderer::activeBone)
+            {
+                toUpdate = &v.weights[i];
+                updated = true;
+                break;
+            }
+        }
+
+        // no such existing weight yet - replace the smallest influence
+        //  bone with our active one
+        if (!updated)
+        {
+            auto minWeightBone = 0;
+            auto minWeight = v.weights[0];
+
+            for (int i = 1; i < v.weights.length(); i++)
+            {
+                if (v.weights[i] < minWeight)
+                {
+                    minWeight = v.weights[i];
+                    minWeightBone = i;
+                }
+            }
+
+            // update the weights
+            v.bones[minWeightBone] = Renderer::activeBone;
+            v.weights[minWeightBone] = 0.f;
+            toUpdate = &v.weights[minWeightBone];
+        }
+
+        // update the weight
+        (*toUpdate) = brush->Blend(*toUpdate, glm::distance(info.worldPosition, v.position));
+
+        // the components of the result must add up to one
+        auto sum = 0.f;
+        for (int i = 0; i < v.weights.length(); i++)
+            sum += v.weights[i];
+        v.weights /= sum;
     }
+
+    Renderer::UpdateMeshVertices(editedMesh.get());
 }

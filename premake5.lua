@@ -45,6 +45,8 @@ project "MeshSkinner"
 	cppdialect "C++17"
 	staticruntime "on"
 
+	debugdir ""
+
 	pchheader "pch.h"
 	pchsource "MeshSkinner/src/pch.cpp"
 
