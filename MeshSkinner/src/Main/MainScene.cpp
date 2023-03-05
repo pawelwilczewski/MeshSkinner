@@ -232,10 +232,6 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
     {
         auto &v = editedMesh->vertices[vIndex];
 
-        // calculate the goalWeight
-        auto alpha = 1.f - glm::distance(info.worldPosition, v.position) / brush->radius;
-        auto goalWeight = brush->weight * glm::pow(alpha, brush->falloff);
-
         // try to update an already existing weight
         float *toUpdate;
         bool updated = false;
@@ -273,7 +269,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
         }
 
         // update the weight
-        (*toUpdate) = brush->Blend(*toUpdate, goalWeight);
+        (*toUpdate) = brush->Blend(*toUpdate, glm::distance(info.worldPosition, v.position));
 
         // the components of the result must add up to one
         auto sum = 0.f;

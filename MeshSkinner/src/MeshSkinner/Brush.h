@@ -6,17 +6,18 @@
 class Brush : Tool
 {
 public:
-	enum class BlendMode { Linear = 0, Add, Multiply, Gaussian, Mix };
+	// NOTE: upon updating any of these, ALSO update the strings array at the top of Brush.cpp
+	enum class BlendMode { Mix = 0, Add, Subtract, Lighten, Darken, ColorDodge, Difference, Screen, HardLight, Overlay, SoftLight, Exclusion };
 
 public:
-	Brush(const std::string &toolWindowName, BlendMode blendMode = BlendMode::Add, float weight = 1.f, float radius = 10.f, float falloff = 1.f, float strength = 1.f);
+	Brush(const std::string &toolWindowName, BlendMode blendMode = BlendMode::Add, float weight = 1.f, float radius = 10.f, float falloff = 0.5f, float strength = 1.f);
 	virtual ~Brush() = default;
 
 protected:
 	virtual void OnUpdateUI() override;
 
 public:
-	float Blend(float oldWeight, float newWeight);
+	float Blend(float oldWeight, float distance);
 
 public:
 	BlendMode blendMode;

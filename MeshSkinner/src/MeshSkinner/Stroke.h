@@ -18,7 +18,7 @@ public:
 	enum class Type { PixelDistance = 0, WorldDistance, EachFrame, FixedDeltaTime };
 
 public:
-	Stroke(const std::string &toolWindowName, const std::function<void(StrokeQueryInfo &)> &queryFunction, Type type = Type::PixelDistance, float pixelDistance = 10.f, float worldDistance = 1.f, float fixedIntervalTime = 0.1f);
+	Stroke(const std::string &toolWindowName, const std::function<void(StrokeQueryInfo &)> &queryFunction, Type type = Type::WorldDistance, float pixelDistance = 10.f, float worldDistance = 1.f, float fixedIntervalTime = 0.1f);
 	virtual ~Stroke();
 
 protected:
