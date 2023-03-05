@@ -21,6 +21,7 @@ static Ref<Entity> staticEntity3;
 static Ref<Entity> skeletalEntity;
 //static Ref<Entity> skeletalEntity2;
 //static Ref<Entity> staticSkeletalEntity;
+static auto rootBone = Ref<Bone>();
 
 static Ref<SkeletalMesh> editedMesh;
 
@@ -81,7 +82,6 @@ void MainScene::OnStart()
     auto staticMesh = MakeRef<StaticMesh>(staticVertices, indices, MaterialLibrary::GetDefault(), true);
     //auto skeletalMesh = MakeRef<SkeletalMesh>(skeletalVertices, indices, MaterialLibrary::GetDefault(), true);
     auto skeletalMesh = MakeRef<SkeletalMesh>();
-    auto rootBone = Ref<Bone>();
     MeshLibrary::Get("assets/models/shark.gltf", skeletalMesh, rootBone);
     skeletalMesh->material = MakeRef<Material>(ShaderLibrary::Get("WeightPaint"));
 
@@ -155,6 +155,15 @@ void MainScene::OnUpdate()
     staticEntity->transform.SetScale(glm::vec3(glm::sin(Time::GetTimeSeconds())));
 }
 
+static void DrawTree(const Ref<Entity> &n)
+{
+    if (ImGui::TreeNode(n->name.c_str())) {
+        for (const auto &child : n->GetChildren())
+            DrawTree(child);
+        ImGui::TreePop();
+    }
+}
+
 void MainScene::OnUpdateUI()
 {
     // debug fps info
@@ -208,6 +217,11 @@ void MainScene::OnUpdateUI()
         camera->transform.SetPosition(glm::vec3(0.f));
         camera->transform.SetRotation(glm::vec3(0.f));
     }
+    ImGui::End();
+
+    // hierarchy
+    ImGui::Begin("Hierarchy");
+    DrawTree(rootBone);
     ImGui::End();
 }
 
