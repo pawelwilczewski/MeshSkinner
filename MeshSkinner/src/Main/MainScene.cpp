@@ -179,17 +179,15 @@ void MainScene::OnUpdateUI()
     ImGui::Begin("Edited Mesh");
     InteractiveWidget(ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1));
     InteractiveWidget(ImGui::InputText("Input file path", &sourceFile)); // TODO: for text inputs: unfocus if clicked in the viewport
-    if (ImGui::Button("Import file"))
+    if (InteractiveWidget(ImGui::Button("Import file")))
     {
-        UserInterface::UpdateUserInteraction(true);
         Log::Info("TODO: IMPLEMENT Importing file {}", sourceFile);
 
 
     }
     InteractiveWidget(ImGui::InputText("Export file path", &targetFile));
-    if (ImGui::Button("Export file"))
+    if (InteractiveWidget(ImGui::Button("Export file")))
     {
-        UserInterface::UpdateUserInteraction(true);
         Log::Info("Exporting updated mesh from {} to {}", sourceFile, targetFile);
 
         MeshLibrary::ExportUpdated(sourceFile, targetFile, editedMesh);
@@ -205,9 +203,8 @@ void MainScene::OnUpdateUI()
 
     // viewport
     ImGui::Begin("Viewport Settings");
-    if (ImGui::Button("Reset camera"))
+    if (InteractiveWidget(ImGui::Button("Reset camera")))
     {
-        UserInterface::UpdateUserInteraction(true);
         camera->transform.SetPosition(glm::vec3(0.f));
         camera->transform.SetRotation(glm::vec3(0.f));
     }
