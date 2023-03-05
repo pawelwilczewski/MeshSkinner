@@ -128,6 +128,9 @@ void MainScene::OnStart()
     //staticSkeletalEntity->AddComponent(staticMesh);
     //staticSkeletalEntity->AddComponent(skeletalMesh);
 
+    // TODO: NOW: instead, have a sceneRoot entity and submit it in the renderer (recursively)
+    //  also we should be able to remove currently submitted entities
+    //  we may need to be able to update entities submitted in renderer
     Renderer::Submit(noneEntity);
     Renderer::Submit(staticEntity);
     Renderer::Submit(staticEntity2);
@@ -223,6 +226,8 @@ void MainScene::OnUpdateUI()
     ImGui::Begin("Hierarchy");
     DrawTree(rootBone);
     ImGui::End();
+
+    // TODO: entity details (transform widget, component names); maybe add some ui function which can be customised in components and will be called for each component
 }
 
 void MainScene::OnLateUpdate()
