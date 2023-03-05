@@ -170,7 +170,7 @@ static void DrawTree(const Ref<Entity> &entity)
 {
     if (ImGui::TreeNode(entity->name.c_str()))
     {
-        entitySelectedInHierarchy = entity;
+        entitySelectedInHierarchy = entity; // TODO: this only works if only one node is expanded
         for (const auto &child : entity->GetChildren())
             DrawTree(child);
         ImGui::TreePop();
@@ -239,7 +239,30 @@ void MainScene::OnUpdateUI()
 
     ImGui::Begin("Entity");
     if (entitySelectedInHierarchy)
+    {
         ImGui::Text(entitySelectedInHierarchy->name.c_str());
+        ImGui::Separator();
+
+        glm::vec3 positionCopy = entitySelectedInHierarchy->transform.GetPosition();
+        glm::vec3 rotationCopy = entitySelectedInHierarchy->transform.GetRotation();
+        glm::vec3 scaleCopy = entitySelectedInHierarchy->transform.GetScale();
+        ImGui::Text("Transform");
+        ImGui::DragFloat3("Position", glm::value_ptr(positionCopy), 1.f, -1000000000.f, 1000000000.f);
+        ImGui::DragFloat3("Rotation", glm::value_ptr(rotationCopy), 1.f, -1000000000.f, 1000000000.f);
+        ImGui::DragFloat3("Scale", glm::value_ptr(scaleCopy), 1.f, -1000000000.f, 1000000000.f);
+        entitySelectedInHierarchy->transform.SetPosition(positionCopy);
+        entitySelectedInHierarchy->transform.SetRotation(rotationCopy);
+        entitySelectedInHierarchy->transform.SetScale(scaleCopy);
+
+        ImGui::Separator();
+        ImGui::Text("Components");
+        ImGui::Separator();
+        for (const auto &component : entitySelectedInHierarchy->GetComponents<EntityComponent>())
+        {
+            ImGui::Text("\tSome component");
+            ImGui::Separator();
+        }
+    }
     ImGui::End();
 
     // TODO: entity details (transform widget, component names); maybe add some ui function which can be customised in components and will be called for each component
