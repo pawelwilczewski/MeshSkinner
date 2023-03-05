@@ -15,6 +15,7 @@ struct StrokeQueryInfo
 class Stroke : public Tool
 {
 public:
+	// NOTE: upon updating any of these, ALSO update the strings array at the top of Stroke.cpp
 	enum class Type { PixelDistance = 0, WorldDistance, EachFrame, FixedDeltaTime };
 
 public:

@@ -10,7 +10,7 @@ public:
 	enum class BlendMode { Mix = 0, Add, Subtract, Lighten, Darken, ColorDodge, Difference, Screen, HardLight, Overlay, SoftLight, Exclusion };
 
 public:
-	Brush(const std::string &toolWindowName, BlendMode blendMode = BlendMode::Add, float weight = 1.f, float radius = 10.f, float falloff = 0.5f, float strength = 1.f);
+	Brush(const std::string &toolWindowName, BlendMode blendMode = BlendMode::Mix, float weight = 1.f, float radius = 10.f, float falloff = 0.5f, float strength = 1.f);
 	virtual ~Brush() = default;
 
 protected:

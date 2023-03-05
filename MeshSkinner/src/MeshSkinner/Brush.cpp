@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Brush.h"
 
-static constexpr std::array<const char *, 12> BrushBlendModeNames = { "Mix", "Add", "Subtract", "Lighten", "Darken", "ColorDodge", "Difference", "Screen", "HardLight", "Overlay", "SoftLight", "Exclusion" };
+static constexpr std::array<const char *, 12> BrushBlendModeNames = { "Mix", "Add", "Subtract", "Lighten", "Darken", "Color Dodge", "Difference", "Screen", "Hard Light", "Overlay", "Soft Light", "Exclusion" };
 
 Brush::Brush(const std::string &toolWindowName, BlendMode blendMode, float weight, float radius, float falloff, float strength) :
     Tool(toolWindowName), blendMode(blendMode), weight(weight), radius(radius), falloff(falloff), strength(strength)
