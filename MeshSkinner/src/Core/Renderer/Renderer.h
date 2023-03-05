@@ -46,9 +46,9 @@ public:
 	static void FrameEnd();
 
 private:
-	static void SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, uint32_t skeletonID = -1);
-	static void SubmitMeshStatic(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh);
-	static void SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh);
+	static void SubmitMesh(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, uint32_t skeletonID = -1);
+	static void SubmitMesh(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh);
+	static void SubmitMesh(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh);
 
 	static void Render(const DrawCalls::iterator &it);
 
@@ -60,9 +60,6 @@ public:
 	static int activeBone;
 
 private:
-	static DrawCalls staticMeshDrawCallsStatic;
-	static DrawCalls skeletalMeshDrawCallsStatic;
-
-	static DrawCalls staticMeshDrawCallsDynamic;
-	static DrawCalls skeletalMeshDrawCallsDynamic;
+	static DrawCalls staticMeshDrawCalls;
+	static DrawCalls skeletalMeshDrawCalls;
 };

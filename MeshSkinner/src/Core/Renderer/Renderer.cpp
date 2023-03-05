@@ -18,22 +18,16 @@ DrawCallInfo::DrawCallInfo() :
 Ref<Camera> Renderer::activeCamera;
 int Renderer::activeBone = 0;
 
-DrawCalls Renderer::staticMeshDrawCallsStatic;
-DrawCalls Renderer::skeletalMeshDrawCallsStatic;
-
-DrawCalls Renderer::staticMeshDrawCallsDynamic;
-DrawCalls Renderer::skeletalMeshDrawCallsDynamic;
+DrawCalls Renderer::staticMeshDrawCalls;
+DrawCalls Renderer::skeletalMeshDrawCalls;
 
 void Renderer::Init()
 {
-	staticMeshDrawCallsStatic = DrawCalls();
-	staticMeshDrawCallsStatic = DrawCalls();
-
-	skeletalMeshDrawCallsDynamic = DrawCalls();
-	skeletalMeshDrawCallsDynamic = DrawCalls();
+	staticMeshDrawCalls = DrawCalls();
+	staticMeshDrawCalls = DrawCalls();
 }
 
-void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, uint32_t skeletonID)
+void Renderer::SubmitMesh(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, uint32_t skeletonID)
 {
 	// insert new shader if necessary
 	if (drawCalls.find(mesh->material->shader) == drawCalls.end())
@@ -129,19 +123,19 @@ void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Mesh *mesh, Dra
 	vertexInfo->AppendData(ids.data(), ids.size());
 }
 
-void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh)
+void Renderer::SubmitMesh(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh)
 {
 	// TODO: URGENT: refactor submission to not have these lambdas
-	SubmitMeshStatic(entity, mesh.get(), staticMeshDrawCallsStatic);
+	SubmitMesh(entity, mesh.get(), staticMeshDrawCalls);
 }
 
-void Renderer::SubmitMeshStatic(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh)
+void Renderer::SubmitMesh(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh)
 {
 	// submit the mesh
-	SubmitMeshStatic(entity, mesh.get(), skeletalMeshDrawCallsStatic, -1); // TODO: URGENT add the correct skeletonID here (offset to transforms for corresponding bone ids for animation)
+	SubmitMesh(entity, mesh.get(), skeletalMeshDrawCalls, -1); // TODO: URGENT add the correct skeletonID here (offset to transforms for corresponding bone ids for animation)
 
-	auto &skeletons = skeletalMeshDrawCallsStatic[mesh->material->shader]->skeletons;
-	auto &transforms = skeletalMeshDrawCallsStatic[mesh->material->shader]->transforms;
+	auto &skeletons = skeletalMeshDrawCalls[mesh->material->shader]->skeletons;
+	auto &transforms = skeletalMeshDrawCalls[mesh->material->shader]->transforms;
 
 	// submit all bones
 	uint32_t skeletonTransformOffset;
@@ -169,7 +163,7 @@ void Renderer::Submit(const Ref<Entity> &entity)
 		if (!mesh->isStatic)
 			continue;
 
-		SubmitMeshStatic(entity, mesh);
+		SubmitMesh(entity, mesh);
 	}
 
 	// submit all skeletal meshes
@@ -178,7 +172,7 @@ void Renderer::Submit(const Ref<Entity> &entity)
 	{
 		if (!mesh->isStatic) continue;
 
-		SubmitMeshStatic(entity, mesh);
+		SubmitMesh(entity, mesh);
 	}
 }
 
@@ -223,10 +217,10 @@ void Renderer::UpdateMeshVertices(const Mesh *mesh)
 	switch (mesh->GetVertexType())
 	{
 	case Mesh::VertexType::Static:
-		drawCalls = staticMeshDrawCallsStatic;
+		drawCalls = staticMeshDrawCalls;
 		break;
 	case Mesh::VertexType::Skeletal:
-		drawCalls = skeletalMeshDrawCallsStatic;
+		drawCalls = skeletalMeshDrawCalls;
 		break;
 	}
 
@@ -247,8 +241,8 @@ void Renderer::FrameEnd()
 
 	// helper iterators used for rendering with correct depth - insert other DrawCalls here to effectively dispatch them
 	std::vector<std::pair<DrawCalls::iterator, DrawCalls::iterator>> drawCallIterators = {
-		{ staticMeshDrawCallsStatic.begin(), staticMeshDrawCallsStatic.end() },
-		{ skeletalMeshDrawCallsStatic.begin(), skeletalMeshDrawCallsStatic.end() }
+		{ staticMeshDrawCalls.begin(), staticMeshDrawCalls.end() },
+		{ skeletalMeshDrawCalls.begin(), skeletalMeshDrawCalls.end() }
 	};
 
 	// helper array to ensure all transforms are updated (some entities have static and skeletal meshes
