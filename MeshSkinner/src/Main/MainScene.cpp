@@ -28,14 +28,17 @@ static Ref<SkeletalMesh> editedMesh;
 static std::string sourceFile;
 static std::string targetFile;
 
-// TODO: URGENT: stroke params for when to place another "dot" etc.
-
-static bool clickedInViewport = false;
+static Ref<Entity> entitySelectedInHierarchy;
 
 MainScene::MainScene() : Scene()
 {
+    sceneRoot = MakeRef<Entity>("Scene");
+
     camera = MakeRef<Camera>("MainCamera");
-    cameraController = MakeUnique<CameraController>(camera, 10.f);
+    cameraController = MakeRef<CameraController>(10.f);
+    camera->AddComponent(cameraController);
+
+    camera->SetParent(sceneRoot);
 
     Renderer::activeCamera = camera;
 
@@ -86,15 +89,19 @@ void MainScene::OnStart()
     skeletalMesh->material = MakeRef<Material>(ShaderLibrary::Get("WeightPaint"));
 
     noneEntity = MakeRef<Entity>("none");
+    noneEntity->SetParent(sceneRoot);
 
     staticEntity = MakeRef<Entity>("static", Transform(glm::vec3(0.f, 0.f, 2.f)));
     staticEntity->AddComponent(MeshLibrary::GetCube());
+    staticEntity->SetParent(sceneRoot);
 
     staticEntity2 = MakeRef<Entity>("static2", Transform(glm::vec3(0.f, 0.f, -2.f)));
     staticEntity2->AddComponent(staticMesh);
+    staticEntity2->SetParent(sceneRoot);
 
     staticEntity3 = MakeRef<Entity>("static 3", Transform(glm::vec3(0.f, 1.f, 2.f)));
     staticEntity3->AddComponent(staticMesh);
+    staticEntity3->SetParent(sceneRoot);
 
     skeletalEntity = MakeRef<Entity>("skeletal", Transform(glm::vec3(15.f, 0.f, 2.f)));
     skeletalEntity->AddComponent(skeletalMesh);
@@ -104,6 +111,7 @@ void MainScene::OnStart()
     rootBone->transform.Translate(glm::vec3(-200.f, 0.f, 0.f));
     //rootBone->transform.Translate(glm::vec3(-500.f, 0.f, 0.f));
     //rootBone->transform.SetScale(glm::vec3(10.f, 10.f, 10.f));
+    rootBone->SetParent(sceneRoot);
 
     // add bone meshes
     auto boneMat = MakeRef<Material>(ShaderLibrary::Get("Bone"));
@@ -158,10 +166,12 @@ void MainScene::OnUpdate()
     staticEntity->transform.SetScale(glm::vec3(glm::sin(Time::GetTimeSeconds())));
 }
 
-static void DrawTree(const Ref<Entity> &n)
+static void DrawTree(const Ref<Entity> &entity)
 {
-    if (ImGui::TreeNode(n->name.c_str())) {
-        for (const auto &child : n->GetChildren())
+    if (ImGui::TreeNode(entity->name.c_str()))
+    {
+        entitySelectedInHierarchy = entity;
+        for (const auto &child : entity->GetChildren())
             DrawTree(child);
         ImGui::TreePop();
     }
@@ -224,7 +234,12 @@ void MainScene::OnUpdateUI()
 
     // hierarchy
     ImGui::Begin("Hierarchy");
-    DrawTree(rootBone);
+    DrawTree(sceneRoot);
+    ImGui::End();
+
+    ImGui::Begin("Entity");
+    if (entitySelectedInHierarchy)
+        ImGui::Text(entitySelectedInHierarchy->name.c_str());
     ImGui::End();
 
     // TODO: entity details (transform widget, component names); maybe add some ui function which can be customised in components and will be called for each component

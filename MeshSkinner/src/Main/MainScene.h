@@ -26,11 +26,12 @@ private:
 	Unique<class Brush> brush;
 	Unique<class Stroke> stroke;
 
+	Ref<Entity> sceneRoot;
+
 	Ref<class Camera> camera; // TODO: make unique and use weak in renderer? that wont work though? figure it out..
-	Unique<class CameraController> cameraController;
+	Ref<class CameraController> cameraController;
 
 private:
 	CallbackRef<StrokeQueryInfo> onStrokeQueryCallback;
-
 	CallbackRef<StrokeQueryInfo> onStrokeEmplaceCallback;
 };

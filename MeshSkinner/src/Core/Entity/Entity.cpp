@@ -30,6 +30,7 @@ void Entity::AddComponent(Ref<EntityComponent> component)
 	components.insert(component);
 
 	component->entity = weak_from_this();
+	component->OnAttached();
 }
 
 void Entity::RemoveComponent(Ref<EntityComponent> component)
@@ -37,6 +38,7 @@ void Entity::RemoveComponent(Ref<EntityComponent> component)
 	components.erase(component);
 
 	component->entity.reset();
+	component->OnDetached();
 }
 
 void Entity::SetParent(const Ref<Entity> &parent)
