@@ -100,7 +100,7 @@ void Stroke::UpdateSubscribe() const
 		assert(false); // TODO: implement
 		break;
 	case Type::PixelDistance:
-		Input::OnMouseMovedSubscribe(onStrokeUpdateVec2CallbackWrapper); // TODO: reconsider cos lagging because single-threaded
+		Input::OnMouseMovedSubscribe(onStrokeUpdateVec2CallbackWrapper); // TODO: reconsider changing to Update cos lagging because single-threaded
 		break;
 	case Type::WorldDistance:
 		Application::OnUpdateSubscribe(onStrokeUpdateCallback);
