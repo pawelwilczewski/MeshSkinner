@@ -30,6 +30,10 @@ static std::string targetFile;
 
 static Ref<Entity> entitySelectedInHierarchy;
 
+static std::vector<Animation> anims;
+
+static auto skeletalMesh = MakeRef<SkeletalMesh>();
+
 MainScene::MainScene() : Scene()
 {
     sceneRoot = MakeRef<Entity>("Scene");
@@ -84,8 +88,7 @@ void MainScene::OnStart()
 
     auto staticMesh = MakeRef<StaticMesh>(staticVertices, indices, MaterialLibrary::GetDefault(), true);
     //auto skeletalMesh = MakeRef<SkeletalMesh>(skeletalVertices, indices, MaterialLibrary::GetDefault(), true);
-    auto skeletalMesh = MakeRef<SkeletalMesh>();
-    MeshLibrary::Get("assets/models/shark.gltf", skeletalMesh, rootBone);
+    MeshLibrary::Import("assets/models/shark.gltf", skeletalMesh, rootBone);
     skeletalMesh->material = MakeRef<Material>(ShaderLibrary::Get("WeightPaint"));
 
     noneEntity = MakeRef<Entity>("none");
@@ -148,6 +151,8 @@ void MainScene::OnStart()
     //Renderer::Submit(staticSkeletalEntity);
 
     editedMesh = skeletalMesh;
+
+    MeshLibrary::Import("assets/models/shark.gltf", anims);
 }
 
 void MainScene::OnEarlyUpdate()
@@ -164,13 +169,23 @@ void MainScene::OnUpdate()
     //skeletalEntity->transform.Translate(glm::vec3(0.f, -1.f, 0.f) * Time::GetDeltaSeconds());
     //skeletalEntity->transform.Rotate(glm::vec3(30.f, 0.f, 0.f) * Time::GetDeltaSeconds());
     staticEntity->transform.SetScale(glm::vec3(glm::sin(Time::GetTimeSeconds())));
+
+    auto &anim = anims[3];
+    for (const auto &bone : skeletalMesh->skeleton->GetBones())
+    {
+        bone->transform.SetPosition(anim.EvaluateTranslation(bone->name, Time::GetTimeSeconds()));
+        bone->transform.SetRotation(glm::degrees(glm::eulerAngles(anim.EvaluateRotation(bone->name, Time::GetTimeSeconds()))));
+        bone->transform.SetScale(anim.EvaluateScale(bone->name, Time::GetTimeSeconds()));
+    }
 }
 
 static void DrawTree(const Ref<Entity> &entity)
 {
     if (ImGui::TreeNode(entity->name.c_str()))
     {
-        entitySelectedInHierarchy = entity; // TODO: this only works if only one node is expanded
+        if (ImGui::IsItemToggledOpen())
+            entitySelectedInHierarchy = entity; // TODO: this only works if only one node is expanded
+
         for (const auto &child : entity->GetChildren())
             DrawTree(child);
         ImGui::TreePop();
@@ -249,7 +264,7 @@ void MainScene::OnUpdateUI()
         ImGui::Text("Transform");
         ImGui::DragFloat3("Position", glm::value_ptr(positionCopy), 1.f, -1000000000.f, 1000000000.f);
         ImGui::DragFloat3("Rotation", glm::value_ptr(rotationCopy), 1.f, -1000000000.f, 1000000000.f);
-        ImGui::DragFloat3("Scale", glm::value_ptr(scaleCopy), 1.f, -1000000000.f, 1000000000.f);
+        ImGui::DragFloat3("Scale", glm::value_ptr(scaleCopy), 0.05f, -1000000000.f, 1000000000.f);
         entitySelectedInHierarchy->transform.SetPosition(positionCopy);
         entitySelectedInHierarchy->transform.SetRotation(rotationCopy);
         entitySelectedInHierarchy->transform.SetScale(scaleCopy);

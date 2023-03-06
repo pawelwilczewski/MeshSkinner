@@ -1,36 +1,84 @@
 #include "pch.h"
 #include "Animation.h"
 
-Animation::Animation(bool loop) : loop(loop), keyframes(std::unordered_map<const char *, std::vector<Keyframe>>())
+Animation::Animation(const std::string &name, bool loop) : name(name), loop(loop)
 {
 }
 
-glm::mat4 Animation::Evaluate(const char *boneName, float time)
+glm::vec3 Animation::EvaluateTranslation(const std::string &boneName, float time)
 {
-	auto &frames = keyframes.at(boneName);
+	// TODO: switch on interpolation mode and use this as a reference: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#appendix-c-interpolation
 
-	assert(frames.size() > 0);
+	auto &track = tracks.at(boneName);
+	auto &positions = track.translationKeyframes;
 
-	if (loop && frames.back().time > glm::epsilon<float>()) // effectively do not divide by 0
-		time = glm::modf(time, frames.back().time);
+	if (positions.size() > 1 && loop)
+		time = glm::modf(time, positions.back().time);
 
-	for (size_t i = 1; i < frames.size(); i++)
+	for (size_t i = 1; i < positions.size(); i++)
 	{
-		if (time <= frames[i].time)
+		if (time <= positions[i].time)
 		{
-			auto alpha = (time - frames[i - 1].time) / (frames[i].time - frames[i - 1].time);
+			auto alpha = (time - positions[i - 1].time) / (positions[i].time - positions[i - 1].time);
 
-			auto position = glm::mix(frames[i - 1].transform.GetPosition(), frames[i].transform.GetPosition(), alpha);
-			auto rotation = glm::lerp(glm::quat(glm::radians(frames[i - 1].transform.GetRotation())), glm::quat(glm::radians(frames[i].transform.GetRotation())), alpha);
-			auto scale = glm::mix(frames[i - 1].transform.GetScale(), frames[i].transform.GetScale(), alpha);
-
-			auto result = glm::translate(glm::mat4(1.f), position);
-			result *= glm::toMat4(rotation);
-			result = glm::scale(result, scale);
-
-			return result;
+			return glm::mix(positions[i - 1].value, positions[i].value, alpha);
 		}
 	}
 
-	return frames[frames.size() - 1].transform.GetMatrix();
+	return glm::vec3(0.f);
+}
+
+glm::quat Animation::EvaluateRotation(const std::string &boneName, float time)
+{
+	// TODO: switch on interpolation mode and use this as a reference: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#appendix-c-interpolation
+
+	auto &track = tracks.at(boneName);
+	auto &rotations = track.rotationKeyframes;
+
+	if (rotations.size() > 1 && loop)
+		time = glm::modf(time, rotations.back().time);
+
+	for (size_t i = 1; i < rotations.size(); i++)
+	{
+		if (time <= rotations[i].time)
+		{
+			auto alpha = (time - rotations[i - 1].time) / (rotations[i].time - rotations[i - 1].time);
+
+			return glm::lerp(rotations[i - 1].value, rotations[i].value, alpha);
+		}
+	}
+
+	return glm::quat();
+}
+
+glm::vec3 Animation::EvaluateScale(const std::string &boneName, float time)
+{
+	// TODO: switch on interpolation mode and use this as a reference: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#appendix-c-interpolation
+
+	auto &track = tracks.at(boneName);
+	auto &scales = track.scaleKeyframes;
+
+	if (scales.size() > 1 && loop)
+		time = glm::modf(time, scales.back().time);
+
+	for (size_t i = 1; i < scales.size(); i++)
+	{
+		if (time <= scales[i].time)
+		{
+			auto alpha = (time - scales[i - 1].time) / (scales[i].time - scales[i - 1].time);
+
+			return glm::mix(scales[i - 1].value, scales[i].value, alpha);
+		}
+	}
+
+	return glm::vec3(1.f);
+}
+
+glm::mat4 Animation::Evaluate(const std::string &boneName, float time)
+{
+	auto result = glm::translate(glm::mat4(1.f), EvaluateTranslation(boneName, time));
+	result *= glm::toMat4(EvaluateRotation(boneName, time));
+	result = glm::scale(result, EvaluateScale(boneName, time));
+
+	return result;
 }

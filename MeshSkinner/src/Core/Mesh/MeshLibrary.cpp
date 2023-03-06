@@ -6,7 +6,7 @@
 Ref<StaticMesh> MeshLibrary::GetCube()
 {
 	auto cubeMesh = MakeRef<StaticMesh>();
-	Get("assets/models/default/cube.glb", cubeMesh);
+	Import("assets/models/default/cube.glb", cubeMesh);
 	return cubeMesh;
 }
 
@@ -14,7 +14,7 @@ Ref<StaticMesh> MeshLibrary::GetBone(float length)
 {
 	// take cube, offset the vertices accordingly and set the color to random (gradient)
 	auto mesh = MakeRef<StaticMesh>();
-	Get("assets/models/default/cube.glb", mesh);
+	Import("assets/models/default/cube.glb", mesh);
 
 	// offset to correct the origin
 	for (auto &vertex : mesh->vertices)
@@ -110,7 +110,7 @@ static bool UpdateIndices(const tinygltf::Primitive &primitive, const Ref<Mesh> 
 	return true;
 }
 
-bool MeshLibrary::Get(const std::string &path, Ref<StaticMesh> &outMesh)
+bool MeshLibrary::Import(const std::string &path, Ref<StaticMesh> &outMesh)
 {
 	// TODO: get from the cache map if already loaded once
 
@@ -183,7 +183,7 @@ bool MeshLibrary::Get(const std::string &path, Ref<StaticMesh> &outMesh)
 	return true;
 }
 
-bool MeshLibrary::Get(const std::string &path, Ref<SkeletalMesh> &outMesh, Ref<Bone> &outRoot)
+bool MeshLibrary::Import(const std::string &path, Ref<SkeletalMesh> &outMesh, Ref<Bone> &outRoot)
 {
 	// TODO: get from the cache map if already loaded once
 
@@ -349,6 +349,107 @@ bool MeshLibrary::Get(const std::string &path, Ref<SkeletalMesh> &outMesh, Ref<B
 	}
 
 	return true;
+}
+
+bool MeshLibrary::Import(const std::string &path, std::vector<Animation> &outAnimations)
+{
+	if (!LoadFromFile(path))
+		return false;
+
+	// import the mesh
+	for (const auto &animation : model.animations)
+	{
+		// init the animation
+		auto anim = Animation(animation.name);
+
+		for (const auto &channel : animation.channels)
+		{
+			// ensure the track is inserted
+			auto &boneName = model.nodes[channel.target_node].name;
+			if (anim.tracks.find(boneName) == anim.tracks.end())
+				anim.tracks.insert({ boneName, AnimationTrack() });
+			auto &track = anim.tracks[boneName];
+
+			// interpolation mode update
+			auto &interp = animation.samplers[channel.sampler].interpolation;
+			if (interp == "LINEAR")
+				track.interpolation = AnimationInterpolationMode::Linear;
+			else if (interp == "STEP")
+				track.interpolation = AnimationInterpolationMode::Step;
+			else if (interp == "CUBICSPLINE")
+				track.interpolation = AnimationInterpolationMode::CubicSpline;
+			else
+				assert(false);
+
+			// get times bufferview
+			auto &timesBufferIndex = animation.samplers[channel.sampler].input;
+			auto &timesBufferAccessor = model.accessors[timesBufferIndex];
+			auto &timesBufferView = model.bufferViews[timesBufferAccessor.bufferView];
+
+			// get times data and keyframes length
+			auto timesData = (float *)&(model.buffers[timesBufferView.buffer].data[timesBufferAccessor.byteOffset + timesBufferView.byteOffset]);
+
+			// add initial keyframes with time data
+			for (size_t i = 0; i < timesBufferAccessor.count; i++)
+			{
+				if (channel.target_path == "translation")
+					track.translationKeyframes.push_back(Keyframe<glm::vec3>(timesData[i], glm::vec3(0.f)));
+				else if (channel.target_path == "rotation")
+					track.rotationKeyframes.push_back(Keyframe<glm::quat>(timesData[i], glm::quat()));
+				else if (channel.target_path == "scale")
+					track.scaleKeyframes.push_back(Keyframe<glm::vec3>(timesData[i], glm::vec3(0.f)));
+				else if (channel.target_path == "weights")
+					track.weightsKeyframes.push_back(Keyframe<float>(timesData[i], 0.f));
+				else
+					assert(false);
+			}
+
+			// get values buffer view
+			auto &valuesBufferIndex = animation.samplers[channel.sampler].output;
+			auto &valuesBufferAccessor = model.accessors[valuesBufferIndex];
+			auto &valuesBufferView = model.bufferViews[valuesBufferAccessor.bufferView];
+
+			// update the keyframes
+			if (channel.target_path == "translation")
+			{
+				auto valuesData = (glm::vec3 *)&(model.buffers[valuesBufferView.buffer].data[valuesBufferAccessor.byteOffset + valuesBufferView.byteOffset]);
+
+				// update positions
+				for (size_t i = 0; i < valuesBufferAccessor.count; i++)
+					track.translationKeyframes[i].value = valuesData[i];
+			}
+			else if (channel.target_path == "rotation")
+			{
+				auto valuesData = (glm::quat *) &(model.buffers[valuesBufferView.buffer].data[valuesBufferAccessor.byteOffset + valuesBufferView.byteOffset]);
+
+				// update rotations
+				for (size_t i = 0; i < valuesBufferAccessor.count; i++)
+					track.rotationKeyframes[i].value = valuesData[i];
+			}
+			else if (channel.target_path == "scale")
+			{
+				auto valuesData = (glm::vec3 *) &(model.buffers[valuesBufferView.buffer].data[valuesBufferAccessor.byteOffset + valuesBufferView.byteOffset]);
+
+				// update scale
+				for (size_t i = 0; i < valuesBufferAccessor.count; i++)
+					track.scaleKeyframes[i].value = valuesData[i];
+			}
+			else if (channel.target_path == "weights")
+			{
+				auto valuesData = (float *) &(model.buffers[valuesBufferView.buffer].data[valuesBufferAccessor.byteOffset + valuesBufferView.byteOffset]);
+
+				for (size_t i = 0; i < valuesBufferAccessor.count; i++)
+					track.weightsKeyframes[i].value = valuesData[i];
+			}
+			else
+				assert(false);
+		}
+
+		// add the animation to the out vector
+		outAnimations.push_back(anim);
+	}
+
+	return false;
 }
 
 void MeshLibrary::ExportUpdated(const std::string &source, const std::string &target, const Ref<SkeletalMesh> &inMesh)
