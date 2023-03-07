@@ -54,7 +54,7 @@ void main()
 
 	uint transformID = vertexInfo[gl_VertexID].transformID;
 	Bone bone0 = bones[vertexInfo[gl_VertexID].skeletonID + int(in_Bones[0])];
-	mat4 t = bone0.localMatrix;//transforms[transformID] * (bone0.localMatrix * bone0.inverseBindMatrix);
+	mat4 t = transforms[transformID] * (bone0.localMatrix * bone0.inverseBindMatrix);
 
 	vec4 worldPosition = t * vec4(in_Position, 1.0);
 	gl_Position = u_ViewProjection * worldPosition;

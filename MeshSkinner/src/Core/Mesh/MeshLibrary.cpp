@@ -204,41 +204,54 @@ bool MeshLibrary::Import(const std::string &path, Ref<SkeletalMesh> &outMesh, Re
 
 		// init bones
 		for (auto &bone : outMesh->skeleton->bones)
-			bone.reset(new Bone());
+			bone = MakeRef<Bone>();
 
 		// get hold of inverse bind matrices data
 		auto &inverseBindMatrices = model.accessors[skin.inverseBindMatrices];
 		void *inverseBindMatricesData = &(model.buffers[model.bufferViews[inverseBindMatrices.bufferView].buffer].data[inverseBindMatrices.byteOffset + model.bufferViews[inverseBindMatrices.bufferView].byteOffset]);
 		glm::mat4 *inverseBindMatricesMatData = static_cast<glm::mat4 *>(inverseBindMatricesData);
 
+		int i = 0;
 		for (const auto &joint : skin.joints)
 		{
+			auto &refJoint = model.nodes[joint];
+			auto &bone = outMesh->skeleton->bones[i++];
+
 			// name
-			outMesh->skeleton->bones[joint]->name = model.nodes[joint].name;
+			bone->name = refJoint.name;
 
 			// inverse bind matrix
-			outMesh->skeleton->bones[joint]->inverseBindMatrix = inverseBindMatricesMatData[joint];
+			bone->inverseBindMatrix = inverseBindMatricesMatData[joint];
 
 			// local transform
-			if (model.nodes[joint].translation.size() > 0)
+			if (refJoint.translation.size() > 0)
 			{
-				std::vector<float> translationData(model.nodes[joint].translation.begin(), model.nodes[joint].translation.end());
-				outMesh->skeleton->bones[joint]->transform.SetPosition(glm::make_vec3(translationData.data()));
+				std::vector<float> translationData(refJoint.translation.begin(), refJoint.translation.end());
+				bone->transform.SetPosition(glm::make_vec3(translationData.data()));
 			}
-			if (model.nodes[joint].rotation.size() > 0)
+			if (refJoint.rotation.size() > 0)
 			{
-				std::vector<float> rotationData(model.nodes[joint].rotation.begin(), model.nodes[joint].rotation.end());
-				outMesh->skeleton->bones[joint]->transform.SetRotation(glm::degrees(glm::eulerAngles(glm::make_quat(rotationData.data()))));
+				std::vector<float> rotationData(refJoint.rotation.begin(), refJoint.rotation.end());
+				bone->transform.SetRotation(glm::degrees(glm::eulerAngles(glm::make_quat(rotationData.data()))));
 			}
-			if (model.nodes[joint].scale.size() > 0)
+			if (refJoint.scale.size() > 0)
 			{
-				std::vector<float> scaleData(model.nodes[joint].scale.begin(), model.nodes[joint].scale.end());
-				outMesh->skeleton->bones[joint]->transform.SetScale(glm::make_vec3(scaleData.data()));
+				std::vector<float> scaleData(refJoint.scale.begin(), refJoint.scale.end());
+				bone->transform.SetScale(glm::make_vec3(scaleData.data()));
 			}
 
 			// update children's parent index
-			for (const auto &child : model.nodes[joint].children)
-				outMesh->skeleton->bones[child]->SetParent(outMesh->skeleton->bones[joint]);
+			for (const auto &child : refJoint.children)
+			{
+				// child refers to node index overall, not in
+				//find index of child in joints and use it here
+				auto it = std::find(skin.joints.begin(), skin.joints.end(), child);
+				if (it != skin.joints.end())
+				{
+					auto index = it - skin.joints.begin();
+					outMesh->skeleton->bones[index]->SetParent(bone);
+				}
+			}
 		}
 
 		// update the root
