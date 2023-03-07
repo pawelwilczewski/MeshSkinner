@@ -66,55 +66,57 @@ MainScene::~MainScene()
 
 void MainScene::OnStart()
 {
-    std::vector<StaticVertex> staticVertices;
-    staticVertices.push_back(StaticVertex(glm::vec3(-0.6f, -0.4f, -0.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(0.f, 0.5f, 1.f)));
-    staticVertices.push_back(StaticVertex(glm::vec3(0.6f, -0.4f, 0.3f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.f, 0.3f, 0.f)));
-    staticVertices.push_back(StaticVertex(glm::vec3(0.f, 0.6f, 0.5f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.f, 0.f, 0.8f)));
-    staticVertices.push_back(StaticVertex(glm::vec3(0.4f, -0.6f, -0.4f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(0.f, 0.3f, 1.f)));
+    //std::vector<StaticVertex> staticVertices;
+    //staticVertices.push_back(StaticVertex(glm::vec3(-0.6f, -0.4f, -0.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(0.f, 0.5f, 1.f)));
+    //staticVertices.push_back(StaticVertex(glm::vec3(0.6f, -0.4f, 0.3f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.f, 0.3f, 0.f)));
+    //staticVertices.push_back(StaticVertex(glm::vec3(0.f, 0.6f, 0.5f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.f, 0.f, 0.8f)));
+    //staticVertices.push_back(StaticVertex(glm::vec3(0.4f, -0.6f, -0.4f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(0.f, 0.3f, 1.f)));
 
-    std::vector<SkeletalVertex> skeletalVertices;
-    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-2.8f, -0.5f, -1.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(0.0f, 1.0f, 0.f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
-    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-1.6f, -0.7f, -2.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
-    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-0.6f, 3.4f, -1.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
-    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-1.2f, 0.4f, -4.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(0.0f, 0.0f, 1.f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
+    //std::vector<SkeletalVertex> skeletalVertices;
+    //skeletalVertices.push_back(SkeletalVertex(glm::vec3(-2.8f, -0.5f, -1.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(0.0f, 1.0f, 0.f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
+    //skeletalVertices.push_back(SkeletalVertex(glm::vec3(-1.6f, -0.7f, -2.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
+    //skeletalVertices.push_back(SkeletalVertex(glm::vec3(-0.6f, 3.4f, -1.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
+    //skeletalVertices.push_back(SkeletalVertex(glm::vec3(-1.2f, 0.4f, -4.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(0.0f, 0.0f, 1.f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
 
-    std::vector<uint32_t> indices;
-    indices.push_back(0);
-    indices.push_back(1);
-    indices.push_back(2);
-    indices.push_back(2);
-    indices.push_back(3);
-    indices.push_back(0);
+    //std::vector<uint32_t> indices;
+    //indices.push_back(0);
+    //indices.push_back(1);
+    //indices.push_back(2);
+    //indices.push_back(2);
+    //indices.push_back(3);
+    //indices.push_back(0);
 
-    auto staticMesh = MakeRef<StaticMesh>(staticVertices, indices, MaterialLibrary::GetDefault());
-    //auto skeletalMesh = MakeRef<SkeletalMesh>(skeletalVertices, indices, MaterialLibrary::GetDefault());
+    //auto staticMesh = MakeRef<StaticMesh>(staticVertices, indices, MaterialLibrary::GetDefault());
     MeshLibrary::Import("assets/models/shark.gltf", skeletalMesh, rootBone);
     skeletalMesh->material = MakeRef<Material>(ShaderLibrary::Get("WeightPaint"));
 
-    noneEntity = MakeRef<Entity>("none");
-    noneEntity->SetParent(sceneRoot);
+    //noneEntity = MakeRef<Entity>("none");
+    //noneEntity->SetParent(sceneRoot);
 
-    staticEntity = MakeRef<Entity>("static", Transform(glm::vec3(0.f, 0.f, 2.f)));
-    staticEntity->AddComponent(MeshLibrary::GetCube());
-    staticEntity->SetParent(sceneRoot);
+    //staticEntity = MakeRef<Entity>("static", Transform(glm::vec3(0.f, 0.f, 2.f)));
+    //staticEntity->AddComponent(MeshLibrary::GetCube());
+    //staticEntity->SetParent(sceneRoot);
 
-    staticEntity2 = MakeRef<Entity>("static2", Transform(glm::vec3(0.f, 0.f, -2.f)));
-    staticEntity2->AddComponent(staticMesh);
-    staticEntity2->SetParent(sceneRoot);
+    //staticEntity2 = MakeRef<Entity>("static2", Transform(glm::vec3(0.f, 0.f, -2.f)));
+    //staticEntity2->AddComponent(staticMesh);
+    //staticEntity2->SetParent(sceneRoot);
 
-    staticEntity3 = MakeRef<Entity>("static 3", Transform(glm::vec3(0.f, 1.f, 2.f)));
-    staticEntity3->AddComponent(staticMesh);
-    staticEntity3->SetParent(sceneRoot);
+    //staticEntity3 = MakeRef<Entity>("static 3", Transform(glm::vec3(0.f, 1.f, 2.f)));
+    //staticEntity3->AddComponent(staticMesh);
+    //staticEntity3->SetParent(sceneRoot);
 
-    skeletalEntity = MakeRef<Entity>("skeletal", Transform(glm::vec3(15.f, 0.f, 2.f)));
-    skeletalEntity->AddComponent(skeletalMesh);
+    //skeletalEntity = MakeRef<Entity>("skeletal", Transform(glm::vec3(15.f, 0.f, 2.f)));
+    
     //skeletalEntity->transform.SetScale(glm::vec3(0.01f));
-    skeletalEntity->SetParent(rootBone); // TODO: URGENT: it should be the other way around - make sure to use relative transformations in the shader (has to be fixed for animation nevertheless)
+    //skeletalEntity->SetParent(rootBone); // TODO: URGENT: it should be the other way around - make sure to use relative transformations in the shader (has to be fixed for animation nevertheless)
     //rootBone->transform.SetScale(glm::vec3(0.01f));
-    rootBone->transform.Translate(glm::vec3(-200.f, 0.f, 0.f));
+    //rootBone->transform.Translate(glm::vec3(-200.f, 0.f, 0.f));
     //rootBone->transform.Translate(glm::vec3(-500.f, 0.f, 0.f));
     //rootBone->transform.SetScale(glm::vec3(10.f, 10.f, 10.f));
     rootBone->SetParent(sceneRoot);
+    skeletalEntity = MakeRef<Entity>("skeletal");
+    skeletalEntity->AddComponent(skeletalMesh);
+    skeletalEntity->SetParent(sceneRoot);
 
     // add bone meshes
     auto boneMat = MakeRef<Material>(ShaderLibrary::Get("Bone"));
@@ -142,11 +144,12 @@ void MainScene::OnStart()
     // TODO: NOW: instead, have a sceneRoot entity and submit it in the renderer (recursively)
     //  also we should be able to remove currently submitted entities
     //  we may need to be able to update entities submitted in renderer
+    Renderer::Submit(rootBone);
+    Renderer::Submit(skeletalEntity);
     //Renderer::Submit(noneEntity);
     //Renderer::Submit(staticEntity);
     //Renderer::Submit(staticEntity2);
     //Renderer::Submit(staticEntity3);
-    Renderer::Submit(skeletalEntity);
     //Renderer::Submit(skeletalEntity2);
     //Renderer::Submit(staticSkeletalEntity);
 
@@ -162,15 +165,15 @@ void MainScene::OnEarlyUpdate()
 
 void MainScene::OnUpdate()
 {
-    staticEntity->transform.Translate(glm::vec3(0.1f) * Time::GetDeltaSeconds());
-    staticEntity2->transform.Translate(glm::vec3(0.1f) * Time::GetDeltaSeconds());
-    staticEntity3->transform.Translate(glm::vec3(-0.1f) * Time::GetDeltaSeconds());
-    //staticSkeletalEntity->transform.Translate(glm::vec3(-0.1f) * Time::GetDeltaSeconds());
-    //skeletalEntity->transform.Translate(glm::vec3(0.f, -1.f, 0.f) * Time::GetDeltaSeconds());
-    //skeletalEntity->transform.Rotate(glm::vec3(30.f, 0.f, 0.f) * Time::GetDeltaSeconds());
-    staticEntity->transform.SetScale(glm::vec3(glm::sin(Time::GetTimeSeconds())));
+    //staticEntity->transform.Translate(glm::vec3(0.1f) * Time::GetDeltaSeconds());
+    //staticEntity2->transform.Translate(glm::vec3(0.1f) * Time::GetDeltaSeconds());
+    //staticEntity3->transform.Translate(glm::vec3(-0.1f) * Time::GetDeltaSeconds());
+    ////staticSkeletalEntity->transform.Translate(glm::vec3(-0.1f) * Time::GetDeltaSeconds());
+    ////skeletalEntity->transform.Translate(glm::vec3(0.f, -1.f, 0.f) * Time::GetDeltaSeconds());
+    ////skeletalEntity->transform.Rotate(glm::vec3(30.f, 0.f, 0.f) * Time::GetDeltaSeconds());
+    //staticEntity->transform.SetScale(glm::vec3(glm::sin(Time::GetTimeSeconds())));
 
-    auto &anim = anims[1];
+    auto &anim = anims[0];
     for (const auto &bone : skeletalMesh->skeleton->GetBones())
     {
         bone->transform.SetPosition(anim.EvaluateTranslation(bone->name, Time::GetTimeSeconds()));

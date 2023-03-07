@@ -14,9 +14,9 @@ public:
 
 struct BoneGPU
 {
-	BoneGPU(Bone &bone);
+	BoneGPU(Bone &bone, const glm::mat4 &inverseRootWorldMatrix);
 
-	glm::mat4 localMatrix;
+	glm::mat4 modelMatrix;
 	glm::mat4 inverseBindMatrix;
 };
 

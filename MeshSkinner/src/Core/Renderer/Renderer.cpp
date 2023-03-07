@@ -126,7 +126,6 @@ void Renderer::SubmitMesh(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls
 
 void Renderer::SubmitMesh(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh)
 {
-	// TODO: URGENT: refactor submission to not have these lambdas
 	SubmitMesh(entity, mesh.get(), staticMeshDrawCalls);
 }
 
@@ -135,23 +134,26 @@ void Renderer::SubmitMesh(const Ref<Entity> &entity, const Ref<SkeletalMesh> &me
 	// submit the mesh
 	SubmitMesh(entity, mesh.get(), skeletalMeshDrawCalls, true);
 
+	// submit the skeleton (all bones)
 	auto &skeletons = skeletalMeshDrawCalls[mesh->material->shader]->skeletons;
 	auto &bones = skeletalMeshDrawCalls[mesh->material->shader]->bones;
-	// submit skeleton (all bones)
 	if (skeletons.find(mesh->skeleton) == skeletons.end())
 	{
 		skeletons.insert({ mesh->skeleton, bones->GetLength() });
 
+		auto inverseRoot = glm::inverse(mesh->skeleton->GetRootBone()->GetParent()->GetWorldMatrix());
 		for (auto &bone : mesh->skeleton->GetBones())
 		{
-			bones->AppendData(&BoneGPU(*bone.get()), 1);
+			auto bonegpu = BoneGPU(*bone.get(), inverseRoot);
+			bones->AppendData(&bonegpu, 1);
 			Submit(bone);
 		}
 	}
 	else
 	{
-		Log::Error("Trying to render the same skeleton more than once!");
-		assert(false);
+		Log::Info("Trying to render the same skeleton more than once! Skipping this mesh (perhaps mesh attached to the root bone).");
+
+		return;
 	}
 }
 
@@ -186,9 +188,18 @@ static void UpdateTransforms(const Ref<DrawCallInfo> &info, std::unordered_set<c
 
 	// update all bones
 	for (auto &[skeleton, skeletonID] : info->skeletons)
+	{
+		auto inverseRoot = glm::inverse(skeleton->GetRootBone()->GetWorldMatrix());
 		for (int i = 0; i < skeleton->GetBones().size(); i++)
+		{
 			if (!skeleton->GetBones()[i]->GetIsWorldMatrixUpdated())
-				info->bones->SetData(&BoneGPU(*skeleton->GetBones()[i].get()), 1, skeletonID + i);
+			{
+				auto bonegpu = BoneGPU(*skeleton->GetBones()[i].get(), inverseRoot);
+				info->bones->SetData(&bonegpu, 1, skeletonID + i);
+				entitiesToUpdate.insert(skeleton->GetBones()[i].get());
+			}
+		}
+	}
 }
 
 void Renderer::Render(const DrawCalls::iterator &it)

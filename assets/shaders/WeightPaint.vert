@@ -52,10 +52,15 @@ void main()
 	else
 		io_Color = mix(yellow, red, (weight - 3.0 * transitionSize) / transitionSize);
 
-	uint transformID = vertexInfo[gl_VertexID].transformID;
-	Bone bone0 = bones[vertexInfo[gl_VertexID].skeletonID + int(in_Bones[0])];
-	mat4 t = transforms[transformID] * (bone0.localMatrix * bone0.inverseBindMatrix);
+	mat4 t = transforms[vertexInfo[gl_VertexID].transformID];
 
-	vec4 worldPosition = t * vec4(in_Position, 1.0);
+	mat4 m = mat4(0.0);
+	for (int i = 0; i < 4; i++)
+	{
+		Bone bone = bones[vertexInfo[gl_VertexID].skeletonID + int(in_Bones[i])];
+		m += bone.modelMatrix * bone.inverseBindMatrix * in_Weights[i];
+	}
+
+	vec4 worldPosition = t * m * vec4(in_Position, 1.0);
 	gl_Position = u_ViewProjection * worldPosition;
 }
