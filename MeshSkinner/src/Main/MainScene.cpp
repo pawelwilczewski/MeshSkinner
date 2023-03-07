@@ -86,8 +86,8 @@ void MainScene::OnStart()
     indices.push_back(3);
     indices.push_back(0);
 
-    auto staticMesh = MakeRef<StaticMesh>(staticVertices, indices, MaterialLibrary::GetDefault(), true);
-    //auto skeletalMesh = MakeRef<SkeletalMesh>(skeletalVertices, indices, MaterialLibrary::GetDefault(), true);
+    auto staticMesh = MakeRef<StaticMesh>(staticVertices, indices, MaterialLibrary::GetDefault());
+    //auto skeletalMesh = MakeRef<SkeletalMesh>(skeletalVertices, indices, MaterialLibrary::GetDefault());
     MeshLibrary::Import("assets/models/shark.gltf", skeletalMesh, rootBone);
     skeletalMesh->material = MakeRef<Material>(ShaderLibrary::Get("WeightPaint"));
 
@@ -142,10 +142,10 @@ void MainScene::OnStart()
     // TODO: NOW: instead, have a sceneRoot entity and submit it in the renderer (recursively)
     //  also we should be able to remove currently submitted entities
     //  we may need to be able to update entities submitted in renderer
-    Renderer::Submit(noneEntity);
-    Renderer::Submit(staticEntity);
-    Renderer::Submit(staticEntity2);
-    Renderer::Submit(staticEntity3);
+    //Renderer::Submit(noneEntity);
+    //Renderer::Submit(staticEntity);
+    //Renderer::Submit(staticEntity2);
+    //Renderer::Submit(staticEntity3);
     Renderer::Submit(skeletalEntity);
     //Renderer::Submit(skeletalEntity2);
     //Renderer::Submit(staticSkeletalEntity);
@@ -170,7 +170,7 @@ void MainScene::OnUpdate()
     //skeletalEntity->transform.Rotate(glm::vec3(30.f, 0.f, 0.f) * Time::GetDeltaSeconds());
     staticEntity->transform.SetScale(glm::vec3(glm::sin(Time::GetTimeSeconds())));
 
-    auto &anim = anims[3];
+    auto &anim = anims[1];
     for (const auto &bone : skeletalMesh->skeleton->GetBones())
     {
         bone->transform.SetPosition(anim.EvaluateTranslation(bone->name, Time::GetTimeSeconds()));

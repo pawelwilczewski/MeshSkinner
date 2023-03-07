@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Mesh.h"
 
-Mesh::Mesh(const std::vector<uint32_t> &indices, Ref<Material> material, bool isStatic) : EntityComponent(), indices(indices), material(material), isStatic(isStatic)
+Mesh::Mesh(const std::vector<uint32_t> &indices, Ref<Material> material) : EntityComponent(), indices(indices), material(material)
 {
 
 }
@@ -19,7 +19,7 @@ const BufferLayout &Mesh::GetVertexBufferLayout() const
     }
 }
 
-StaticMesh::StaticMesh(const std::vector<StaticVertex> &vertices, const std::vector<uint32_t> &indices, Ref<Material> material, bool isStatic) : Mesh(indices, material, isStatic), vertices(vertices)
+StaticMesh::StaticMesh(const std::vector<StaticVertex> &vertices, const std::vector<uint32_t> &indices, Ref<Material> material) : Mesh(indices, material), vertices(vertices)
 {
 
 }
@@ -39,7 +39,7 @@ size_t StaticMesh::GetVerticesLength() const
     return vertices.size();
 }
 
-SkeletalMesh::SkeletalMesh(const std::vector<SkeletalVertex> &vertices, const std::vector<uint32_t> &indices, Ref<Material> material, bool isStatic) : Mesh(indices, material, isStatic), vertices(vertices)
+SkeletalMesh::SkeletalMesh(const std::vector<SkeletalVertex> &vertices, const std::vector<uint32_t> &indices, Ref<Material> material) : Mesh(indices, material), vertices(vertices)
 {
 
 }

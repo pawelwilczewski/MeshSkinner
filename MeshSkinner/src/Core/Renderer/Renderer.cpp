@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Renderer.h"
 
-VertexInfo::VertexInfo(uint32_t transformID, uint32_t materialID, uint32_t skeletonID) : transformID(transformID), materialID(materialID), skeletonTransformsID(skeletonID)
+VertexInfo::VertexInfo(uint32_t transformID, uint32_t materialID, uint32_t skeletonID) : transformID(transformID), materialID(materialID), skeletonID(skeletonID)
 {
 
 }
@@ -10,7 +10,8 @@ DrawCallInfo::DrawCallInfo() :
 	vao(MakeUnique<VertexArray<uint32_t>>()),
 	transforms(MakeUnique<StorageBuffer<glm::mat4>>()),
 	materials(MakeUnique<StorageBuffer<MaterialGPU>>()),
-	vertexInfo(MakeUnique<StorageBuffer<VertexInfo>>())
+	vertexInfo(MakeUnique<StorageBuffer<VertexInfo>>()),
+	bones(MakeUnique<StorageBuffer<BoneGPU>>())
 {
 
 }
@@ -23,11 +24,10 @@ DrawCalls Renderer::skeletalMeshDrawCalls;
 
 void Renderer::Init()
 {
-	staticMeshDrawCalls = DrawCalls();
-	staticMeshDrawCalls = DrawCalls();
+
 }
 
-void Renderer::SubmitMesh(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, uint32_t skeletonID)
+void Renderer::SubmitMesh(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, bool skeletal)
 {
 	// insert new shader if necessary
 	if (drawCalls.find(mesh->material->shader) == drawCalls.end())
@@ -73,6 +73,7 @@ void Renderer::SubmitMesh(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls
 	auto &transforms = drawCalls[mesh->material->shader]->transforms;
 	auto &materials = drawCalls[mesh->material->shader]->materials;
 	auto &meshes = drawCalls[mesh->material->shader]->meshes;
+	auto &bones = drawCalls[mesh->material->shader]->bones;
 
 	// get the transform id
 	uint32_t transformID;
@@ -119,7 +120,7 @@ void Renderer::SubmitMesh(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls
 
 	// append the vertex info
 	auto materialID = materials->GetLength() - 1;
-	auto ids = std::vector<VertexInfo>(vao->GetVertexBuffer(0)->GetLength() - indexOffset, VertexInfo(transformID, materialID, skeletonID));
+	auto ids = std::vector<VertexInfo>(vao->GetVertexBuffer(0)->GetLength() - indexOffset, VertexInfo(transformID, materialID, skeletal ? bones->GetLength() : -1));
 	vertexInfo->AppendData(ids.data(), ids.size());
 }
 
@@ -132,25 +133,25 @@ void Renderer::SubmitMesh(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh
 void Renderer::SubmitMesh(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh)
 {
 	// submit the mesh
-	SubmitMesh(entity, mesh.get(), skeletalMeshDrawCalls, -1); // TODO: URGENT add the correct skeletonID here (offset to transforms for corresponding bone ids for animation)
+	SubmitMesh(entity, mesh.get(), skeletalMeshDrawCalls, true);
 
 	auto &skeletons = skeletalMeshDrawCalls[mesh->material->shader]->skeletons;
-	auto &transforms = skeletalMeshDrawCalls[mesh->material->shader]->transforms;
-
-	// submit all bones
-	uint32_t skeletonTransformOffset;
+	auto &bones = skeletalMeshDrawCalls[mesh->material->shader]->bones;
+	// submit skeleton (all bones)
 	if (skeletons.find(mesh->skeleton) == skeletons.end())
 	{
-		skeletonTransformOffset = transforms->GetLength();
-		skeletons.insert({ mesh->skeleton, skeletonTransformOffset });
+		skeletons.insert({ mesh->skeleton, bones->GetLength() });
 
 		for (auto &bone : mesh->skeleton->GetBones())
+		{
+			bones->AppendData(&BoneGPU(*bone.get()), 1);
 			Submit(bone);
+		}
 	}
 	else
 	{
 		Log::Error("Trying to render the same skeleton more than once!");
-		return;
+		assert(false);
 	}
 }
 
@@ -159,26 +160,16 @@ void Renderer::Submit(const Ref<Entity> &entity)
 	// submit all static meshes
 	auto staticMeshes = entity->GetComponents<StaticMesh>();
 	for (const auto &mesh : staticMeshes)
-	{
-		if (!mesh->isStatic)
-			continue;
-
 		SubmitMesh(entity, mesh);
-	}
 
 	// submit all skeletal meshes
 	auto skeletalMeshes = entity->GetComponents<SkeletalMesh>();
 	for (auto &mesh : skeletalMeshes)
-	{
-		if (!mesh->isStatic) continue;
-
 		SubmitMesh(entity, mesh);
-	}
 }
 
 void Renderer::FrameBegin()
 {
-	// TODO: submit all dynamic meshes
 }
 
 static void UpdateTransforms(const Ref<DrawCallInfo> &info, std::unordered_set<const Entity *> &entitiesToUpdate)
@@ -192,6 +183,12 @@ static void UpdateTransforms(const Ref<DrawCallInfo> &info, std::unordered_set<c
 			entitiesToUpdate.insert(entity.get());
 		}
 	}
+
+	// update all bones
+	for (auto &[skeleton, skeletonID] : info->skeletons)
+		for (int i = 0; i < skeleton->GetBones().size(); i++)
+			if (!skeleton->GetBones()[i]->GetIsWorldMatrixUpdated())
+				info->bones->SetData(&BoneGPU(*skeleton->GetBones()[i].get()), 1, skeletonID + i);
 }
 
 void Renderer::Render(const DrawCalls::iterator &it)
@@ -205,6 +202,7 @@ void Renderer::Render(const DrawCalls::iterator &it)
 	// TODO: probably id shouldn't be necessary (similar to uploading uniforms)
 	shader->SetupStorageBuffer("ss_VertexInfo", info->vertexInfo->GetID());
 	shader->SetupStorageBuffer("ss_Transforms", info->transforms->GetID());
+	shader->SetupStorageBuffer("ss_Bones", info->bones->GetID());
 	//shader->SetupStorageBuffer("ss_Materials", info->materials->GetID());
 
 	info->vao->Bind();
