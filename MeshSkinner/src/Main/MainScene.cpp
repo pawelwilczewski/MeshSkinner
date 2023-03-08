@@ -184,12 +184,19 @@ void MainScene::OnUpdate()
 
 static void DrawTree(const Ref<Entity> &entity)
 {
-    if (ImGui::TreeNode(entity->name.c_str()))
-    {
-        if (ImGui::IsItemToggledOpen())
-            entitySelectedInHierarchy = entity; // TODO: this only works if only one node is expanded
+    const auto &children = entity->GetChildren();
 
-        for (const auto &child : entity->GetChildren())
+    // workout the flag to use for this node
+    auto flag = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow;
+    if (children.size() == 0)                   flag |= ImGuiTreeNodeFlags_Leaf;
+    if (entitySelectedInHierarchy == entity)    flag |= ImGuiTreeNodeFlags_Selected;
+
+    if (ImGui::TreeNodeEx(entity->name.c_str(), flag))
+    {
+        if (ImGui::IsItemActivated())
+            entitySelectedInHierarchy = entity;
+
+        for (const auto &child : children)
             DrawTree(child);
         ImGui::TreePop();
     }
