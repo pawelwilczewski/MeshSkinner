@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "CameraController.h"
 
-CameraController::CameraController(const Ref<Camera> &camera, float moveSpeed, float moveSpeedMultiplier, float moveSpeedMultiplierDelta, float maxSpeed, float minSpeed) : camera(camera), moveSpeed(moveSpeed), moveSpeedMultiplier(moveSpeedMultiplier), moveSpeedMultiplierDelta(moveSpeedMultiplierDelta), maxSpeed(maxSpeed), minSpeed(minSpeed)
+CameraController::CameraController(float moveSpeed, float moveSpeedMultiplier, float moveSpeedMultiplierDelta, float maxSpeed, float minSpeed) : EntityComponent(), moveSpeed(moveSpeed), moveSpeedMultiplier(moveSpeedMultiplier), moveSpeedMultiplierDelta(moveSpeedMultiplierDelta), maxSpeed(maxSpeed), minSpeed(minSpeed)
 {
 	onUpdateCallback = MakeCallbackNoArgRef([&]() { OnUpdate(); });
 	onMouseScrolledCallback = MakeCallbackRef<glm::vec2>([&](const glm::vec2 &delta) { OnMouseScrolled(delta); });
@@ -10,9 +10,6 @@ CameraController::CameraController(const Ref<Camera> &camera, float moveSpeed, f
 	Application::OnUpdateSubscribe(onUpdateCallback);
 	Input::OnMouseScrolledSubscribe(onMouseScrolledCallback);
 	Input::OnMouseMovedSubscribe(onMouseMovedCallback);
-
-	// TODO: investigate why setting this rotation resolves initial camera jump on mouse move
-	camera->transform.SetRotation(glm::vec3(0.f));
 }
 
 CameraController::~CameraController()
@@ -62,4 +59,19 @@ void CameraController::OnMouseMoved(const glm::vec2 &position)
 	auto delta = Input::GetMouseDelta();
 	auto newRotation = camera->transform.GetRotation() + glm::vec3(-delta.y, delta.x, 0.f) * mouseSensitivity;
 	camera->transform.SetRotation(glm::vec3(glm::clamp(newRotation.x, -90.f, 90.f), newRotation.y, newRotation.z));
+}
+
+void CameraController::OnAttached()
+{
+	camera.reset(dynamic_cast<Camera *>(GetEntity().lock().get())); // lol
+
+	if (!camera)
+		Log::Error("Trying to attach camera controller to non-camera entity!");
+
+	// TODO: investigate why setting this rotation resolves initial camera jump on mouse move
+	camera->transform.SetRotation(glm::vec3(0.f));
+}
+
+void CameraController::OnDetached()
+{
 }

@@ -12,6 +12,14 @@ public:
 	glm::mat4 inverseBindMatrix = glm::mat4(1.f);
 };
 
+struct BoneGPU
+{
+	BoneGPU(Bone &bone, const glm::mat4 &inverseRootWorldMatrix);
+
+	glm::mat4 modelMatrix;
+	glm::mat4 inverseBindMatrix;
+};
+
 class Skeleton
 {
 	friend class MeshLibrary;

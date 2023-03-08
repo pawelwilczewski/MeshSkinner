@@ -6,7 +6,7 @@
 Ref<StaticMesh> MeshLibrary::GetCube()
 {
 	auto cubeMesh = MakeRef<StaticMesh>();
-	Get("assets/models/default/cube.glb", cubeMesh);
+	Import("assets/models/default/cube.glb", cubeMesh);
 	return cubeMesh;
 }
 
@@ -14,7 +14,7 @@ Ref<StaticMesh> MeshLibrary::GetBone(float length)
 {
 	// take cube, offset the vertices accordingly and set the color to random (gradient)
 	auto mesh = MakeRef<StaticMesh>();
-	Get("assets/models/default/cube.glb", mesh);
+	Import("assets/models/default/cube.glb", mesh);
 
 	// offset to correct the origin
 	for (auto &vertex : mesh->vertices)
@@ -110,7 +110,7 @@ static bool UpdateIndices(const tinygltf::Primitive &primitive, const Ref<Mesh> 
 	return true;
 }
 
-bool MeshLibrary::Get(const std::string &path, Ref<StaticMesh> &outMesh)
+bool MeshLibrary::Import(const std::string &path, Ref<StaticMesh> &outMesh)
 {
 	// TODO: get from the cache map if already loaded once
 
@@ -183,7 +183,7 @@ bool MeshLibrary::Get(const std::string &path, Ref<StaticMesh> &outMesh)
 	return true;
 }
 
-bool MeshLibrary::Get(const std::string &path, Ref<SkeletalMesh> &outMesh, Ref<Bone> &outRoot)
+bool MeshLibrary::Import(const std::string &path, Ref<SkeletalMesh> &outMesh, Ref<Bone> &outRoot)
 {
 	// TODO: get from the cache map if already loaded once
 
@@ -204,41 +204,56 @@ bool MeshLibrary::Get(const std::string &path, Ref<SkeletalMesh> &outMesh, Ref<B
 
 		// init bones
 		for (auto &bone : outMesh->skeleton->bones)
-			bone.reset(new Bone());
+			bone = MakeRef<Bone>();
 
 		// get hold of inverse bind matrices data
-		auto &inverseBindMatrices = model.accessors[skin.inverseBindMatrices];
-		void *inverseBindMatricesData = &(model.buffers[model.bufferViews[inverseBindMatrices.bufferView].buffer].data[inverseBindMatrices.byteOffset + model.bufferViews[inverseBindMatrices.bufferView].byteOffset]);
+		auto &inverseBindMatricesAccessor = model.accessors[skin.inverseBindMatrices];
+		auto &inverseBindMatricesBufferView = model.bufferViews[inverseBindMatricesAccessor.bufferView];
+		void *inverseBindMatricesData = &(model.buffers[inverseBindMatricesBufferView.buffer].data[inverseBindMatricesAccessor.byteOffset + inverseBindMatricesBufferView.byteOffset]);
 		glm::mat4 *inverseBindMatricesMatData = static_cast<glm::mat4 *>(inverseBindMatricesData);
 
+		int i = 0;
 		for (const auto &joint : skin.joints)
 		{
-			// name
-			outMesh->skeleton->bones[joint]->name = model.nodes[joint].name;
+			auto &refJoint = model.nodes[joint];
+			auto &bone = outMesh->skeleton->bones[i];
 
+			// name
+			bone->name = refJoint.name;
 			// inverse bind matrix
-			outMesh->skeleton->bones[joint]->inverseBindMatrix = inverseBindMatricesMatData[joint];
+			bone->inverseBindMatrix = inverseBindMatricesMatData[i];
 
 			// local transform
-			if (model.nodes[joint].translation.size() > 0)
+			if (refJoint.translation.size() > 0)
 			{
-				std::vector<float> translationData(model.nodes[joint].translation.begin(), model.nodes[joint].translation.end());
-				outMesh->skeleton->bones[joint]->transform.SetPosition(glm::make_vec3(translationData.data()));
+				std::vector<float> translationData(refJoint.translation.begin(), refJoint.translation.end());
+				bone->transform.SetPosition(glm::make_vec3(translationData.data()));
 			}
-			if (model.nodes[joint].rotation.size() > 0)
+			if (refJoint.rotation.size() > 0)
 			{
-				std::vector<float> rotationData(model.nodes[joint].rotation.begin(), model.nodes[joint].rotation.end());
-				outMesh->skeleton->bones[joint]->transform.SetRotation(glm::degrees(glm::eulerAngles(glm::make_quat(rotationData.data()))));
+				std::vector<float> rotationData(refJoint.rotation.begin(), refJoint.rotation.end());
+				bone->transform.SetRotation(glm::degrees(glm::eulerAngles(glm::make_quat(rotationData.data()))));
 			}
-			if (model.nodes[joint].scale.size() > 0)
+			if (refJoint.scale.size() > 0)
 			{
-				std::vector<float> scaleData(model.nodes[joint].scale.begin(), model.nodes[joint].scale.end());
-				outMesh->skeleton->bones[joint]->transform.SetScale(glm::make_vec3(scaleData.data()));
+				std::vector<float> scaleData(refJoint.scale.begin(), refJoint.scale.end());
+				bone->transform.SetScale(glm::make_vec3(scaleData.data()));
 			}
 
 			// update children's parent index
-			for (const auto &child : model.nodes[joint].children)
-				outMesh->skeleton->bones[child]->SetParent(outMesh->skeleton->bones[joint]);
+			for (const auto &child : refJoint.children)
+			{
+				// child refers to node index overall, not an index in the joints array
+				// so just find the index of the child in the joints array and use it here
+				auto it = std::find(skin.joints.begin(), skin.joints.end(), child);
+				if (it != skin.joints.end())
+				{
+					auto index = it - skin.joints.begin();
+					outMesh->skeleton->bones[index]->SetParent(bone);
+				}
+			}
+
+			i++;
 		}
 
 		// update the root
@@ -349,6 +364,107 @@ bool MeshLibrary::Get(const std::string &path, Ref<SkeletalMesh> &outMesh, Ref<B
 	}
 
 	return true;
+}
+
+bool MeshLibrary::Import(const std::string &path, std::vector<Animation> &outAnimations)
+{
+	if (!LoadFromFile(path))
+		return false;
+
+	// import the mesh
+	for (const auto &animation : model.animations)
+	{
+		// init the animation
+		auto anim = Animation(animation.name);
+
+		for (const auto &channel : animation.channels)
+		{
+			// ensure the track is inserted
+			auto &boneName = model.nodes[channel.target_node].name;
+			if (anim.tracks.find(boneName) == anim.tracks.end())
+				anim.tracks.insert({ boneName, AnimationTrack() });
+			auto &track = anim.tracks[boneName];
+
+			// interpolation mode update
+			auto &interp = animation.samplers[channel.sampler].interpolation;
+			if (interp == "LINEAR")
+				track.interpolation = AnimationInterpolationMode::Linear;
+			else if (interp == "STEP")
+				track.interpolation = AnimationInterpolationMode::Step;
+			else if (interp == "CUBICSPLINE")
+				track.interpolation = AnimationInterpolationMode::CubicSpline;
+			else
+				assert(false);
+
+			// get times bufferview
+			auto &timesBufferIndex = animation.samplers[channel.sampler].input;
+			auto &timesBufferAccessor = model.accessors[timesBufferIndex];
+			auto &timesBufferView = model.bufferViews[timesBufferAccessor.bufferView];
+
+			// get times data and keyframes length
+			auto timesData = (float *)&(model.buffers[timesBufferView.buffer].data[timesBufferAccessor.byteOffset + timesBufferView.byteOffset]);
+
+			// add initial keyframes with time data
+			for (size_t i = 0; i < timesBufferAccessor.count; i++)
+			{
+				if (channel.target_path == "translation")
+					track.translationKeyframes.push_back(Keyframe<glm::vec3>(timesData[i], glm::vec3(0.f)));
+				else if (channel.target_path == "rotation")
+					track.rotationKeyframes.push_back(Keyframe<glm::quat>(timesData[i], glm::quat()));
+				else if (channel.target_path == "scale")
+					track.scaleKeyframes.push_back(Keyframe<glm::vec3>(timesData[i], glm::vec3(0.f)));
+				else if (channel.target_path == "weights")
+					track.weightsKeyframes.push_back(Keyframe<float>(timesData[i], 0.f));
+				else
+					assert(false);
+			}
+
+			// get values buffer view
+			auto &valuesBufferIndex = animation.samplers[channel.sampler].output;
+			auto &valuesBufferAccessor = model.accessors[valuesBufferIndex];
+			auto &valuesBufferView = model.bufferViews[valuesBufferAccessor.bufferView];
+
+			// update the keyframes
+			if (channel.target_path == "translation")
+			{
+				auto valuesData = (glm::vec3 *)&(model.buffers[valuesBufferView.buffer].data[valuesBufferAccessor.byteOffset + valuesBufferView.byteOffset]);
+
+				// update positions
+				for (size_t i = 0; i < valuesBufferAccessor.count; i++)
+					track.translationKeyframes[i].value = valuesData[i];
+			}
+			else if (channel.target_path == "rotation")
+			{
+				auto valuesData = (glm::quat *) &(model.buffers[valuesBufferView.buffer].data[valuesBufferAccessor.byteOffset + valuesBufferView.byteOffset]);
+
+				// update rotations
+				for (size_t i = 0; i < valuesBufferAccessor.count; i++)
+					track.rotationKeyframes[i].value = valuesData[i];
+			}
+			else if (channel.target_path == "scale")
+			{
+				auto valuesData = (glm::vec3 *) &(model.buffers[valuesBufferView.buffer].data[valuesBufferAccessor.byteOffset + valuesBufferView.byteOffset]);
+
+				// update scale
+				for (size_t i = 0; i < valuesBufferAccessor.count; i++)
+					track.scaleKeyframes[i].value = valuesData[i];
+			}
+			else if (channel.target_path == "weights")
+			{
+				auto valuesData = (float *) &(model.buffers[valuesBufferView.buffer].data[valuesBufferAccessor.byteOffset + valuesBufferView.byteOffset]);
+
+				for (size_t i = 0; i < valuesBufferAccessor.count; i++)
+					track.weightsKeyframes[i].value = valuesData[i];
+			}
+			else
+				assert(false);
+		}
+
+		// add the animation to the out vector
+		outAnimations.push_back(anim);
+	}
+
+	return false;
 }
 
 void MeshLibrary::ExportUpdated(const std::string &source, const std::string &target, const Ref<SkeletalMesh> &inMesh)

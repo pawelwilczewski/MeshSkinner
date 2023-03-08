@@ -21,17 +21,90 @@ namespace MathUtils
 	std::vector<uint32_t> GetVerticesInRadiusLocalSpace(const Mesh *mesh, const glm::vec3 &point, float radius);
 	std::vector<uint32_t> GetVerticesInRadius(const Mesh *mesh, const glm::vec3 &point, float radius);
 
-    float BlendMix(const float oldWeight, const float goalWeight, const float alpha);
-    float BlendAdd(const float oldWeight, const float goalWeight, const float alpha);
-    float BlendSubtract(const float oldWeight, const float goalWeight, const float alpha);
-    float BlendMultiply(const float oldWeight, const float goalWeight, const float alpha);
-    float BlendLighten(const float oldWeight, const float goalWeight, const float alpha);
-    float BlendDarken(const float oldWeight, const float goalWeight, const float alpha);
-    float BlendColorDodge(float oldWeight, float goalWeight, float alpha);
-    float BlendDifference(float oldWeight, float goalWeight, float alpha);
-    float BlendScreen(float oldWeight, float goalWeight, float alpha);
-    float BlendHardLight(float oldWeight, float goalWeight, float alpha);
-    float BlendOverlay(float oldWeight, float goalWeight, float alpha);
-    float BlendSoftLight(float oldWeight, float goalWeight, float alpha);
-    float BlendExclusion(float oldWeight, float goalWeight, float alpha);
+    constexpr float BlendMix(float oldWeight, float goalWeight, float alpha)
+    {
+        return (1.0f - alpha) * oldWeight + goalWeight * alpha;
+    }
+
+    constexpr float BlendAdd(float oldWeight, float goalWeight, float alpha)
+    {
+        return oldWeight + goalWeight * alpha;
+    }
+
+    constexpr float BlendSubtract(float oldWeight, float goalWeight, float alpha)
+    {
+        return oldWeight - goalWeight * alpha;
+    }
+
+    constexpr float BlendMultiply(float oldWeight, float goalWeight, float alpha)
+    {
+        return ((1.0f - alpha) + alpha * goalWeight) * oldWeight;
+    }
+
+    constexpr float BlendLighten(float oldWeight, float goalWeight, float alpha)
+    {
+        return (oldWeight < goalWeight) ? BlendMix(oldWeight, goalWeight, alpha) : oldWeight;
+    }
+
+    constexpr float BlendDarken(float oldWeight, float goalWeight, float alpha)
+    {
+        return (oldWeight > goalWeight) ? BlendMix(oldWeight, goalWeight, alpha) : oldWeight;
+    }
+
+    constexpr float BlendColorDodge(float oldWeight, float goalWeight, float alpha)
+    {
+        float val = (goalWeight == 1.0f) ? 1.0f : glm::min((oldWeight * (225.0f / 255.0f)) / (1.0f - goalWeight), 1.0f);
+        return (1.0f - alpha) * oldWeight + val * alpha;
+    }
+
+    constexpr float BlendDifference(float oldWeight, float goalWeight, float alpha)
+    {
+        float val = glm::abs(oldWeight - goalWeight);
+        return (1.0f - alpha) * oldWeight + val * alpha;
+    }
+
+    constexpr float BlendScreen(float oldWeight, float goalWeight, float alpha)
+    {
+        float val = glm::max(1.0f - (1.0f - oldWeight) * (1.0f - goalWeight), 0.f);
+        return (1.0f - alpha) * oldWeight + val * alpha;
+    }
+
+    constexpr float BlendHardLight(float oldWeight, float goalWeight, float alpha)
+    {
+        float val = 0.f;
+        if (goalWeight > 0.5f)
+            val = 1.0f - ((1.0f - 2.0f * (goalWeight - 0.5f)) * (1.0f - oldWeight));
+        else
+            val = 2.0f * goalWeight * oldWeight;
+
+        return (1.0f - alpha) * oldWeight + val * alpha;
+    }
+
+    constexpr float BlendOverlay(float oldWeight, float goalWeight, float alpha)
+    {
+        float val = 0.f;
+        if (oldWeight > 0.5f)
+            val = 1.0f - ((1.0f - 2.0f * (oldWeight - 0.5f)) * (1.0f - goalWeight));
+        else
+            val = 2.0f * goalWeight * oldWeight;
+
+        return (1.0f - alpha) * oldWeight + val * alpha;
+    }
+
+    constexpr float BlendSoftLight(float oldWeight, float goalWeight, float alpha)
+    {
+        float val = 0.f;
+        if (oldWeight < 0.5f)
+            val = ((2.0f * (goalWeight / 2.0f + 0.25f)) * oldWeight);
+        else
+            val = 1.0f - (2.0f * (1.0f - (goalWeight / 2.0f + 0.25f)) * (1.0f - oldWeight));
+
+        return (1.0f - alpha) * oldWeight + val * alpha;
+    }
+
+    constexpr float BlendExclusion(float oldWeight, float goalWeight, float alpha)
+    {
+        float val = (0.5f - (2.0f * (oldWeight - 0.5f) * (goalWeight - 0.5f)));
+        return (1.0f - alpha) * oldWeight + val * alpha;
+    }
 }

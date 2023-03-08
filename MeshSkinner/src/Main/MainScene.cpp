@@ -21,20 +21,28 @@ static Ref<Entity> staticEntity3;
 static Ref<Entity> skeletalEntity;
 //static Ref<Entity> skeletalEntity2;
 //static Ref<Entity> staticSkeletalEntity;
+static auto rootBone = Ref<Bone>();
 
 static Ref<SkeletalMesh> editedMesh;
 
 static std::string sourceFile;
 static std::string targetFile;
 
-// TODO: URGENT: stroke params for when to place another "dot" etc.
+static Ref<Entity> entitySelectedInHierarchy;
 
-static bool clickedInViewport = false;
+static std::vector<Animation> anims;
+
+static auto skeletalMesh = MakeRef<SkeletalMesh>();
 
 MainScene::MainScene() : Scene()
 {
+    sceneRoot = MakeRef<Entity>("Scene");
+
     camera = MakeRef<Camera>("MainCamera");
-    cameraController = MakeUnique<CameraController>(camera, 10.f);
+    cameraController = MakeRef<CameraController>(10.f);
+    camera->AddComponent(cameraController);
+
+    camera->SetParent(sceneRoot);
 
     Renderer::activeCamera = camera;
 
@@ -78,32 +86,37 @@ void MainScene::OnStart()
     indices.push_back(3);
     indices.push_back(0);
 
-    auto staticMesh = MakeRef<StaticMesh>(staticVertices, indices, MaterialLibrary::GetDefault(), true);
-    //auto skeletalMesh = MakeRef<SkeletalMesh>(skeletalVertices, indices, MaterialLibrary::GetDefault(), true);
-    auto skeletalMesh = MakeRef<SkeletalMesh>();
-    auto rootBone = Ref<Bone>();
-    MeshLibrary::Get("assets/models/shark.gltf", skeletalMesh, rootBone);
+    MeshLibrary::Import("assets/models/shark.gltf", skeletalMesh, rootBone);
     skeletalMesh->material = MakeRef<Material>(ShaderLibrary::Get("WeightPaint"));
 
     noneEntity = MakeRef<Entity>("none");
+    noneEntity->SetParent(sceneRoot);
 
     staticEntity = MakeRef<Entity>("static", Transform(glm::vec3(0.f, 0.f, 2.f)));
     staticEntity->AddComponent(MeshLibrary::GetCube());
+    staticEntity->SetParent(sceneRoot);
 
+    auto staticMesh = MakeRef<StaticMesh>(staticVertices, indices, MaterialLibrary::GetDefault());
     staticEntity2 = MakeRef<Entity>("static2", Transform(glm::vec3(0.f, 0.f, -2.f)));
     staticEntity2->AddComponent(staticMesh);
+    staticEntity2->SetParent(sceneRoot);
 
     staticEntity3 = MakeRef<Entity>("static 3", Transform(glm::vec3(0.f, 1.f, 2.f)));
     staticEntity3->AddComponent(staticMesh);
+    staticEntity3->SetParent(sceneRoot);
 
-    skeletalEntity = MakeRef<Entity>("skeletal", Transform(glm::vec3(15.f, 0.f, 2.f)));
-    skeletalEntity->AddComponent(skeletalMesh);
+    //skeletalEntity = MakeRef<Entity>("skeletal", Transform(glm::vec3(15.f, 0.f, 2.f)));
+    
     //skeletalEntity->transform.SetScale(glm::vec3(0.01f));
-    skeletalEntity->SetParent(rootBone); // TODO: URGENT: it should be the other way around - make sure to use relative transformations in the shader (has to be fixed for animation nevertheless)
+    //skeletalEntity->SetParent(rootBone); // TODO: URGENT: it should be the other way around - make sure to use relative transformations in the shader (has to be fixed for animation nevertheless)
     //rootBone->transform.SetScale(glm::vec3(0.01f));
-    rootBone->transform.Translate(glm::vec3(-200.f, 0.f, 0.f));
+    //rootBone->transform.Translate(glm::vec3(-200.f, 0.f, 0.f));
     //rootBone->transform.Translate(glm::vec3(-500.f, 0.f, 0.f));
     //rootBone->transform.SetScale(glm::vec3(10.f, 10.f, 10.f));
+    rootBone->SetParent(sceneRoot);
+    skeletalEntity = MakeRef<Entity>("skeletal");
+    skeletalEntity->AddComponent(skeletalMesh);
+    skeletalEntity->SetParent(sceneRoot);
 
     // add bone meshes
     auto boneMat = MakeRef<Material>(ShaderLibrary::Get("Bone"));
@@ -128,15 +141,21 @@ void MainScene::OnStart()
     //staticSkeletalEntity->AddComponent(staticMesh);
     //staticSkeletalEntity->AddComponent(skeletalMesh);
 
+    // TODO: NOW: instead, have a sceneRoot entity and submit it in the renderer (recursively)
+    //  also we should be able to remove currently submitted entities
+    //  we may need to be able to update entities submitted in renderer
+    Renderer::Submit(rootBone);
+    Renderer::Submit(skeletalEntity);
     Renderer::Submit(noneEntity);
     Renderer::Submit(staticEntity);
     Renderer::Submit(staticEntity2);
     Renderer::Submit(staticEntity3);
-    Renderer::Submit(skeletalEntity);
     //Renderer::Submit(skeletalEntity2);
     //Renderer::Submit(staticSkeletalEntity);
 
     editedMesh = skeletalMesh;
+
+    MeshLibrary::Import("assets/models/shark.gltf", anims);
 }
 
 void MainScene::OnEarlyUpdate()
@@ -153,6 +172,27 @@ void MainScene::OnUpdate()
     //skeletalEntity->transform.Translate(glm::vec3(0.f, -1.f, 0.f) * Time::GetDeltaSeconds());
     //skeletalEntity->transform.Rotate(glm::vec3(30.f, 0.f, 0.f) * Time::GetDeltaSeconds());
     staticEntity->transform.SetScale(glm::vec3(glm::sin(Time::GetTimeSeconds())));
+
+    auto &anim = anims[0];
+    for (const auto &bone : skeletalMesh->skeleton->GetBones())
+    {
+        bone->transform.SetPosition(anim.EvaluateTranslation(bone->name, Time::GetTimeSeconds()));
+        bone->transform.SetRotation(glm::degrees(glm::eulerAngles(anim.EvaluateRotation(bone->name, Time::GetTimeSeconds()))));
+        bone->transform.SetScale(anim.EvaluateScale(bone->name, Time::GetTimeSeconds()));
+    }
+}
+
+static void DrawTree(const Ref<Entity> &entity)
+{
+    if (ImGui::TreeNode(entity->name.c_str()))
+    {
+        if (ImGui::IsItemToggledOpen())
+            entitySelectedInHierarchy = entity; // TODO: this only works if only one node is expanded
+
+        for (const auto &child : entity->GetChildren())
+            DrawTree(child);
+        ImGui::TreePop();
+    }
 }
 
 void MainScene::OnUpdateUI()
@@ -179,17 +219,15 @@ void MainScene::OnUpdateUI()
     ImGui::Begin("Edited Mesh");
     InteractiveWidget(ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1));
     InteractiveWidget(ImGui::InputText("Input file path", &sourceFile)); // TODO: for text inputs: unfocus if clicked in the viewport
-    if (ImGui::Button("Import file"))
+    if (InteractiveWidget(ImGui::Button("Import file")))
     {
-        UserInterface::UpdateUserInteraction(true);
         Log::Info("TODO: IMPLEMENT Importing file {}", sourceFile);
 
 
     }
     InteractiveWidget(ImGui::InputText("Export file path", &targetFile));
-    if (ImGui::Button("Export file"))
+    if (InteractiveWidget(ImGui::Button("Export file")))
     {
-        UserInterface::UpdateUserInteraction(true);
         Log::Info("Exporting updated mesh from {} to {}", sourceFile, targetFile);
 
         MeshLibrary::ExportUpdated(sourceFile, targetFile, editedMesh);
@@ -205,13 +243,47 @@ void MainScene::OnUpdateUI()
 
     // viewport
     ImGui::Begin("Viewport Settings");
-    if (ImGui::Button("Reset camera"))
+    if (InteractiveWidget(ImGui::Button("Reset camera")))
     {
-        UserInterface::UpdateUserInteraction(true);
         camera->transform.SetPosition(glm::vec3(0.f));
         camera->transform.SetRotation(glm::vec3(0.f));
     }
     ImGui::End();
+
+    // hierarchy
+    ImGui::Begin("Hierarchy");
+    DrawTree(sceneRoot);
+    ImGui::End();
+
+    ImGui::Begin("Entity");
+    if (entitySelectedInHierarchy)
+    {
+        ImGui::Text(entitySelectedInHierarchy->name.c_str());
+        ImGui::Separator();
+
+        glm::vec3 positionCopy = entitySelectedInHierarchy->transform.GetPosition();
+        glm::vec3 rotationCopy = entitySelectedInHierarchy->transform.GetRotation();
+        glm::vec3 scaleCopy = entitySelectedInHierarchy->transform.GetScale();
+        ImGui::Text("Transform");
+        ImGui::DragFloat3("Position", glm::value_ptr(positionCopy), 1.f, -1000000000.f, 1000000000.f);
+        ImGui::DragFloat3("Rotation", glm::value_ptr(rotationCopy), 1.f, -1000000000.f, 1000000000.f);
+        ImGui::DragFloat3("Scale", glm::value_ptr(scaleCopy), 0.05f, -1000000000.f, 1000000000.f);
+        entitySelectedInHierarchy->transform.SetPosition(positionCopy);
+        entitySelectedInHierarchy->transform.SetRotation(rotationCopy);
+        entitySelectedInHierarchy->transform.SetScale(scaleCopy);
+
+        ImGui::Separator();
+        ImGui::Text("Components");
+        ImGui::Separator();
+        for (const auto &component : entitySelectedInHierarchy->GetComponents<EntityComponent>())
+        {
+            ImGui::Text("\tSome component");
+            ImGui::Separator();
+        }
+    }
+    ImGui::End();
+
+    // TODO: entity details (transform widget, component names); maybe add some ui function which can be customised in components and will be called for each component
 }
 
 void MainScene::OnLateUpdate()

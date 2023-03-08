@@ -33,3 +33,8 @@ const std::vector<Ref<Bone>> &Skeleton::GetBones() const
 {
     return bones;
 }
+
+BoneGPU::BoneGPU(Bone &bone, const glm::mat4 &inverseRootWorldMatrix) : modelMatrix(bone.GetWorldMatrix() * inverseRootWorldMatrix), inverseBindMatrix(bone.inverseBindMatrix)
+{
+
+}

@@ -2,10 +2,10 @@
 
 #include "Camera.h"
 
-class CameraController
+class CameraController : public EntityComponent
 {
 public:
-	CameraController(const Ref<Camera> &camera, float moveSpeed = 10.f, float moveSpeedMultiplier = 1.f, float moveSpeedMultiplierDelta = 0.2f, float maxSpeed = 10000.f, float minSpeed = 0.1f);
+	CameraController(float moveSpeed = 10.f, float moveSpeedMultiplier = 1.f, float moveSpeedMultiplierDelta = 0.2f, float maxSpeed = 10000.f, float minSpeed = 0.1f);
 	virtual ~CameraController();
 
 protected:
@@ -13,6 +13,9 @@ protected:
 
 	void OnMouseScrolled(const glm::vec2 &delta);
 	void OnMouseMoved(const glm::vec2 &delta);
+
+	virtual void OnAttached() override;
+	virtual void OnDetached() override;
 
 public:
 	float moveSpeed;

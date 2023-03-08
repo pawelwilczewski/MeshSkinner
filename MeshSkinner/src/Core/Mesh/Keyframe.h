@@ -3,11 +3,11 @@
 #include "Application/Core.h"
 #include "Core/Entity/Transform.h"
 
+template <typename T>
 struct Keyframe
 {
-	Keyframe(float time = 0.f, const Transform &transform = Transform());
+	Keyframe(float time, const T &value) : time(time), value(value) {}
 
-public:
 	float time;
-	Transform transform;
+	T value;
 };

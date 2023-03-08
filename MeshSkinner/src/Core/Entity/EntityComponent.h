@@ -13,6 +13,10 @@ public:
 public:
 	Weak<Entity> GetEntity() const;
 
+protected:
+	virtual void OnAttached() {}
+	virtual void OnDetached() {}
+
 private:
 	Weak<Entity> entity;
 };
