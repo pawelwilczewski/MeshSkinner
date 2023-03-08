@@ -25,6 +25,7 @@ private:
 private:
 	Unique<class Brush> brush;
 	Unique<Stroke> stroke;
+	Unique<class Hierarchy> hierarchy;
 
 	Ref<Entity> sceneRoot;
 

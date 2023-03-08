@@ -8,6 +8,7 @@
 
 #include "MeshSkinner/Tool/Brush.h"
 #include "MeshSkinner/Tool/Stroke.h"
+#include "MeshSkinner/Tool/Hierarchy.h"
 
 static Ref<VertexArray<uint32_t>> vao;
 static Ref<VertexBuffer<StaticVertex>> vbo;
@@ -27,8 +28,6 @@ static Ref<SkeletalMesh> editedMesh;
 
 static std::string sourceFile;
 static std::string targetFile;
-
-static Ref<Entity> entitySelectedInHierarchy;
 
 static std::vector<Animation> anims;
 
@@ -57,6 +56,8 @@ MainScene::MainScene() : Scene()
     onStrokeEmplaceCallback = MakeCallbackRef<StrokeQueryInfo>([&](const StrokeQueryInfo &info) { OnStrokeEmplace(info); });
 
     stroke->OnStrokeEmplaceSubscribe(onStrokeEmplaceCallback);
+
+    hierarchy = MakeUnique<Hierarchy>("Hierarchy", sceneRoot);
 }
 
 MainScene::~MainScene()
@@ -182,26 +183,6 @@ void MainScene::OnUpdate()
     }
 }
 
-static void DrawTree(const Ref<Entity> &entity)
-{
-    const auto &children = entity->GetChildren();
-
-    // workout the flag to use for this node
-    auto flag = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow;
-    if (children.size() == 0)                   flag |= ImGuiTreeNodeFlags_Leaf;
-    if (entitySelectedInHierarchy == entity)    flag |= ImGuiTreeNodeFlags_Selected;
-
-    if (ImGui::TreeNodeEx(entity->name.c_str(), flag))
-    {
-        if (ImGui::IsItemActivated())
-            entitySelectedInHierarchy = entity;
-
-        for (const auto &child : children)
-            DrawTree(child);
-        ImGui::TreePop();
-    }
-}
-
 void MainScene::OnUpdateUI()
 {
     // debug fps info
@@ -256,41 +237,6 @@ void MainScene::OnUpdateUI()
         camera->transform.SetRotation(glm::vec3(0.f));
     }
     ImGui::End();
-
-    // hierarchy
-    ImGui::Begin("Hierarchy");
-    DrawTree(sceneRoot);
-    ImGui::End();
-
-    ImGui::Begin("Entity");
-    if (entitySelectedInHierarchy)
-    {
-        ImGui::Text(entitySelectedInHierarchy->name.c_str());
-        ImGui::Separator();
-
-        glm::vec3 positionCopy = entitySelectedInHierarchy->transform.GetPosition();
-        glm::vec3 rotationCopy = entitySelectedInHierarchy->transform.GetRotation();
-        glm::vec3 scaleCopy = entitySelectedInHierarchy->transform.GetScale();
-        ImGui::Text("Transform");
-        ImGui::DragFloat3("Position", glm::value_ptr(positionCopy), 1.f, -1000000000.f, 1000000000.f);
-        ImGui::DragFloat3("Rotation", glm::value_ptr(rotationCopy), 1.f, -1000000000.f, 1000000000.f);
-        ImGui::DragFloat3("Scale", glm::value_ptr(scaleCopy), 0.05f, -1000000000.f, 1000000000.f);
-        entitySelectedInHierarchy->transform.SetPosition(positionCopy);
-        entitySelectedInHierarchy->transform.SetRotation(rotationCopy);
-        entitySelectedInHierarchy->transform.SetScale(scaleCopy);
-
-        ImGui::Separator();
-        ImGui::Text("Components");
-        ImGui::Separator();
-        for (const auto &component : entitySelectedInHierarchy->GetComponents<EntityComponent>())
-        {
-            ImGui::Text("\tSome component");
-            ImGui::Separator();
-        }
-    }
-    ImGui::End();
-
-    // TODO: entity details (transform widget, component names); maybe add some ui function which can be customised in components and will be called for each component
 }
 
 void MainScene::OnLateUpdate()
