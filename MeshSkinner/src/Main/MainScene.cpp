@@ -6,8 +6,8 @@
 #include "Core/Camera/Camera.h"
 #include "Core/Camera/CameraController.h"
 
-#include "MeshSkinner/Brush.h"
-#include "MeshSkinner/Stroke.h"
+#include "MeshSkinner/Tool/Brush.h"
+#include "MeshSkinner/Tool/Stroke.h"
 
 static Ref<VertexArray<uint32_t>> vao;
 static Ref<VertexBuffer<StaticVertex>> vbo;

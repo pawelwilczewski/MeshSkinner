@@ -3,7 +3,7 @@
 #include "Application/Core.h"
 #include "Application/Scene.h"
 
-#include "MeshSkinner/Stroke.h"
+#include "MeshSkinner/Tool/Stroke.h"
 
 class MainScene : public Scene
 {
@@ -24,7 +24,7 @@ private:
 
 private:
 	Unique<class Brush> brush;
-	Unique<class Stroke> stroke;
+	Unique<Stroke> stroke;
 
 	Ref<Entity> sceneRoot;
 
