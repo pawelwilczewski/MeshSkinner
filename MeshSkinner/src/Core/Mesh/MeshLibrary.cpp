@@ -207,21 +207,21 @@ bool MeshLibrary::Import(const std::string &path, Ref<SkeletalMesh> &outMesh, Re
 			bone = MakeRef<Bone>();
 
 		// get hold of inverse bind matrices data
-		auto &inverseBindMatrices = model.accessors[skin.inverseBindMatrices];
-		void *inverseBindMatricesData = &(model.buffers[model.bufferViews[inverseBindMatrices.bufferView].buffer].data[inverseBindMatrices.byteOffset + model.bufferViews[inverseBindMatrices.bufferView].byteOffset]);
+		auto &inverseBindMatricesAccessor = model.accessors[skin.inverseBindMatrices];
+		auto &inverseBindMatricesBufferView = model.bufferViews[inverseBindMatricesAccessor.bufferView];
+		void *inverseBindMatricesData = &(model.buffers[inverseBindMatricesBufferView.buffer].data[inverseBindMatricesAccessor.byteOffset + inverseBindMatricesBufferView.byteOffset]);
 		glm::mat4 *inverseBindMatricesMatData = static_cast<glm::mat4 *>(inverseBindMatricesData);
 
 		int i = 0;
 		for (const auto &joint : skin.joints)
 		{
 			auto &refJoint = model.nodes[joint];
-			auto &bone = outMesh->skeleton->bones[i++];
+			auto &bone = outMesh->skeleton->bones[i];
 
 			// name
 			bone->name = refJoint.name;
-
 			// inverse bind matrix
-			bone->inverseBindMatrix = inverseBindMatricesMatData[joint];
+			bone->inverseBindMatrix = inverseBindMatricesMatData[i];
 
 			// local transform
 			if (refJoint.translation.size() > 0)
@@ -243,8 +243,8 @@ bool MeshLibrary::Import(const std::string &path, Ref<SkeletalMesh> &outMesh, Re
 			// update children's parent index
 			for (const auto &child : refJoint.children)
 			{
-				// child refers to node index overall, not in
-				//find index of child in joints and use it here
+				// child refers to node index overall, not an index in the joints array
+				// so just find the index of the child in the joints array and use it here
 				auto it = std::find(skin.joints.begin(), skin.joints.end(), child);
 				if (it != skin.joints.end())
 				{
@@ -252,6 +252,8 @@ bool MeshLibrary::Import(const std::string &path, Ref<SkeletalMesh> &outMesh, Re
 					outMesh->skeleton->bones[index]->SetParent(bone);
 				}
 			}
+
+			i++;
 		}
 
 		// update the root
