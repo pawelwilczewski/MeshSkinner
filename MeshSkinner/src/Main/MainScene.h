@@ -21,6 +21,7 @@ protected:
 
 private:
 	void OnStrokeEmplace(const StrokeQueryInfo &info);
+	void OnFileDropped(const std::vector<std::string> &paths);
 
 private:
 	Unique<class Brush> brush;
@@ -34,8 +35,10 @@ private:
 	Ref<class Camera> camera; // TODO: make unique and use weak in renderer? that wont work though? figure it out..
 	Ref<class CameraControllerComponent> cameraController;
 
+	std::vector<std::string> unhandledDroppedFiles;
+
 private:
-	CallbackRef<StrokeQueryInfo> onStrokeQueryCallback;
 	CallbackRef<StrokeQueryInfo> onStrokeEmplaceCallback;
 	CallbackNoArgRef onDrawAdditionalViewportWidgetsCallback;
+	CallbackRef<std::vector<std::string>> onFileDroppedCallback;
 };

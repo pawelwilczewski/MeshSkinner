@@ -21,21 +21,23 @@ public:
 
 	static bool IsMouseInViewport();
 
-	static void OnKeyPressedSubscribe(CallbackRef<int> callback) { onKeyPressed.Subscribe(callback); }
-	static void OnKeyReleasedSubscribe(CallbackRef<int> callback) { onKeyReleased.Subscribe(callback); }
-	static void OnMouseButtonPressedSubscribe(CallbackRef<int> callback) { onMouseButtonPressed.Subscribe(callback); }
-	static void OnMouseButtonReleasedSubscribe(CallbackRef<int> callback) { onMouseButtonReleased.Subscribe(callback); }
-	static void OnMouseMovedSubscribe(CallbackRef<glm::vec2> callback) { onMouseMoved.Subscribe(callback); }
-	static void OnMouseScrolledSubscribe(CallbackRef<glm::vec2> callback) { onMouseScrolled.Subscribe(callback); }
-	static void OnWindowResizedSubscribe(CallbackRef<glm::ivec2> callback) { onWindowResized.Subscribe(callback); }
+	static void OnKeyPressedSubscribe(const CallbackRef<int> &callback);
+	static void OnKeyReleasedSubscribe(const CallbackRef<int> &callback);
+	static void OnMouseButtonPressedSubscribe(const CallbackRef<int> &callback);
+	static void OnMouseButtonReleasedSubscribe(const CallbackRef<int> &callback);
+	static void OnMouseMovedSubscribe(const CallbackRef<glm::vec2> &callback);
+	static void OnMouseScrolledSubscribe(const CallbackRef<glm::vec2> &callback);
+	static void OnWindowResizedSubscribe(const CallbackRef<glm::ivec2> &callback);
+	static void OnFileDroppedSubscribe(const CallbackRef<std::vector<std::string>> &callback);
 
-	static void OnKeyPressedUnsubscribe(CallbackRef<int> callback) { onKeyPressed.Unsubscribe(callback); }
-	static void OnKeyReleasedUnsubscribe(CallbackRef<int> callback) { onKeyReleased.Unsubscribe(callback); }
-	static void OnMouseButtonPressedUnsubscribe(CallbackRef<int> callback) { onMouseButtonPressed.Unsubscribe(callback); }
-	static void OnMouseButtonReleasedUnsubscribe(CallbackRef<int> callback) { onMouseButtonReleased.Unsubscribe(callback); }
-	static void OnMouseMovedUnsubscribe(CallbackRef<glm::vec2> callback) { onMouseMoved.Unsubscribe(callback); }
-	static void OnMouseScrolledUnsubscribe(CallbackRef<glm::vec2> callback) { onMouseScrolled.Unsubscribe(callback); }
-	static void OnWindowResizedUnsubscribe(CallbackRef<glm::ivec2> callback) { onWindowResized.Unsubscribe(callback); }
+	static void OnKeyPressedUnsubscribe(const CallbackRef<int> &callback);
+	static void OnKeyReleasedUnsubscribe(const CallbackRef<int> &callback);
+	static void OnMouseButtonPressedUnsubscribe(const CallbackRef<int> &callback);
+	static void OnMouseButtonReleasedUnsubscribe(const CallbackRef<int> &callback);
+	static void OnMouseMovedUnsubscribe(const CallbackRef<glm::vec2> &callback);
+	static void OnMouseScrolledUnsubscribe(const CallbackRef<glm::vec2> &callback);
+	static void OnWindowResizedUnsubscribe(const CallbackRef<glm::ivec2> &callback);
+	static void OnFileDroppedUnsubscribe(const CallbackRef<std::vector<std::string>> &callback);
 
 private:
 	static void HandleKeyCallback(GLFWwindow *window, int key, int, int action, int);
@@ -43,6 +45,7 @@ private:
 	static void HandleMouseMovedCallback(GLFWwindow *window, double x, double y);
 	static void HandleMouseScrolledCallback(GLFWwindow *window, double offsetX, double offsetY);
 	static void HandleWindowResizedCallback(GLFWwindow *window, int width, int height);
+	static void HandleFileDropCallback(GLFWwindow *window, int pathCount, const char *paths[]);
 
 private:
 	static glm::vec2 mouseDelta;
@@ -55,4 +58,5 @@ private:
 	static Event<glm::vec2> onMouseMoved;
 	static Event<glm::vec2> onMouseScrolled;
 	static Event<glm::ivec2> onWindowResized;
+	static Event<std::vector<std::string>> onFileDropped;
 };
