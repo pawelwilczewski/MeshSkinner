@@ -12,13 +12,20 @@
 
 glm::ivec2 UserInterface::viewportSize = glm::ivec2(1);
 glm::ivec2 UserInterface::viewportScreenPosition = glm::ivec2(0);
+ImFont *UserInterface::defaultFont = nullptr;
 bool UserInterface::interacting = false;
-
-glm::ivec2 UserInterface::GetViewportSize() { return viewportSize; }
-void UserInterface::UpdateViewportSize(const glm::ivec2 &newSize) { viewportSize = newSize; }
-
-CallbackRef<int> UserInterface::onMouseButtonDownCallback;
 bool UserInterface::clickedInViewport = false;
+CallbackRef<int> UserInterface::onMouseButtonDownCallback;
+
+void UserInterface::UpdateViewportSize(const glm::ivec2 &newSize)
+{
+	viewportSize = newSize;
+}
+
+glm::ivec2 UserInterface::GetViewportSize()
+{
+	return viewportSize;
+}
 
 glm::ivec2 UserInterface::GetViewportScreenPosition()
 {
@@ -148,6 +155,8 @@ void UserInterface::Init()
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
     io.ConfigWindowsMoveFromTitleBarOnly = true;
 
+	defaultFont = io.Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 18 * Window::GetScreenSize().y / 1440.f);
+
 	SetupImGuiStyle();
 
     // Setup Platform/Renderer bindings
@@ -211,11 +220,15 @@ void UserInterface::FrameBegin()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+	ImGui::PushFont(defaultFont);
+
     SetupDockspaceViewport();
 }
 
 void UserInterface::FrameEnd()
 {
+	ImGui::PopFont();
+
     ImGuiIO &io = ImGui::GetIO();
     auto bufferSize = Window::GetFramebufferSize();
     io.DisplaySize = { (float)bufferSize.x, (float)bufferSize.y };

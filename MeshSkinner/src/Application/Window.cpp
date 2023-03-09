@@ -108,6 +108,12 @@ void Window::RegenFramebuffer(const glm::ivec2 bufferSize)
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+glm::ivec2 Window::GetScreenSize()
+{
+    auto vid = glfwGetVideoMode(glfwGetPrimaryMonitor());
+    return glm::ivec2(vid->width, vid->height);
+}
+
 GLFWwindow *Window::GetNativeWindow() { return window; }
 
 glm::ivec2 Window::GetFramebufferSize()

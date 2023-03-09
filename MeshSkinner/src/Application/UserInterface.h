@@ -37,6 +37,8 @@ private:
 
 	static bool interacting;
 
+	static ImFont *defaultFont;
+
 private:
 	static CallbackRef<int> onMouseButtonDownCallback;
 	static bool clickedInViewport;
