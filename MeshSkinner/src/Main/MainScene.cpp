@@ -37,36 +37,45 @@ static auto skeletalMesh = MakeRef<SkeletalMeshComponent>("SkeletalMeshComponent
 
 MainScene::MainScene() : Scene()
 {
+    // scene root setup
     sceneRoot = MakeRef<Entity>("Scene");
 
+    // camera setup
     camera = MakeRef<Camera>("MainCamera");
     cameraController = MakeRef<CameraControllerComponent>("CameraControllerComponent 0", 10.f);
     camera->AddComponent(cameraController);
-
     camera->SetParent(sceneRoot);
-
     Renderer::activeCamera = camera;
 
+    // tool initialisation
     brush = MakeUnique<Brush>("Brush Parameters");
     stroke = MakeUnique<Stroke>("Stroke Parameters", [&](StrokeQueryInfo &info) {
         info.hitTarget = MathUtils::RayMeshIntersectionLocalSpace(camera->ProjectViewportToWorld(info.viewportPosition), editedMesh.get(), info.worldPosition);
         });
+    hierarchy = MakeUnique<Hierarchy>("Hierarchy", sceneRoot);
+    animationControls = MakeUnique<AnimationControls>();
+    sceneStats = MakeUnique<SceneStats>();
+
+    // callbacks
+    onDrawAdditionalViewportWidgetsCallback = MakeCallbackNoArgRef([&]() {
+        if (Window::GetCursorVisibility())
+        {
+            auto mousePos = Input::GetMouseScreenPosition();
+            ImGui::GetWindowDrawList()->AddCircle(ImVec2(mousePos.x, mousePos.y), 10.f, ImColor(0.8f, 0.8f, 0.8f, 1.f));
+        }
+        });
+    UserInterface::OnDrawAdditionalViewportWidgetsSubscribe(onDrawAdditionalViewportWidgetsCallback);
+
+    onStrokeEmplaceCallback = MakeCallbackRef<StrokeQueryInfo>([&](const StrokeQueryInfo &info) { OnStrokeEmplace(info); });
+    stroke->OnStrokeEmplaceSubscribe(onStrokeEmplaceCallback);
 
     ShaderLibrary::Load("Bone", "assets/shaders/Bone.vert", "assets/shaders/Bone.frag", 1);
     ShaderLibrary::Load("WeightPaint", "assets/shaders/WeightPaint.vert", "assets/shaders/WeightPaint.frag", 0);
-
-    onStrokeEmplaceCallback = MakeCallbackRef<StrokeQueryInfo>([&](const StrokeQueryInfo &info) { OnStrokeEmplace(info); });
-
-    stroke->OnStrokeEmplaceSubscribe(onStrokeEmplaceCallback);
-
-    hierarchy = MakeUnique<Hierarchy>("Hierarchy", sceneRoot);
-
-    animationControls = MakeUnique<AnimationControls>();
-    sceneStats = MakeUnique<SceneStats>();
 }
 
 MainScene::~MainScene()
 {
+    UserInterface::OnDrawAdditionalViewportWidgetsUnsubscribe(onDrawAdditionalViewportWidgetsCallback);
     stroke->OnStrokeEmplaceUnsubscribe(onStrokeEmplaceCallback);
 }
 
@@ -192,6 +201,13 @@ void MainScene::OnUpdateUI()
 {
     // TODO: all of these can be Tools - make that happen
 
+    //const auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs;
+    //ImGui::Begin("##overlay", nullptr, flags);
+    //auto windowPos = Window::GetWindowPosition();
+    //ImGui::SetWindowPos(ImVec2(windowPos.x, windowPos.y), ImGuiCond_Always);
+    //ImGui::SetWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y), ImGuiCond_Always);
+    //ImGui::End();
+
     // edited mesh
     ImGui::Begin("Edited MeshComponent");
     InteractiveWidget(ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1));
@@ -221,7 +237,7 @@ void MainScene::OnUpdateUI()
 
 void MainScene::OnLateUpdate()
 {
-
+    
 }
 
 void MainScene::OnEnd()

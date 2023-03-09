@@ -12,6 +12,7 @@ struct StrokeQueryInfo
 	glm::vec2 viewportPosition;
 };
 
+// TODO: potentially add radius type (world - fixed in world / pixel - fixed in viewport)
 class Stroke : public Tool
 {
 public:

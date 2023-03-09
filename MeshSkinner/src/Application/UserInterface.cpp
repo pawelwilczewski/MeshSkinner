@@ -12,6 +12,7 @@
 
 glm::ivec2 UserInterface::viewportSize = glm::ivec2(1);
 glm::ivec2 UserInterface::viewportScreenPosition = glm::ivec2(0);
+EventNoArg UserInterface::onDrawAdditionalViewportWidgets = EventNoArg();
 ImFont *UserInterface::defaultFont = nullptr;
 bool UserInterface::interacting = false;
 bool UserInterface::clickedInViewport = false;
@@ -174,8 +175,22 @@ void UserInterface::SetupDockspaceViewport()
 
     // display the framebuffer
     ImGui::Image((void *)(intptr_t)Window::GetFramebufferTexture(), availableSize);
+
+    onDrawAdditionalViewportWidgets.Invoke();
+
     ImGui::End();
 }
+
+void UserInterface::OnDrawAdditionalViewportWidgetsSubscribe(const CallbackNoArgRef &callback)
+{
+    onDrawAdditionalViewportWidgets.Subscribe(callback);
+}
+
+void UserInterface::OnDrawAdditionalViewportWidgetsUnsubscribe(const CallbackNoArgRef &callback)
+{
+    onDrawAdditionalViewportWidgets.Unsubscribe(callback);
+}
+
 
 void UserInterface::OnMouseButtonDown(int button)
 {

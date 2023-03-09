@@ -37,4 +37,5 @@ private:
 private:
 	CallbackRef<StrokeQueryInfo> onStrokeQueryCallback;
 	CallbackRef<StrokeQueryInfo> onStrokeEmplaceCallback;
+	CallbackNoArgRef onDrawAdditionalViewportWidgetsCallback;
 };

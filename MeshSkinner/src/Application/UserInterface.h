@@ -7,8 +7,6 @@ class UserInterface
 public:
 	static glm::ivec2 GetViewportSize();
 	static void UpdateViewportSize(const glm::ivec2 &newSize);
-
-public:
 	static glm::ivec2 GetViewportScreenPosition();
 
 public:
@@ -22,11 +20,13 @@ private:
 	static void FrameEnd();
 	static void Terminate();
 
-private:
 	static void ResetUserInteracting();
 
-private:
 	static void SetupDockspaceViewport();
+
+public:
+	static void OnDrawAdditionalViewportWidgetsSubscribe(const CallbackNoArgRef &callback);
+	static void OnDrawAdditionalViewportWidgetsUnsubscribe(const CallbackNoArgRef &callback);
 
 private:
 	static void OnMouseButtonDown(int button);
@@ -42,6 +42,9 @@ private:
 private:
 	static CallbackRef<int> onMouseButtonDownCallback;
 	static bool clickedInViewport;
+
+private:
+	static EventNoArg onDrawAdditionalViewportWidgets;
 };
 
 constexpr auto InteractiveWidget = UserInterface::UpdateUserInteraction;

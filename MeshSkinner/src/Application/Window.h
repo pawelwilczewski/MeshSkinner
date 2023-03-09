@@ -24,6 +24,7 @@ public:
 
 public:
 	static void SetCursorVisibility(bool visible);
+	static bool GetCursorVisibility();
 
 private:
 	static GLFWwindow *window;
