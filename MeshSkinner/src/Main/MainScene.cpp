@@ -24,14 +24,14 @@ static Ref<Entity> skeletalEntity;
 //static Ref<Entity> staticSkeletalEntity;
 static auto rootBone = Ref<Bone>();
 
-static Ref<SkeletalMesh> editedMesh;
+static Ref<SkeletalMeshComponent> editedMesh;
 
 static std::string sourceFile;
 static std::string targetFile;
 
 static std::vector<Animation> anims;
 
-static auto skeletalMesh = MakeRef<SkeletalMesh>("SkeletalMeshComponent");
+static auto skeletalMesh = MakeRef<SkeletalMeshComponent>("SkeletalMeshComponent");
 
 MainScene::MainScene() : Scene()
 {
@@ -97,7 +97,7 @@ void MainScene::OnStart()
     staticEntity->AddComponent(MeshLibrary::GetCube());
     staticEntity->SetParent(sceneRoot);
 
-    auto staticMesh = MakeRef<StaticMesh>("StaticMeshComponent", staticVertices, indices, MaterialLibrary::GetDefault());
+    auto staticMesh = MakeRef<StaticMeshComponent>("StaticMeshComponent", staticVertices, indices, MaterialLibrary::GetDefault());
     staticEntity2 = MakeRef<Entity>("static2", Transform(glm::vec3(0.f, 0.f, -2.f)));
     staticEntity2->AddComponent(staticMesh);
     staticEntity2->SetParent(sceneRoot);

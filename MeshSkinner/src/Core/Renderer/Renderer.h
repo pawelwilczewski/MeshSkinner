@@ -48,8 +48,8 @@ public:
 
 private:
 	static void SubmitMesh(const Ref<Entity> &entity, const MeshComponent *mesh, DrawCalls &drawCalls, bool skeletal = false);
-	static void SubmitMesh(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh);
-	static void SubmitMesh(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh);
+	static void SubmitMesh(const Ref<Entity> &entity, const Ref<StaticMeshComponent> &mesh);
+	static void SubmitMesh(const Ref<Entity> &entity, const Ref<SkeletalMeshComponent> &mesh);
 
 	static void Render(const DrawCalls::iterator &it);
 

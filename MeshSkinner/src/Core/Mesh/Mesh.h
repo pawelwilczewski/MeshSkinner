@@ -27,11 +27,11 @@ public:
 	Ref<Material> material;
 };
 
-class StaticMesh : public MeshComponent
+class StaticMeshComponent : public MeshComponent
 {
 public:
-	StaticMesh(const std::string &name = "StaticMeshComponent", const std::vector<StaticVertex> &vertices = {}, const std::vector<uint32_t> &indices = {}, Ref<Material> material = MaterialLibrary::GetDefault());
-	virtual ~StaticMesh() = default;
+	StaticMeshComponent(const std::string &name = "StaticMeshComponent", const std::vector<StaticVertex> &vertices = {}, const std::vector<uint32_t> &indices = {}, Ref<Material> material = MaterialLibrary::GetDefault());
+	virtual ~StaticMeshComponent() = default;
 
 public:
 	virtual const void *GetVertices() const override;
@@ -42,11 +42,11 @@ public:
 	std::vector<StaticVertex> vertices;
 };
 
-class SkeletalMesh : public MeshComponent
+class SkeletalMeshComponent : public MeshComponent
 {
 public:
-	SkeletalMesh(const std::string &name = "SkeletalMeshComponent", const std::vector<SkeletalVertex> &vertices = {}, const std::vector<uint32_t> &indices = {}, Ref<Material> material = MaterialLibrary::GetDefault());
-	virtual ~SkeletalMesh() = default;
+	SkeletalMeshComponent(const std::string &name = "SkeletalMeshComponent", const std::vector<SkeletalVertex> &vertices = {}, const std::vector<uint32_t> &indices = {}, Ref<Material> material = MaterialLibrary::GetDefault());
+	virtual ~SkeletalMeshComponent() = default;
 
 public:
 	virtual const void *GetVertices() const override;

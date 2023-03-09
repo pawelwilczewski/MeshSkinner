@@ -19,42 +19,42 @@ const BufferLayout &MeshComponent::GetVertexBufferLayout() const
     }
 }
 
-StaticMesh::StaticMesh(const std::string &name, const std::vector<StaticVertex> &vertices, const std::vector<uint32_t> &indices, Ref<Material> material) : MeshComponent(name, indices, material), vertices(vertices)
+StaticMeshComponent::StaticMeshComponent(const std::string &name, const std::vector<StaticVertex> &vertices, const std::vector<uint32_t> &indices, Ref<Material> material) : MeshComponent(name, indices, material), vertices(vertices)
 {
 
 }
 
-const void *StaticMesh::GetVertices() const
+const void *StaticMeshComponent::GetVertices() const
 {
     return vertices.data();
 }
 
-MeshComponent::VertexType StaticMesh::GetVertexType() const
+MeshComponent::VertexType StaticMeshComponent::GetVertexType() const
 {
     return Static;
 }
 
-size_t StaticMesh::GetVerticesLength() const
+size_t StaticMeshComponent::GetVerticesLength() const
 {
     return vertices.size();
 }
 
-SkeletalMesh::SkeletalMesh(const std::string &name, const std::vector<SkeletalVertex> &vertices, const std::vector<uint32_t> &indices, Ref<Material> material) : MeshComponent(name, indices, material), vertices(vertices)
+SkeletalMeshComponent::SkeletalMeshComponent(const std::string &name, const std::vector<SkeletalVertex> &vertices, const std::vector<uint32_t> &indices, Ref<Material> material) : MeshComponent(name, indices, material), vertices(vertices)
 {
 
 }
 
-const void *SkeletalMesh::GetVertices() const
+const void *SkeletalMeshComponent::GetVertices() const
 {
     return vertices.data();
 }
 
-MeshComponent::VertexType SkeletalMesh::GetVertexType() const
+MeshComponent::VertexType SkeletalMeshComponent::GetVertexType() const
 {
     return Skeletal;
 }
 
-size_t SkeletalMesh::GetVerticesLength() const
+size_t SkeletalMeshComponent::GetVerticesLength() const
 {
     return vertices.size();
 }

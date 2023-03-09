@@ -3,17 +3,17 @@
 
 #include "tiny_gltf.h"
 
-Ref<StaticMesh> MeshLibrary::GetCube()
+Ref<StaticMeshComponent> MeshLibrary::GetCube()
 {
-	auto cubeMesh = MakeRef<StaticMesh>();
+	auto cubeMesh = MakeRef<StaticMeshComponent>();
 	Import("assets/models/default/cube.glb", cubeMesh);
 	return cubeMesh;
 }
 
-Ref<StaticMesh> MeshLibrary::GetBone(float length)
+Ref<StaticMeshComponent> MeshLibrary::GetBone(float length)
 {
 	// take cube, offset the vertices accordingly and set the color to random (gradient)
-	auto mesh = MakeRef<StaticMesh>();
+	auto mesh = MakeRef<StaticMeshComponent>();
 	Import("assets/models/default/cube.glb", mesh);
 
 	// offset to correct the origin
@@ -110,7 +110,7 @@ static bool UpdateIndices(const tinygltf::Primitive &primitive, const Ref<MeshCo
 	return true;
 }
 
-bool MeshLibrary::Import(const std::string &path, Ref<StaticMesh> &outMesh)
+bool MeshLibrary::Import(const std::string &path, Ref<StaticMeshComponent> &outMesh)
 {
 	// TODO: get from the cache map if already loaded once
 
@@ -183,7 +183,7 @@ bool MeshLibrary::Import(const std::string &path, Ref<StaticMesh> &outMesh)
 	return true;
 }
 
-bool MeshLibrary::Import(const std::string &path, Ref<SkeletalMesh> &outMesh, Ref<Bone> &outRoot)
+bool MeshLibrary::Import(const std::string &path, Ref<SkeletalMeshComponent> &outMesh, Ref<Bone> &outRoot)
 {
 	// TODO: get from the cache map if already loaded once
 
@@ -467,7 +467,7 @@ bool MeshLibrary::Import(const std::string &path, std::vector<Animation> &outAni
 	return false;
 }
 
-void MeshLibrary::ExportUpdated(const std::string &source, const std::string &target, const Ref<SkeletalMesh> &inMesh)
+void MeshLibrary::ExportUpdated(const std::string &source, const std::string &target, const Ref<SkeletalMeshComponent> &inMesh)
 {
 	LoadGLTF(source);
 
