@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "StaticMesh.h"
+#include "StaticMeshComponent.h"
 
 StaticMeshComponent::StaticMeshComponent(const std::string &name, const std::vector<StaticVertex> &vertices, const std::vector<uint32_t> &indices, Ref<Material> material) : MeshComponent(name, indices, material), vertices(vertices)
 {

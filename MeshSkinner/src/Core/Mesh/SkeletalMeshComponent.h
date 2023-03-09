@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Application/Core.h"
-#include "Mesh.h"
+#include "MeshComponent.h"
 #include "Skeleton.h"
 
 class SkeletalMeshComponent : public MeshComponent
