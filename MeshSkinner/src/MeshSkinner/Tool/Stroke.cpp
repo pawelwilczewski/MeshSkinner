@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Stroke.h"
 
-static constexpr std::array<const char *, 3> StrokeUpdateTypeNames = { "Pixel Distance", "World Distance", "Each Frame" };
+static constexpr std::array<const char *, 3> strokeUpdateTypeNames = { "Pixel Distance", "World Distance", "Each Frame" };
 
 StrokeQueryInfo::StrokeQueryInfo(bool hitTarget, const glm::vec3 &worldPosition, const glm::vec2 &viewportPosition)
 	: hitTarget(hitTarget), worldPosition(worldPosition), viewportPosition(viewportPosition)
@@ -125,7 +125,7 @@ void Stroke::OnUpdateUI()
 	ImGui::Begin(toolWindowName.c_str());
 
 	Type tempType = type;
-	if (InteractiveWidget(ImGui::ListBox("Stroke update type", (int *)(&tempType), StrokeUpdateTypeNames.data(), StrokeUpdateTypeNames.size())))
+	if (InteractiveWidget(ImGui::ListBox("Stroke update type", (int *)(&tempType), strokeUpdateTypeNames.data(), strokeUpdateTypeNames.size())))
 		SetType(tempType);
 
 	switch (type)

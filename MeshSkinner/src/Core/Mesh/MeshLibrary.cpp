@@ -460,6 +460,19 @@ bool MeshLibrary::Import(const std::string &path, std::vector<Animation> &outAni
 				assert(false);
 		}
 
+		// update the duration
+		for (const auto &track : anim.tracks)
+		{
+			if (track.second.translationKeyframes.size() > 0)
+				anim.duration = glm::max(anim.duration, track.second.translationKeyframes.back().time);
+			if (track.second.rotationKeyframes.size() > 0)
+				anim.duration = glm::max(anim.duration, track.second.rotationKeyframes.back().time);
+			if (track.second.scaleKeyframes.size() > 0)
+				anim.duration = glm::max(anim.duration, track.second.scaleKeyframes.back().time);
+			if (track.second.weightsKeyframes.size() > 0)
+				anim.duration = glm::max(anim.duration, track.second.weightsKeyframes.back().time);
+		}
+
 		// add the animation to the out vector
 		outAnimations.push_back(anim);
 	}

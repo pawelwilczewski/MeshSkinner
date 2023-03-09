@@ -188,12 +188,15 @@ void MainScene::OnUpdate()
     //skeletalEntity->transform.Rotate(glm::vec3(30.f, 0.f, 0.f) * Time::GetDeltaSeconds());
     staticEntity->transform.SetScale(glm::vec3(glm::sin(Time::GetTimeSeconds())));
 
-    auto &anim = anims[0];
-    for (const auto &bone : skeletalMesh->skeleton->GetBones())
+    auto anim = animationControls->GetCurrentAnimation();
+    if (anim)
     {
-        bone->transform.SetPosition(anim.EvaluateTranslation(bone->name, Time::GetTimeSeconds()));
-        bone->transform.SetRotation(glm::degrees(glm::eulerAngles(anim.EvaluateRotation(bone->name, Time::GetTimeSeconds()))));
-        bone->transform.SetScale(anim.EvaluateScale(bone->name, Time::GetTimeSeconds()));
+        for (const auto &bone : skeletalMesh->skeleton->GetBones())
+        {
+            bone->transform.SetPosition(anim->EvaluateTranslation(bone->name, animationControls->GetAnimationTime()));
+            bone->transform.SetRotation(glm::degrees(glm::eulerAngles(anim->EvaluateRotation(bone->name, animationControls->GetAnimationTime()))));
+            bone->transform.SetScale(anim->EvaluateScale(bone->name, animationControls->GetAnimationTime()));
+        }
     }
 }
 
