@@ -13,12 +13,12 @@ void Hierarchy::DrawTree(const Ref<Entity> &entity)
     // workout the flag to use for this node
     auto flag = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow;
     if (children.size() == 0)                   flag |= ImGuiTreeNodeFlags_Leaf;
-    if (entitySelectedInHierarchy.lock() == entity)    flag |= ImGuiTreeNodeFlags_Selected;
+    if (selectedEntity.lock() == entity)    flag |= ImGuiTreeNodeFlags_Selected;
 
     if (ImGui::TreeNodeEx(entity->name.c_str(), flag))
     {
         if (ImGui::IsItemActivated())
-            entitySelectedInHierarchy = entity;
+            selectedEntity = entity;
 
         for (const auto &child : children)
             DrawTree(child);
@@ -26,9 +26,14 @@ void Hierarchy::DrawTree(const Ref<Entity> &entity)
     }
 }
 
+Ref<Entity> Hierarchy::GetSelectedEntity() const
+{
+    return selectedEntity.lock();
+}
+
 void Hierarchy::OnUpdateUI()
 {
-    auto selected = entitySelectedInHierarchy.lock();
+    auto selected = selectedEntity.lock();
 
     // hierarchy
     ImGui::Begin("Hierarchy");

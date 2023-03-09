@@ -7,7 +7,7 @@ class EntityComponent
 	friend class Entity;
 
 public:
-	EntityComponent() = default;
+	EntityComponent(const std::string &name);
 	virtual ~EntityComponent() = default;
 
 public:
@@ -16,6 +16,9 @@ public:
 protected:
 	virtual void OnAttached() {}
 	virtual void OnDetached() {}
+
+public:
+	std::string name;
 
 private:
 	Weak<Entity> entity;

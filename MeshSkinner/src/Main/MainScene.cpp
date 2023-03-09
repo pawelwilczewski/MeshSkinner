@@ -31,14 +31,14 @@ static std::string targetFile;
 
 static std::vector<Animation> anims;
 
-static auto skeletalMesh = MakeRef<SkeletalMesh>();
+static auto skeletalMesh = MakeRef<SkeletalMesh>("SkeletalMeshComponent");
 
 MainScene::MainScene() : Scene()
 {
     sceneRoot = MakeRef<Entity>("Scene");
 
     camera = MakeRef<Camera>("MainCamera");
-    cameraController = MakeRef<CameraController>(10.f);
+    cameraController = MakeRef<CameraController>("CameraController", 10.f);
     camera->AddComponent(cameraController);
 
     camera->SetParent(sceneRoot);
@@ -97,7 +97,7 @@ void MainScene::OnStart()
     staticEntity->AddComponent(MeshLibrary::GetCube());
     staticEntity->SetParent(sceneRoot);
 
-    auto staticMesh = MakeRef<StaticMesh>(staticVertices, indices, MaterialLibrary::GetDefault());
+    auto staticMesh = MakeRef<StaticMesh>("StaticMeshComponent", staticVertices, indices, MaterialLibrary::GetDefault());
     staticEntity2 = MakeRef<Entity>("static2", Transform(glm::vec3(0.f, 0.f, -2.f)));
     staticEntity2->AddComponent(staticMesh);
     staticEntity2->SetParent(sceneRoot);

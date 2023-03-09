@@ -16,8 +16,11 @@ private:
 	void DrawTree(const Ref<Entity> &entity);
 
 public:
+	Ref<Entity> GetSelectedEntity() const;
+
+public:
 	Weak<Entity> root;
 
 private:
-	Weak<Entity> entitySelectedInHierarchy;
+	Weak<Entity> selectedEntity;
 };

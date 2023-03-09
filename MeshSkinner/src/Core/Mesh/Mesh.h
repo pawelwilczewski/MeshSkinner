@@ -13,7 +13,7 @@ public:
 	enum VertexType { Static, Skeletal};
 
 public:
-	Mesh(const std::vector<uint32_t> &indices = {}, Ref<Material> material = MaterialLibrary::GetDefault());
+	Mesh(const std::string &name, const std::vector<uint32_t> &indices = {}, Ref<Material> material = MaterialLibrary::GetDefault());
 	virtual ~Mesh() = default;
 
 public:
@@ -30,7 +30,7 @@ public:
 class StaticMesh : public Mesh
 {
 public:
-	StaticMesh(const std::vector<StaticVertex> &vertices = {}, const std::vector<uint32_t> &indices = {}, Ref<Material> material = MaterialLibrary::GetDefault());
+	StaticMesh(const std::string &name = "StaticMeshComponent", const std::vector<StaticVertex> &vertices = {}, const std::vector<uint32_t> &indices = {}, Ref<Material> material = MaterialLibrary::GetDefault());
 	virtual ~StaticMesh() = default;
 
 public:
@@ -45,7 +45,7 @@ public:
 class SkeletalMesh : public Mesh
 {
 public:
-	SkeletalMesh(const std::vector<SkeletalVertex> &vertices = {}, const std::vector<uint32_t> &indices = {}, Ref<Material> material = MaterialLibrary::GetDefault());
+	SkeletalMesh(const std::string &name = "SkeletalMeshComponent", const std::vector<SkeletalVertex> &vertices = {}, const std::vector<uint32_t> &indices = {}, Ref<Material> material = MaterialLibrary::GetDefault());
 	virtual ~SkeletalMesh() = default;
 
 public:
