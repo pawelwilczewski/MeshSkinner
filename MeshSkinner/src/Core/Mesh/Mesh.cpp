@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "Mesh.h"
 
-Mesh::Mesh(const std::string &name, const std::vector<uint32_t> &indices, Ref<Material> material) : EntityComponent(name), indices(indices), material(material)
+MeshComponent::MeshComponent(const std::string &name, const std::vector<uint32_t> &indices, Ref<Material> material) : EntityComponent(name), indices(indices), material(material)
 {
 
 }
 
-const BufferLayout &Mesh::GetVertexBufferLayout() const
+const BufferLayout &MeshComponent::GetVertexBufferLayout() const
 {
     switch (GetVertexType())
     {
@@ -19,7 +19,7 @@ const BufferLayout &Mesh::GetVertexBufferLayout() const
     }
 }
 
-StaticMesh::StaticMesh(const std::string &name, const std::vector<StaticVertex> &vertices, const std::vector<uint32_t> &indices, Ref<Material> material) : Mesh(name, indices, material), vertices(vertices)
+StaticMesh::StaticMesh(const std::string &name, const std::vector<StaticVertex> &vertices, const std::vector<uint32_t> &indices, Ref<Material> material) : MeshComponent(name, indices, material), vertices(vertices)
 {
 
 }
@@ -29,7 +29,7 @@ const void *StaticMesh::GetVertices() const
     return vertices.data();
 }
 
-Mesh::VertexType StaticMesh::GetVertexType() const
+MeshComponent::VertexType StaticMesh::GetVertexType() const
 {
     return Static;
 }
@@ -39,7 +39,7 @@ size_t StaticMesh::GetVerticesLength() const
     return vertices.size();
 }
 
-SkeletalMesh::SkeletalMesh(const std::string &name, const std::vector<SkeletalVertex> &vertices, const std::vector<uint32_t> &indices, Ref<Material> material) : Mesh(name, indices, material), vertices(vertices)
+SkeletalMesh::SkeletalMesh(const std::string &name, const std::vector<SkeletalVertex> &vertices, const std::vector<uint32_t> &indices, Ref<Material> material) : MeshComponent(name, indices, material), vertices(vertices)
 {
 
 }
@@ -49,7 +49,7 @@ const void *SkeletalMesh::GetVertices() const
     return vertices.data();
 }
 
-Mesh::VertexType SkeletalMesh::GetVertexType() const
+MeshComponent::VertexType SkeletalMesh::GetVertexType() const
 {
     return Skeletal;
 }

@@ -78,7 +78,7 @@ static void *GetAttributeData(const tinygltf::Primitive &primitive, const std::s
 	return nullptr;
 }
 
-static bool UpdateIndices(const tinygltf::Primitive &primitive, const Ref<Mesh> &outMesh)
+static bool UpdateIndices(const tinygltf::Primitive &primitive, const Ref<MeshComponent> &outMesh)
 {
 	// add indices
 	auto &indices = model.accessors[primitive.indices];

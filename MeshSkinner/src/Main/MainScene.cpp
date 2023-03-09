@@ -4,7 +4,7 @@
 #include "Core/Renderer/Renderer.h"
 #include "Core/Renderer/Buffer/Buffer.h"
 #include "Core/Camera/Camera.h"
-#include "Core/Camera/CameraController.h"
+#include "Core/Camera/CameraControllerComponent.h"
 
 #include "MeshSkinner/Tool/Brush.h"
 #include "MeshSkinner/Tool/Stroke.h"
@@ -204,7 +204,7 @@ void MainScene::OnUpdateUI()
     ImGui::End();
 
     // edited mesh
-    ImGui::Begin("Edited Mesh");
+    ImGui::Begin("Edited MeshComponent");
     InteractiveWidget(ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1));
     InteractiveWidget(ImGui::InputText("Input file path", &sourceFile)); // TODO: for text inputs: unfocus if clicked in the viewport
     if (InteractiveWidget(ImGui::Button("Import file")))
