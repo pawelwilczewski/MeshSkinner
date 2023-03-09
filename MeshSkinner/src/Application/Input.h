@@ -39,7 +39,7 @@ public:
 	static void OnWindowResizedUnsubscribe(const CallbackRef<glm::ivec2> &callback);
 	static void OnFileDroppedUnsubscribe(const CallbackRef<std::vector<std::string>> &callback);
 
-	static std::vector<std::string> &GetDroppedFiles();
+	static const std::vector<std::string> &GetDroppedFiles();
 
 private:
 	static void HandleKeyCallback(GLFWwindow *window, int key, int, int action, int);

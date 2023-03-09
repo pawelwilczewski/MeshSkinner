@@ -66,9 +66,6 @@ MainScene::MainScene() : Scene()
         });
     UserInterface::OnDrawAdditionalViewportWidgetsSubscribe(onDrawAdditionalViewportWidgetsCallback);
 
-    onFileDroppedCallback = MakeCallbackRef<std::vector<std::string>>([&](const std::vector<std::string> &paths) { OnFileDropped(paths); });
-    Input::OnFileDroppedSubscribe(onFileDroppedCallback);
-
     onStrokeEmplaceCallback = MakeCallbackRef<StrokeQueryInfo>([&](const StrokeQueryInfo &info) { OnStrokeEmplace(info); });
     stroke->OnStrokeEmplaceSubscribe(onStrokeEmplaceCallback);
 
@@ -79,7 +76,6 @@ MainScene::MainScene() : Scene()
 MainScene::~MainScene()
 {
     UserInterface::OnDrawAdditionalViewportWidgetsUnsubscribe(onDrawAdditionalViewportWidgetsCallback);
-    Input::OnFileDroppedUnsubscribe(onFileDroppedCallback);
     stroke->OnStrokeEmplaceUnsubscribe(onStrokeEmplaceCallback);
 }
 
@@ -209,8 +205,10 @@ void MainScene::OnUpdateUI()
     ImGui::Begin("Edited Mesh");
     InteractiveWidget(ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1));
     InteractiveWidget(ImGui::InputText("Input file path", &sourceFile)); // TODO: for text inputs: unfocus if clicked in the viewport
-    if (ImGui::IsItemHovered() && droppedFiles.size() > 0)
-        sourceFile = droppedFiles[0];
+
+    auto &dropped = Input::GetDroppedFiles();
+    if (ImGui::IsItemHovered() && dropped.size() > 0)
+        sourceFile = dropped[0];
 
     if (InteractiveWidget(ImGui::Button("Import file")))
     {
@@ -220,10 +218,8 @@ void MainScene::OnUpdateUI()
     }
 
     InteractiveWidget(ImGui::InputText("Export file path", &targetFile));
-    if (ImGui::IsItemHovered() && droppedFiles.size() > 0)
-        targetFile = droppedFiles[0];
-
-    droppedFiles.clear();
+    if (ImGui::IsItemHovered() && dropped.size() > 0)
+        targetFile = dropped[0];
 
     if (InteractiveWidget(ImGui::Button("Export file")))
     {
@@ -306,9 +302,4 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
     }
 
     Renderer::UpdateMeshVertices(editedMesh.get());
-}
-
-void MainScene::OnFileDropped(const std::vector<std::string> &paths)
-{
-    droppedFiles = paths;
 }

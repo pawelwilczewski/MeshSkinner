@@ -165,7 +165,7 @@ void Input::OnLateUpdate()
 	droppedFilesInNewFrame = false;
 }
 
-std::vector<std::string> &Input::GetDroppedFiles()
+const std::vector<std::string> &Input::GetDroppedFiles()
 {
 	if (droppedFilesInNewFrame)
 		return droppedFiles;
