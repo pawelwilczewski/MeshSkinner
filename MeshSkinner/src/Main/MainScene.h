@@ -27,6 +27,7 @@ private:
 	Unique<Stroke> stroke;
 	Unique<class Hierarchy> hierarchy;
 	Unique<class AnimationControls> animationControls;
+	Unique<class SceneStats> sceneStats;
 
 	Ref<Entity> sceneRoot;
 

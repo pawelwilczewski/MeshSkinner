@@ -10,6 +10,7 @@
 #include "MeshSkinner/Tool/Stroke.h"
 #include "MeshSkinner/Tool/Hierarchy.h"
 #include "MeshSkinner/Tool/AnimationControls.h"
+#include "MeshSkinner/Tool/SceneStats.h"
 
 static Ref<VertexArray<uint32_t>> vao;
 static Ref<VertexBuffer<StaticVertex>> vbo;
@@ -61,6 +62,7 @@ MainScene::MainScene() : Scene()
     hierarchy = MakeUnique<Hierarchy>("Hierarchy", sceneRoot);
 
     animationControls = MakeUnique<AnimationControls>();
+    sceneStats = MakeUnique<SceneStats>();
 }
 
 MainScene::~MainScene()
@@ -188,23 +190,7 @@ void MainScene::OnUpdate()
 
 void MainScene::OnUpdateUI()
 {
-    // debug fps info
-    static int updates = 0;
-    static float frameTimes = 0.f;
-    static float fps = 0.f;
-    updates++;
-    frameTimes += Time::GetDeltaSeconds();
-    fps += Time::GetFPS();
-
     // TODO: all of these can be Tools - make that happen
-
-    // scene stats
-    ImGui::Begin("Scene Stats");
-    ImGui::Text("FPS:            %f", Time::GetFPS());
-    ImGui::Text("Frame time:     %f ms", Time::GetDeltaSeconds() * 1000.f);
-    ImGui::Text("Avg FPS:        %f", fps / updates);
-    ImGui::Text("Avg frame time: %f ms", frameTimes / updates * 1000.f);
-    ImGui::End();
 
     // edited mesh
     ImGui::Begin("Edited MeshComponent");
