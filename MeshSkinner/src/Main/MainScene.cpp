@@ -38,7 +38,7 @@ MainScene::MainScene() : Scene()
     sceneRoot = MakeRef<Entity>("Scene");
 
     camera = MakeRef<Camera>("MainCamera");
-    cameraController = MakeRef<CameraController>("CameraController", 10.f);
+    cameraController = MakeRef<CameraControllerComponent>("CameraControllerComponent 0", 10.f);
     camera->AddComponent(cameraController);
 
     camera->SetParent(sceneRoot);

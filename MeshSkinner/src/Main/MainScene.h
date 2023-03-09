@@ -30,7 +30,7 @@ private:
 	Ref<Entity> sceneRoot;
 
 	Ref<class Camera> camera; // TODO: make unique and use weak in renderer? that wont work though? figure it out..
-	Ref<class CameraController> cameraController;
+	Ref<class CameraControllerComponent> cameraController;
 
 private:
 	CallbackRef<StrokeQueryInfo> onStrokeQueryCallback;
