@@ -3,6 +3,8 @@
 #include "Application/Core.h"
 #include "VertexArray.h"
 #include "Core/Mesh/Mesh.h"
+#include "Core/Mesh/StaticMesh.h"
+#include "Core/Mesh/SkeletalMesh.h"
 #include "Core/Entity/Transform.h"
 #include "Core/Entity/Entity.h"
 #include "Core/Camera/Camera.h"
