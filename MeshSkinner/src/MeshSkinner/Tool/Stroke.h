@@ -17,7 +17,7 @@ class Stroke : public Tool
 {
 public:
 	// NOTE: upon updating any of these, ALSO update the strings array at the top of Stroke.cpp
-	enum class Type { PixelDistance = 0, WorldDistance, EachFrame, FixedDeltaTime };
+	enum class Type { PixelDistance = 0, WorldDistance, EachFrame };
 
 public:
 	Stroke(const std::string &toolWindowName, const std::function<void(StrokeQueryInfo &)> &queryFunction, Type type = Type::WorldDistance, float pixelDistance = 10.f, float worldDistance = 1.f, float fixedIntervalTime = 0.1f);
