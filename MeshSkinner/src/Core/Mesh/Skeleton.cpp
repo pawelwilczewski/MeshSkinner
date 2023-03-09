@@ -10,16 +10,16 @@ Skeleton::Skeleton()
 {
 }
 
-const Ref<Bone> &Skeleton::operator[](const char *boneName) const
+const Bone *Skeleton::operator[](const char *boneName) const
 {
     return GetBoneByName(boneName);
 }
 
-const Ref<Bone> &Skeleton::GetBoneByName(const char *boneName) const
+const Bone *Skeleton::GetBoneByName(const char *boneName) const
 {
     for (const auto &bone : bones)
         if (bone->name == boneName)
-            return bone;
+            return bone.get();
 
     return nullptr;
 }

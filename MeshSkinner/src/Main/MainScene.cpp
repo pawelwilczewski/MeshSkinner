@@ -209,9 +209,9 @@ void MainScene::OnUpdateUI()
     InteractiveWidget(ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1));
     InteractiveWidget(ImGui::InputText("Input file path", &sourceFile)); // TODO: for text inputs: unfocus if clicked in the viewport
 
-    auto &dropped = Input::GetDroppedFiles();
-    if (ImGui::IsItemHovered() && dropped.size() > 0)
-        sourceFile = dropped[0];
+    auto dropped = Input::GetDroppedFiles();
+    if (ImGui::IsItemHovered() && dropped && dropped->size() > 0)
+        sourceFile = dropped->at(0);
 
     if (InteractiveWidget(ImGui::Button("Import file")))
     {
@@ -221,8 +221,8 @@ void MainScene::OnUpdateUI()
     }
 
     InteractiveWidget(ImGui::InputText("Export file path", &targetFile));
-    if (ImGui::IsItemHovered() && dropped.size() > 0)
-        targetFile = dropped[0];
+    if (ImGui::IsItemHovered() && dropped && dropped->size() > 0)
+        targetFile = dropped->at(0);
 
     if (InteractiveWidget(ImGui::Button("Export file")))
     {

@@ -29,9 +29,9 @@ void AnimationControls::OnUpdateUI()
 
 	InteractiveWidget(ImGui::InputText("Animations file path", &sourceFile)); // TODO: for text inputs: unfocus if clicked in the viewport
 
-	auto &dropped = Input::GetDroppedFiles();
-	if (ImGui::IsItemHovered() && dropped.size() > 0)
-		sourceFile = dropped[0];
+	auto dropped = Input::GetDroppedFiles();
+	if (ImGui::IsItemHovered() && dropped && dropped->size() > 0)
+		sourceFile = dropped->at(0);
 
 	if (InteractiveWidget(ImGui::Button("Import animations")))
 	{

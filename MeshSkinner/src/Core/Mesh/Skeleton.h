@@ -28,8 +28,8 @@ public:
 	Skeleton();
 
 public:
-	const Ref<Bone> &operator[](const char *boneName) const;
-	const Ref<Bone> &GetBoneByName(const char *boneName) const;
+	const Bone *operator[](const char *boneName) const;
+	const Bone *GetBoneByName(const char *boneName) const;
 	const Ref<Bone> &GetRootBone() const;
 
 	const std::vector<Ref<Bone>> &GetBones() const;
