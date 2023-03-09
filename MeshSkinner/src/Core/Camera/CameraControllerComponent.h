@@ -1,12 +1,13 @@
 #pragma once
 
+#include "Application/Core.h"
 #include "Camera.h"
 
-class CameraController : public EntityComponent
+class CameraControllerComponent : public EntityComponent
 {
 public:
-	CameraController(float moveSpeed = 10.f, float moveSpeedMultiplier = 1.f, float moveSpeedMultiplierDelta = 0.2f, float maxSpeed = 10000.f, float minSpeed = 0.1f);
-	virtual ~CameraController();
+	CameraControllerComponent(const std::string &name = "CameraControllerComponent", float moveSpeed = 10.f, float moveSpeedMultiplier = 1.f, float moveSpeedMultiplierDelta = 0.2f, float maxSpeed = 10000.f, float minSpeed = 0.1f);
+	virtual ~CameraControllerComponent();
 
 protected:
 	void OnUpdate();

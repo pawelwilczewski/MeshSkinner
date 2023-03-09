@@ -3,17 +3,17 @@
 
 #include "tiny_gltf.h"
 
-Ref<StaticMesh> MeshLibrary::GetCube()
+Ref<StaticMeshComponent> MeshLibrary::GetCube()
 {
-	auto cubeMesh = MakeRef<StaticMesh>();
+	auto cubeMesh = MakeRef<StaticMeshComponent>();
 	Import("assets/models/default/cube.glb", cubeMesh);
 	return cubeMesh;
 }
 
-Ref<StaticMesh> MeshLibrary::GetBone(float length)
+Ref<StaticMeshComponent> MeshLibrary::GetBone(float length)
 {
 	// take cube, offset the vertices accordingly and set the color to random (gradient)
-	auto mesh = MakeRef<StaticMesh>();
+	auto mesh = MakeRef<StaticMeshComponent>();
 	Import("assets/models/default/cube.glb", mesh);
 
 	// offset to correct the origin
@@ -78,7 +78,7 @@ static void *GetAttributeData(const tinygltf::Primitive &primitive, const std::s
 	return nullptr;
 }
 
-static bool UpdateIndices(const tinygltf::Primitive &primitive, const Ref<Mesh> &outMesh)
+static bool UpdateIndices(const tinygltf::Primitive &primitive, const Ref<MeshComponent> &outMesh)
 {
 	// add indices
 	auto &indices = model.accessors[primitive.indices];
@@ -110,7 +110,7 @@ static bool UpdateIndices(const tinygltf::Primitive &primitive, const Ref<Mesh> 
 	return true;
 }
 
-bool MeshLibrary::Import(const std::string &path, Ref<StaticMesh> &outMesh)
+bool MeshLibrary::Import(const std::string &path, Ref<StaticMeshComponent> &outMesh)
 {
 	// TODO: get from the cache map if already loaded once
 
@@ -183,7 +183,7 @@ bool MeshLibrary::Import(const std::string &path, Ref<StaticMesh> &outMesh)
 	return true;
 }
 
-bool MeshLibrary::Import(const std::string &path, Ref<SkeletalMesh> &outMesh, Ref<Bone> &outRoot)
+bool MeshLibrary::Import(const std::string &path, Ref<SkeletalMeshComponent> &outMesh, Ref<Bone> &outRoot)
 {
 	// TODO: get from the cache map if already loaded once
 
@@ -460,6 +460,19 @@ bool MeshLibrary::Import(const std::string &path, std::vector<Animation> &outAni
 				assert(false);
 		}
 
+		// update the duration
+		for (const auto &track : anim.tracks)
+		{
+			if (track.second.translationKeyframes.size() > 0)
+				anim.duration = glm::max(anim.duration, track.second.translationKeyframes.back().time);
+			if (track.second.rotationKeyframes.size() > 0)
+				anim.duration = glm::max(anim.duration, track.second.rotationKeyframes.back().time);
+			if (track.second.scaleKeyframes.size() > 0)
+				anim.duration = glm::max(anim.duration, track.second.scaleKeyframes.back().time);
+			if (track.second.weightsKeyframes.size() > 0)
+				anim.duration = glm::max(anim.duration, track.second.weightsKeyframes.back().time);
+		}
+
 		// add the animation to the out vector
 		outAnimations.push_back(anim);
 	}
@@ -467,7 +480,7 @@ bool MeshLibrary::Import(const std::string &path, std::vector<Animation> &outAni
 	return false;
 }
 
-void MeshLibrary::ExportUpdated(const std::string &source, const std::string &target, const Ref<SkeletalMesh> &inMesh)
+void MeshLibrary::ExportUpdated(const std::string &source, const std::string &target, const Ref<SkeletalMeshComponent> &inMesh)
 {
 	LoadGLTF(source);
 

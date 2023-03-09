@@ -77,6 +77,20 @@ void Transform::RecalculateMatrix()
 	isMatrixUpdated = true;
 }
 
+void Transform::DisplayUI()
+{
+	glm::vec3 positionCopy = GetPosition();
+	glm::vec3 rotationCopy = GetRotation();
+	glm::vec3 scaleCopy = GetScale();
+	ImGui::Text("Transform");
+	ImGui::DragFloat3("Position", glm::value_ptr(positionCopy), 1.f, -1000000000.f, 1000000000.f);
+	ImGui::DragFloat3("Rotation", glm::value_ptr(rotationCopy), 1.f, -1000000000.f, 1000000000.f);
+	ImGui::DragFloat3("Scale", glm::value_ptr(scaleCopy), 0.05f, -1000000000.f, 1000000000.f);
+	SetPosition(positionCopy);
+	SetRotation(rotationCopy);
+	SetScale(scaleCopy);
+}
+
 void Transform::OnMatrixDirtySubscribe(const CallbackNoArgRef &callback)
 {
 	onMatrixDirty.Subscribe(callback);

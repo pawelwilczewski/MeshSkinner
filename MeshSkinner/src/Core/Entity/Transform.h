@@ -39,6 +39,9 @@ protected:
 	virtual void RecalculateMatrix();
 
 public:
+	virtual void DisplayUI();
+
+public:
 	void OnMatrixDirtySubscribe(const CallbackNoArgRef &callback);
 	void OnMatrixDirtyUnsubscribe(const CallbackNoArgRef &callback);
 

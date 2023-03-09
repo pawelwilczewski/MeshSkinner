@@ -3,7 +3,7 @@
 #include "Application/Core.h"
 #include "Application/Scene.h"
 
-#include "MeshSkinner/Stroke.h"
+#include "MeshSkinner/Tool/Stroke.h"
 
 class MainScene : public Scene
 {
@@ -24,14 +24,17 @@ private:
 
 private:
 	Unique<class Brush> brush;
-	Unique<class Stroke> stroke;
+	Unique<Stroke> stroke;
+	Unique<class Hierarchy> hierarchy;
+	Unique<class AnimationControls> animationControls;
+	Unique<class SceneStats> sceneStats;
 
 	Ref<Entity> sceneRoot;
 
 	Ref<class Camera> camera; // TODO: make unique and use weak in renderer? that wont work though? figure it out..
-	Ref<class CameraController> cameraController;
+	Ref<class CameraControllerComponent> cameraController;
 
 private:
-	CallbackRef<StrokeQueryInfo> onStrokeQueryCallback;
 	CallbackRef<StrokeQueryInfo> onStrokeEmplaceCallback;
+	CallbackNoArgRef onDrawAdditionalViewportWidgetsCallback;
 };

@@ -4,10 +4,13 @@
 #include "Core/Renderer/Renderer.h"
 #include "Core/Renderer/Buffer/Buffer.h"
 #include "Core/Camera/Camera.h"
-#include "Core/Camera/CameraController.h"
+#include "Core/Camera/CameraControllerComponent.h"
 
-#include "MeshSkinner/Brush.h"
-#include "MeshSkinner/Stroke.h"
+#include "MeshSkinner/Tool/Brush.h"
+#include "MeshSkinner/Tool/Stroke.h"
+#include "MeshSkinner/Tool/Hierarchy.h"
+#include "MeshSkinner/Tool/AnimationControls.h"
+#include "MeshSkinner/Tool/SceneStats.h"
 
 static Ref<VertexArray<uint32_t>> vao;
 static Ref<VertexBuffer<StaticVertex>> vbo;
@@ -23,44 +26,56 @@ static Ref<Entity> skeletalEntity;
 //static Ref<Entity> staticSkeletalEntity;
 static auto rootBone = Ref<Bone>();
 
-static Ref<SkeletalMesh> editedMesh;
+static Ref<SkeletalMeshComponent> editedMesh;
 
 static std::string sourceFile;
 static std::string targetFile;
 
-static Ref<Entity> entitySelectedInHierarchy;
-
 static std::vector<Animation> anims;
 
-static auto skeletalMesh = MakeRef<SkeletalMesh>();
+static auto skeletalMesh = MakeRef<SkeletalMeshComponent>("SkeletalMeshComponent");
 
 MainScene::MainScene() : Scene()
 {
+    // scene root setup
     sceneRoot = MakeRef<Entity>("Scene");
 
+    // camera setup
     camera = MakeRef<Camera>("MainCamera");
-    cameraController = MakeRef<CameraController>(10.f);
+    cameraController = MakeRef<CameraControllerComponent>("CameraControllerComponent 0", 10.f);
     camera->AddComponent(cameraController);
-
     camera->SetParent(sceneRoot);
-
     Renderer::activeCamera = camera;
 
+    // tool initialisation
     brush = MakeUnique<Brush>("Brush Parameters");
     stroke = MakeUnique<Stroke>("Stroke Parameters", [&](StrokeQueryInfo &info) {
         info.hitTarget = MathUtils::RayMeshIntersectionLocalSpace(camera->ProjectViewportToWorld(info.viewportPosition), editedMesh.get(), info.worldPosition);
         });
+    hierarchy = MakeUnique<Hierarchy>("Hierarchy", sceneRoot);
+    animationControls = MakeUnique<AnimationControls>();
+    sceneStats = MakeUnique<SceneStats>();
+
+    // callbacks
+    onDrawAdditionalViewportWidgetsCallback = MakeCallbackNoArgRef([&]() {
+        if (Window::GetCursorVisibility())
+        {
+            auto mousePos = Input::GetMouseScreenPosition();
+            ImGui::GetWindowDrawList()->AddCircle(ImVec2(mousePos.x, mousePos.y), 10.f, ImColor(0.8f, 0.8f, 0.8f, 1.f));
+        }
+        });
+    UserInterface::OnDrawAdditionalViewportWidgetsSubscribe(onDrawAdditionalViewportWidgetsCallback);
+
+    onStrokeEmplaceCallback = MakeCallbackRef<StrokeQueryInfo>([&](const StrokeQueryInfo &info) { OnStrokeEmplace(info); });
+    stroke->OnStrokeEmplaceSubscribe(onStrokeEmplaceCallback);
 
     ShaderLibrary::Load("Bone", "assets/shaders/Bone.vert", "assets/shaders/Bone.frag", 1);
     ShaderLibrary::Load("WeightPaint", "assets/shaders/WeightPaint.vert", "assets/shaders/WeightPaint.frag", 0);
-
-    onStrokeEmplaceCallback = MakeCallbackRef<StrokeQueryInfo>([&](const StrokeQueryInfo &info) { OnStrokeEmplace(info); });
-
-    stroke->OnStrokeEmplaceSubscribe(onStrokeEmplaceCallback);
 }
 
 MainScene::~MainScene()
 {
+    UserInterface::OnDrawAdditionalViewportWidgetsUnsubscribe(onDrawAdditionalViewportWidgetsCallback);
     stroke->OnStrokeEmplaceUnsubscribe(onStrokeEmplaceCallback);
 }
 
@@ -96,7 +111,7 @@ void MainScene::OnStart()
     staticEntity->AddComponent(MeshLibrary::GetCube());
     staticEntity->SetParent(sceneRoot);
 
-    auto staticMesh = MakeRef<StaticMesh>(staticVertices, indices, MaterialLibrary::GetDefault());
+    auto staticMesh = MakeRef<StaticMeshComponent>("StaticMeshComponent", staticVertices, indices, MaterialLibrary::GetDefault());
     staticEntity2 = MakeRef<Entity>("static2", Transform(glm::vec3(0.f, 0.f, -2.f)));
     staticEntity2->AddComponent(staticMesh);
     staticEntity2->SetParent(sceneRoot);
@@ -173,59 +188,42 @@ void MainScene::OnUpdate()
     //skeletalEntity->transform.Rotate(glm::vec3(30.f, 0.f, 0.f) * Time::GetDeltaSeconds());
     staticEntity->transform.SetScale(glm::vec3(glm::sin(Time::GetTimeSeconds())));
 
-    auto &anim = anims[0];
-    for (const auto &bone : skeletalMesh->skeleton->GetBones())
+    auto anim = animationControls->GetCurrentAnimation();
+    if (anim)
     {
-        bone->transform.SetPosition(anim.EvaluateTranslation(bone->name, Time::GetTimeSeconds()));
-        bone->transform.SetRotation(glm::degrees(glm::eulerAngles(anim.EvaluateRotation(bone->name, Time::GetTimeSeconds()))));
-        bone->transform.SetScale(anim.EvaluateScale(bone->name, Time::GetTimeSeconds()));
-    }
-}
-
-static void DrawTree(const Ref<Entity> &entity)
-{
-    if (ImGui::TreeNode(entity->name.c_str()))
-    {
-        if (ImGui::IsItemToggledOpen())
-            entitySelectedInHierarchy = entity; // TODO: this only works if only one node is expanded
-
-        for (const auto &child : entity->GetChildren())
-            DrawTree(child);
-        ImGui::TreePop();
+        for (const auto &bone : skeletalMesh->skeleton->GetBones())
+        {
+            bone->transform.SetPosition(anim->EvaluateTranslation(bone->name, animationControls->GetAnimationTime()));
+            bone->transform.SetRotation(glm::degrees(glm::eulerAngles(anim->EvaluateRotation(bone->name, animationControls->GetAnimationTime()))));
+            bone->transform.SetScale(anim->EvaluateScale(bone->name, animationControls->GetAnimationTime()));
+        }
     }
 }
 
 void MainScene::OnUpdateUI()
 {
-    // debug fps info
-    static int updates = 0;
-    static float frameTimes = 0.f;
-    static float fps = 0.f;
-    updates++;
-    frameTimes += Time::GetDeltaSeconds();
-    fps += Time::GetFPS();
-
     // TODO: all of these can be Tools - make that happen
-
-    // scene stats
-    ImGui::Begin("Scene Stats");
-    ImGui::Text("FPS:            %f", Time::GetFPS());
-    ImGui::Text("Frame time:     %f ms", Time::GetDeltaSeconds() * 1000.f);
-    ImGui::Text("Avg FPS:        %f", fps / updates);
-    ImGui::Text("Avg frame time: %f ms", frameTimes / updates * 1000.f);
-    ImGui::End();
 
     // edited mesh
     ImGui::Begin("Edited Mesh");
     InteractiveWidget(ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1));
     InteractiveWidget(ImGui::InputText("Input file path", &sourceFile)); // TODO: for text inputs: unfocus if clicked in the viewport
+
+    auto &dropped = Input::GetDroppedFiles();
+    if (ImGui::IsItemHovered() && dropped.size() > 0)
+        sourceFile = dropped[0];
+
     if (InteractiveWidget(ImGui::Button("Import file")))
     {
         Log::Info("TODO: IMPLEMENT Importing file {}", sourceFile);
 
 
     }
+
     InteractiveWidget(ImGui::InputText("Export file path", &targetFile));
+    if (ImGui::IsItemHovered() && dropped.size() > 0)
+        targetFile = dropped[0];
+
     if (InteractiveWidget(ImGui::Button("Export file")))
     {
         Log::Info("Exporting updated mesh from {} to {}", sourceFile, targetFile);
@@ -240,55 +238,11 @@ void MainScene::OnUpdateUI()
     ImGui::Begin("Settings");
     InteractiveWidget(ImGui::DragFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.0001f, 0.0f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput));
     ImGui::End();
-
-    // viewport
-    ImGui::Begin("Viewport Settings");
-    if (InteractiveWidget(ImGui::Button("Reset camera")))
-    {
-        camera->transform.SetPosition(glm::vec3(0.f));
-        camera->transform.SetRotation(glm::vec3(0.f));
-    }
-    ImGui::End();
-
-    // hierarchy
-    ImGui::Begin("Hierarchy");
-    DrawTree(sceneRoot);
-    ImGui::End();
-
-    ImGui::Begin("Entity");
-    if (entitySelectedInHierarchy)
-    {
-        ImGui::Text(entitySelectedInHierarchy->name.c_str());
-        ImGui::Separator();
-
-        glm::vec3 positionCopy = entitySelectedInHierarchy->transform.GetPosition();
-        glm::vec3 rotationCopy = entitySelectedInHierarchy->transform.GetRotation();
-        glm::vec3 scaleCopy = entitySelectedInHierarchy->transform.GetScale();
-        ImGui::Text("Transform");
-        ImGui::DragFloat3("Position", glm::value_ptr(positionCopy), 1.f, -1000000000.f, 1000000000.f);
-        ImGui::DragFloat3("Rotation", glm::value_ptr(rotationCopy), 1.f, -1000000000.f, 1000000000.f);
-        ImGui::DragFloat3("Scale", glm::value_ptr(scaleCopy), 0.05f, -1000000000.f, 1000000000.f);
-        entitySelectedInHierarchy->transform.SetPosition(positionCopy);
-        entitySelectedInHierarchy->transform.SetRotation(rotationCopy);
-        entitySelectedInHierarchy->transform.SetScale(scaleCopy);
-
-        ImGui::Separator();
-        ImGui::Text("Components");
-        ImGui::Separator();
-        for (const auto &component : entitySelectedInHierarchy->GetComponents<EntityComponent>())
-        {
-            ImGui::Text("\tSome component");
-            ImGui::Separator();
-        }
-    }
-    ImGui::End();
-
-    // TODO: entity details (transform widget, component names); maybe add some ui function which can be customised in components and will be called for each component
 }
 
 void MainScene::OnLateUpdate()
 {
-
+    
 }
 
 void MainScene::OnEnd()

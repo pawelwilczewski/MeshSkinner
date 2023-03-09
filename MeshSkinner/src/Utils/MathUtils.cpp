@@ -14,7 +14,7 @@ bool MathUtils::Ray::IntersectsTriangle(const glm::vec3 &v0, const glm::vec3 &v1
     return hit;
 }
 
-bool MathUtils::RayMeshIntersectionLocalSpace(const Ray &ray, const Mesh *mesh, glm::vec3 &closestIntersection)
+bool MathUtils::RayMeshIntersectionLocalSpace(const Ray &ray, const MeshComponent *mesh, glm::vec3 &closestIntersection)
 {
     float smallestDistance = -1.f;
 
@@ -57,7 +57,7 @@ bool MathUtils::RayMeshIntersectionLocalSpace(const Ray &ray, const Mesh *mesh, 
     return smallestDistance >= 0.f;
 }
 
-bool MathUtils::RayMeshIntersection(const Ray &ray, const Mesh *mesh, glm::vec3 &closestIntersection)
+bool MathUtils::RayMeshIntersection(const Ray &ray, const MeshComponent *mesh, glm::vec3 &closestIntersection)
 {
     auto result = RayMeshIntersectionLocalSpace(ray, mesh, closestIntersection);
 
@@ -67,7 +67,7 @@ bool MathUtils::RayMeshIntersection(const Ray &ray, const Mesh *mesh, glm::vec3 
     return result;
 }
 
-std::vector<uint32_t> MathUtils::GetVerticesInRadiusLocalSpace(const Mesh *mesh, const glm::vec3 &point, float radius)
+std::vector<uint32_t> MathUtils::GetVerticesInRadiusLocalSpace(const MeshComponent *mesh, const glm::vec3 &point, float radius)
 {
     std::vector<uint32_t> result;
 
@@ -87,7 +87,7 @@ std::vector<uint32_t> MathUtils::GetVerticesInRadiusLocalSpace(const Mesh *mesh,
     return result;
 }
 
-std::vector<uint32_t> MathUtils::GetVerticesInRadius(const Mesh *mesh, const glm::vec3 &point, float radius)
+std::vector<uint32_t> MathUtils::GetVerticesInRadius(const MeshComponent *mesh, const glm::vec3 &point, float radius)
 {
     const auto &invMatrix = glm::inverse(mesh->GetEntity().lock()->GetWorldMatrix());
     auto pointLocalSpace = glm::vec3(invMatrix * glm::vec4(point, 1.f));

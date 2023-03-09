@@ -27,7 +27,7 @@ void Renderer::Init()
 
 }
 
-void Renderer::SubmitMesh(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, bool skeletal)
+void Renderer::SubmitMesh(const Ref<Entity> &entity, const MeshComponent *mesh, DrawCalls &drawCalls, bool skeletal)
 {
 	// insert new shader if necessary
 	if (drawCalls.find(mesh->material->shader) == drawCalls.end())
@@ -44,10 +44,10 @@ void Renderer::SubmitMesh(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls
 		Ref<GenericVertexBuffer> vbo;
 		switch (mesh->GetVertexType())
 		{
-		case Mesh::VertexType::Static:
+		case MeshComponent::VertexType::Static:
 			vbo = MakeRef<VertexBuffer<StaticVertex>>(mesh->GetVertexBufferLayout());
 			break;
-		case Mesh::VertexType::Skeletal:
+		case MeshComponent::VertexType::Skeletal:
 			vbo = MakeRef<VertexBuffer<SkeletalVertex>>(mesh->GetVertexBufferLayout());
 			break;
 		default:
@@ -124,12 +124,12 @@ void Renderer::SubmitMesh(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls
 	vertexInfo->AppendData(ids.data(), ids.size());
 }
 
-void Renderer::SubmitMesh(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh)
+void Renderer::SubmitMesh(const Ref<Entity> &entity, const Ref<StaticMeshComponent> &mesh)
 {
 	SubmitMesh(entity, mesh.get(), staticMeshDrawCalls);
 }
 
-void Renderer::SubmitMesh(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh)
+void Renderer::SubmitMesh(const Ref<Entity> &entity, const Ref<SkeletalMeshComponent> &mesh)
 {
 	// submit the mesh
 	SubmitMesh(entity, mesh.get(), skeletalMeshDrawCalls, true);
@@ -160,12 +160,12 @@ void Renderer::SubmitMesh(const Ref<Entity> &entity, const Ref<SkeletalMesh> &me
 void Renderer::Submit(const Ref<Entity> &entity)
 {
 	// submit all static meshes
-	auto staticMeshes = entity->GetComponents<StaticMesh>();
+	auto staticMeshes = entity->GetComponents<StaticMeshComponent>();
 	for (const auto &mesh : staticMeshes)
 		SubmitMesh(entity, mesh);
 
 	// submit all skeletal meshes
-	auto skeletalMeshes = entity->GetComponents<SkeletalMesh>();
+	auto skeletalMeshes = entity->GetComponents<SkeletalMeshComponent>();
 	for (auto &mesh : skeletalMeshes)
 		SubmitMesh(entity, mesh);
 }
@@ -220,15 +220,15 @@ void Renderer::Render(const DrawCalls::iterator &it)
 	glDrawElements(GL_TRIANGLES, info->vao->GetIndexBuffer()->GetLength(), GL_UNSIGNED_INT, nullptr);
 }
 
-void Renderer::UpdateMeshVertices(const Mesh *mesh)
+void Renderer::UpdateMeshVertices(const MeshComponent *mesh)
 {
 	DrawCalls drawCalls;
 	switch (mesh->GetVertexType())
 	{
-	case Mesh::VertexType::Static:
+	case MeshComponent::VertexType::Static:
 		drawCalls = staticMeshDrawCalls;
 		break;
-	case Mesh::VertexType::Skeletal:
+	case MeshComponent::VertexType::Skeletal:
 		drawCalls = skeletalMeshDrawCalls;
 		break;
 	}

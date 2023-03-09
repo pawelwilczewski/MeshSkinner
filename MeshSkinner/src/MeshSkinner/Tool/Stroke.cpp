@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Stroke.h"
 
-static constexpr std::array<const char *, 4> StrokeUpdateTypeNames = { "Pixel Distance", "World Distance", "Each Frame", "Fixed Delta Time" };
+static constexpr std::array<const char *, 3> strokeUpdateTypeNames = { "Pixel Distance", "World Distance", "Each Frame" };
 
 StrokeQueryInfo::StrokeQueryInfo(bool hitTarget, const glm::vec3 &worldPosition, const glm::vec2 &viewportPosition)
 	: hitTarget(hitTarget), worldPosition(worldPosition), viewportPosition(viewportPosition)
@@ -66,11 +66,6 @@ void Stroke::OnStrokeUpdate()
 			shouldAttemptEmplace = true;
 			break;
 
-		case Type::FixedDeltaTime:
-			queryFunction(query);
-			shouldAttemptEmplace = true;
-			break;
-
 		default:
 			assert(false);
 		}
@@ -96,9 +91,6 @@ void Stroke::UpdateSubscribe() const
 	case Type::EachFrame:
 		Application::OnUpdateSubscribe(onStrokeUpdateCallback);
 		break;
-	case Type::FixedDeltaTime:
-		assert(false); // TODO: implement
-		break;
 	case Type::PixelDistance:
 		Input::OnMouseMovedSubscribe(onStrokeUpdateVec2CallbackWrapper); // TODO: reconsider changing to Update cos lagging because single-threaded
 		break;
@@ -117,9 +109,6 @@ void Stroke::UpdateUnsubscribe() const
 	case Type::EachFrame:
 		Application::OnUpdateUnsubscribe(onStrokeUpdateCallback);
 		break;
-	case Type::FixedDeltaTime:
-		assert(false); // TODO: implement
-		break;
 	case Type::PixelDistance:
 		Input::OnMouseMovedUnsubscribe(onStrokeUpdateVec2CallbackWrapper);
 		break;
@@ -136,7 +125,7 @@ void Stroke::OnUpdateUI()
 	ImGui::Begin(toolWindowName.c_str());
 
 	Type tempType = type;
-	if (InteractiveWidget(ImGui::ListBox("Stroke update type", (int *)(&tempType), StrokeUpdateTypeNames.data(), StrokeUpdateTypeNames.size())))
+	if (InteractiveWidget(ImGui::ListBox("Stroke update type", (int *)(&tempType), strokeUpdateTypeNames.data(), strokeUpdateTypeNames.size())))
 		SetType(tempType);
 
 	switch (type)
@@ -148,9 +137,6 @@ void Stroke::OnUpdateUI()
 		InteractiveWidget(ImGui::DragFloat("World distance", &worldDistance, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic));
 		break;
 	case Type::EachFrame:
-		break;
-	case Type::FixedDeltaTime:
-		InteractiveWidget(ImGui::DragFloat("Fixed delta time", &pixelDistance, 0.001f, 0.f, 1.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic));
 		break;
 	default:
 		assert(false);

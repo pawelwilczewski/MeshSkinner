@@ -2,7 +2,9 @@
 
 #include "Application/Core.h"
 #include "VertexArray.h"
-#include "Core/Mesh/Mesh.h"
+#include "Core/Mesh/MeshComponent.h"
+#include "Core/Mesh/StaticMeshComponent.h"
+#include "Core/Mesh/SkeletalMeshComponent.h"
 #include "Core/Entity/Transform.h"
 #include "Core/Entity/Entity.h"
 #include "Core/Camera/Camera.h"
@@ -26,7 +28,7 @@ struct DrawCallInfo
 	std::unordered_map<Ref<Entity>, const uint32_t> entities; // TODO: use weak ptrs for entities
 	// key: skeleton already rendered, value: id to use for bones transforms (start)
 	std::unordered_map<Ref<Skeleton>, const uint32_t> skeletons; // TODO: use weak ptrs for skeletons
-	std::unordered_map<const Mesh *, const uint32_t> meshes; // TODO: use weak ptrs for meshes
+	std::unordered_map<const MeshComponent *, const uint32_t> meshes; // TODO: use weak ptrs for meshes
 	Unique<StorageBuffer<glm::mat4>> transforms;
 	Unique<StorageBuffer<BoneGPU>> bones;
 	Unique<StorageBuffer<MaterialGPU>> materials;
@@ -41,20 +43,20 @@ public:
 	static void Init();
 
 	static void Submit(const Ref<Entity> &entity);
-	// TODO: add Remove which should be called upon destruction of Mesh owning entity - shouldn't just use weak_ptrs instead and clean the up accordingly?
+	// TODO: add Remove which should be called upon destruction of MeshComponent owning entity - shouldn't just use weak_ptrs instead and clean the up accordingly?
 
 	static void FrameBegin();
 	static void FrameEnd();
 
 private:
-	static void SubmitMesh(const Ref<Entity> &entity, const Mesh *mesh, DrawCalls &drawCalls, bool skeletal = false);
-	static void SubmitMesh(const Ref<Entity> &entity, const Ref<StaticMesh> &mesh);
-	static void SubmitMesh(const Ref<Entity> &entity, const Ref<SkeletalMesh> &mesh);
+	static void SubmitMesh(const Ref<Entity> &entity, const MeshComponent *mesh, DrawCalls &drawCalls, bool skeletal = false);
+	static void SubmitMesh(const Ref<Entity> &entity, const Ref<StaticMeshComponent> &mesh);
+	static void SubmitMesh(const Ref<Entity> &entity, const Ref<SkeletalMeshComponent> &mesh);
 
 	static void Render(const DrawCalls::iterator &it);
 
 public:
-	static void UpdateMeshVertices(const Mesh *mesh);
+	static void UpdateMeshVertices(const MeshComponent *mesh);
 
 public:
 	static Ref<Camera> activeCamera;

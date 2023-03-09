@@ -5,7 +5,7 @@ Animation::Animation(const std::string &name, bool loop) : name(name), loop(loop
 {
 }
 
-glm::vec3 Animation::EvaluateTranslation(const std::string &boneName, float time)
+glm::vec3 Animation::EvaluateTranslation(const std::string &boneName, float time) const
 {
 	// TODO: switch on interpolation mode and use this as a reference: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#appendix-c-interpolation
 
@@ -13,7 +13,7 @@ glm::vec3 Animation::EvaluateTranslation(const std::string &boneName, float time
 	auto &positions = track.translationKeyframes;
 
 	if (positions.size() > 1 && loop)
-		time = glm::modf(time, positions.back().time);
+		time = fmod(time, positions.back().time);
 
 	for (size_t i = 1; i < positions.size(); i++)
 	{
@@ -28,7 +28,7 @@ glm::vec3 Animation::EvaluateTranslation(const std::string &boneName, float time
 	return glm::vec3(0.f);
 }
 
-glm::quat Animation::EvaluateRotation(const std::string &boneName, float time)
+glm::quat Animation::EvaluateRotation(const std::string &boneName, float time) const
 {
 	// TODO: switch on interpolation mode and use this as a reference: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#appendix-c-interpolation
 
@@ -36,7 +36,7 @@ glm::quat Animation::EvaluateRotation(const std::string &boneName, float time)
 	auto &rotations = track.rotationKeyframes;
 
 	if (rotations.size() > 1 && loop)
-		time = glm::modf(time, rotations.back().time);
+		time = fmod(time, rotations.back().time);
 
 	for (size_t i = 1; i < rotations.size(); i++)
 	{
@@ -51,7 +51,7 @@ glm::quat Animation::EvaluateRotation(const std::string &boneName, float time)
 	return glm::quat();
 }
 
-glm::vec3 Animation::EvaluateScale(const std::string &boneName, float time)
+glm::vec3 Animation::EvaluateScale(const std::string &boneName, float time) const
 {
 	// TODO: switch on interpolation mode and use this as a reference: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#appendix-c-interpolation
 
@@ -59,7 +59,7 @@ glm::vec3 Animation::EvaluateScale(const std::string &boneName, float time)
 	auto &scales = track.scaleKeyframes;
 
 	if (scales.size() > 1 && loop)
-		time = glm::modf(time, scales.back().time);
+		time = fmod(time, scales.back().time);
 
 	for (size_t i = 1; i < scales.size(); i++)
 	{
@@ -74,11 +74,24 @@ glm::vec3 Animation::EvaluateScale(const std::string &boneName, float time)
 	return glm::vec3(1.f);
 }
 
-glm::mat4 Animation::Evaluate(const std::string &boneName, float time)
+glm::mat4 Animation::Evaluate(const std::string &boneName, float time) const
 {
 	auto result = glm::translate(glm::mat4(1.f), EvaluateTranslation(boneName, time));
 	result *= glm::toMat4(EvaluateRotation(boneName, time));
 	result = glm::scale(result, EvaluateScale(boneName, time));
 
 	return result;
+}
+
+float Animation::GetTimeUsedForEvaluation(float timeSeconds) const
+{
+	if (loop)
+		return fmod(timeSeconds, duration);
+	else
+		return glm::clamp(timeSeconds, 0.f, duration);
+}
+
+float Animation::GetDuration() const
+{
+	return duration;
 }

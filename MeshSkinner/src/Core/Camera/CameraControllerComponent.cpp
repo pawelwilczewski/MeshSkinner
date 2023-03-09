@@ -1,7 +1,7 @@
 #include "pch.h"
-#include "CameraController.h"
+#include "CameraControllerComponent.h"
 
-CameraController::CameraController(float moveSpeed, float moveSpeedMultiplier, float moveSpeedMultiplierDelta, float maxSpeed, float minSpeed) : EntityComponent(), moveSpeed(moveSpeed), moveSpeedMultiplier(moveSpeedMultiplier), moveSpeedMultiplierDelta(moveSpeedMultiplierDelta), maxSpeed(maxSpeed), minSpeed(minSpeed)
+CameraControllerComponent::CameraControllerComponent(const std::string &name, float moveSpeed, float moveSpeedMultiplier, float moveSpeedMultiplierDelta, float maxSpeed, float minSpeed) : EntityComponent(name), moveSpeed(moveSpeed), moveSpeedMultiplier(moveSpeedMultiplier), moveSpeedMultiplierDelta(moveSpeedMultiplierDelta), maxSpeed(maxSpeed), minSpeed(minSpeed)
 {
 	onUpdateCallback = MakeCallbackNoArgRef([&]() { OnUpdate(); });
 	onMouseScrolledCallback = MakeCallbackRef<glm::vec2>([&](const glm::vec2 &delta) { OnMouseScrolled(delta); });
@@ -12,14 +12,14 @@ CameraController::CameraController(float moveSpeed, float moveSpeedMultiplier, f
 	Input::OnMouseMovedSubscribe(onMouseMovedCallback);
 }
 
-CameraController::~CameraController()
+CameraControllerComponent::~CameraControllerComponent()
 {
 	Application::OnUpdateUnsubscribe(onUpdateCallback);
 	Input::OnMouseScrolledUnsubscribe(onMouseScrolledCallback);
 	Input::OnMouseMovedUnsubscribe(onMouseMovedCallback);
 }
 
-void CameraController::OnUpdate()
+void CameraControllerComponent::OnUpdate()
 {
 	active = Input::IsMouseButtonPressed(MOUSE_BUTTON_RIGHT);
 	Window::SetCursorVisibility(!active);
@@ -43,7 +43,7 @@ void CameraController::OnUpdate()
 	}
 }
 
-void CameraController::OnMouseScrolled(const glm::vec2 &delta)
+void CameraControllerComponent::OnMouseScrolled(const glm::vec2 &delta)
 {
 	if (!active) return;
 
@@ -51,7 +51,7 @@ void CameraController::OnMouseScrolled(const glm::vec2 &delta)
 	moveSpeedMultiplier = glm::clamp(moveSpeedMultiplier, minSpeed, maxSpeed);
 }
 
-void CameraController::OnMouseMoved(const glm::vec2 &position)
+void CameraControllerComponent::OnMouseMoved(const glm::vec2 &position)
 {
 	if (!active) return;
 
@@ -61,7 +61,7 @@ void CameraController::OnMouseMoved(const glm::vec2 &position)
 	camera->transform.SetRotation(glm::vec3(glm::clamp(newRotation.x, -90.f, 90.f), newRotation.y, newRotation.z));
 }
 
-void CameraController::OnAttached()
+void CameraControllerComponent::OnAttached()
 {
 	camera.reset(dynamic_cast<Camera *>(GetEntity().lock().get())); // lol
 
@@ -72,6 +72,6 @@ void CameraController::OnAttached()
 	camera->transform.SetRotation(glm::vec3(0.f));
 }
 
-void CameraController::OnDetached()
+void CameraControllerComponent::OnDetached()
 {
 }

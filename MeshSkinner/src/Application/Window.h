@@ -14,6 +14,7 @@ public:
 	static void RegenFramebuffer(const glm::ivec2 bufferSize);
 
 public:
+	static glm::ivec2 GetScreenSize();
 	static GLFWwindow *GetNativeWindow();
 	static glm::ivec2 GetFramebufferSize();
 	// returns the position of the content
@@ -23,6 +24,7 @@ public:
 
 public:
 	static void SetCursorVisibility(bool visible);
+	static bool GetCursorVisibility();
 
 private:
 	static GLFWwindow *window;
