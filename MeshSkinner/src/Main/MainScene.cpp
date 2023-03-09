@@ -217,15 +217,6 @@ void MainScene::OnUpdateUI()
     ImGui::Begin("Settings");
     InteractiveWidget(ImGui::DragFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.0001f, 0.0f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput));
     ImGui::End();
-
-    // viewport
-    ImGui::Begin("Viewport Settings");
-    if (InteractiveWidget(ImGui::Button("Reset camera")))
-    {
-        camera->transform.SetPosition(glm::vec3(0.f));
-        camera->transform.SetRotation(glm::vec3(0.f));
-    }
-    ImGui::End();
 }
 
 void MainScene::OnLateUpdate()
