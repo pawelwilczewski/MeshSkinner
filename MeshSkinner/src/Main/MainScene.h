@@ -35,7 +35,7 @@ private:
 	Ref<class Camera> camera; // TODO: make unique and use weak in renderer? that wont work though? figure it out..
 	Ref<class CameraControllerComponent> cameraController;
 
-	std::vector<std::string> unhandledDroppedFiles;
+	std::vector<std::string> droppedFiles;
 
 private:
 	CallbackRef<StrokeQueryInfo> onStrokeEmplaceCallback;

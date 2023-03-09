@@ -39,6 +39,8 @@ public:
 	static void OnWindowResizedUnsubscribe(const CallbackRef<glm::ivec2> &callback);
 	static void OnFileDroppedUnsubscribe(const CallbackRef<std::vector<std::string>> &callback);
 
+	static std::vector<std::string> &GetDroppedFiles();
+
 private:
 	static void HandleKeyCallback(GLFWwindow *window, int key, int, int action, int);
 	static void HandleMouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
@@ -48,7 +50,18 @@ private:
 	static void HandleFileDropCallback(GLFWwindow *window, int pathCount, const char *paths[]);
 
 private:
+	static void OnEarlyUpdate();
+	static void OnLateUpdate();	
+
+private:
 	static glm::vec2 mouseDelta;
+
+	static std::vector<std::string> droppedFiles;
+	static bool droppedFilesInNewFrame;
+
+private:
+	static CallbackNoArgRef onEarlyUpdateCallback;
+	static CallbackNoArgRef onLateUpdateCallback;
 
 private:
 	static Event<int> onKeyPressed;

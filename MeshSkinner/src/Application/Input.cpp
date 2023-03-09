@@ -3,6 +3,12 @@
 
 glm::vec2 Input::mouseDelta = glm::vec2(0.f);
 
+bool Input::droppedFilesInNewFrame = false;
+std::vector<std::string> Input::droppedFiles;
+
+CallbackNoArgRef Input::onEarlyUpdateCallback;
+CallbackNoArgRef Input::onLateUpdateCallback;
+
 Event<int> Input::onKeyPressed;
 Event<int> Input::onKeyReleased;
 Event<int> Input::onMouseButtonPressed;
@@ -20,6 +26,12 @@ void Input::Init()
 	glfwSetScrollCallback(Window::GetNativeWindow(), &HandleMouseScrolledCallback);
 	glfwSetWindowSizeCallback(Window::GetNativeWindow(), &HandleWindowResizedCallback);
 	glfwSetDropCallback(Window::GetNativeWindow(), &HandleFileDropCallback);
+
+	onEarlyUpdateCallback = MakeCallbackNoArgRef([&]() { OnEarlyUpdate(); });
+	onLateUpdateCallback = MakeCallbackNoArgRef([&]() { OnLateUpdate(); });
+
+	Application::OnEarlyUpdateSubscribe(onEarlyUpdateCallback);
+	Application::OnLateUpdateSubscribe(onLateUpdateCallback);
 }
 
 bool Input::IsKeyPressed(int key)
@@ -130,9 +142,33 @@ void Input::HandleWindowResizedCallback(GLFWwindow *window, int width, int heigh
 
 void Input::HandleFileDropCallback(GLFWwindow *window, int pathCount, const char *paths[])
 {
-	std::vector<std::string> result;
+	droppedFiles.clear();
 	for (int i = 0; i < pathCount; i++)
-		result.push_back(paths[i]);
-	
-	onFileDropped.Invoke(result);
+		droppedFiles.push_back(paths[i]);
+
+	droppedFilesInNewFrame = false;
+
+	onFileDropped.Invoke(droppedFiles);
+}
+
+void Input::OnEarlyUpdate()
+{
+	if (droppedFiles.size() > 0)
+		droppedFilesInNewFrame = true;
+}
+
+void Input::OnLateUpdate()
+{
+	if (droppedFiles.size() > 0 && droppedFilesInNewFrame)
+		droppedFiles.clear();
+
+	droppedFilesInNewFrame = false;
+}
+
+std::vector<std::string> &Input::GetDroppedFiles()
+{
+	if (droppedFilesInNewFrame)
+		return droppedFiles;
+	else
+		return std::vector<std::string>();
 }

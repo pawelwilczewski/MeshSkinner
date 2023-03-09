@@ -8,6 +8,7 @@ AnimationControls::AnimationControls(const std::string &toolWindowName) : Tool(t
 void AnimationControls::OnUpdateUI()
 {
 	ImGui::Begin(toolWindowName.c_str());
-	ImGui::Text("anim controls yeah");
+	for (const auto &path : Input::GetDroppedFiles())
+		Log::Info("{}", path);
 	ImGui::End();
 }

@@ -205,19 +205,12 @@ void MainScene::OnUpdateUI()
 {
     // TODO: all of these can be Tools - make that happen
 
-    //const auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs;
-    //ImGui::Begin("##overlay", nullptr, flags);
-    //auto windowPos = Window::GetWindowPosition();
-    //ImGui::SetWindowPos(ImVec2(windowPos.x, windowPos.y), ImGuiCond_Always);
-    //ImGui::SetWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y), ImGuiCond_Always);
-    //ImGui::End();
-
     // edited mesh
     ImGui::Begin("Edited Mesh");
     InteractiveWidget(ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1));
     InteractiveWidget(ImGui::InputText("Input file path", &sourceFile)); // TODO: for text inputs: unfocus if clicked in the viewport
-    if (ImGui::IsItemHovered() && unhandledDroppedFiles.size() > 0)
-        sourceFile = unhandledDroppedFiles[0];
+    if (ImGui::IsItemHovered() && droppedFiles.size() > 0)
+        sourceFile = droppedFiles[0];
 
     if (InteractiveWidget(ImGui::Button("Import file")))
     {
@@ -227,10 +220,10 @@ void MainScene::OnUpdateUI()
     }
 
     InteractiveWidget(ImGui::InputText("Export file path", &targetFile));
-    if (ImGui::IsItemHovered() && unhandledDroppedFiles.size() > 0)
-        targetFile = unhandledDroppedFiles[0];
+    if (ImGui::IsItemHovered() && droppedFiles.size() > 0)
+        targetFile = droppedFiles[0];
 
-    unhandledDroppedFiles.clear();
+    droppedFiles.clear();
 
     if (InteractiveWidget(ImGui::Button("Export file")))
     {
@@ -317,5 +310,5 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
 
 void MainScene::OnFileDropped(const std::vector<std::string> &paths)
 {
-    unhandledDroppedFiles = paths;
+    droppedFiles = paths;
 }
