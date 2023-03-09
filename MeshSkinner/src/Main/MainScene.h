@@ -26,6 +26,7 @@ private:
 	Unique<class Brush> brush;
 	Unique<Stroke> stroke;
 	Unique<class Hierarchy> hierarchy;
+	Unique<class AnimationControls> animationControls;
 
 	Ref<Entity> sceneRoot;
 

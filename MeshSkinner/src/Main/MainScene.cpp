@@ -9,6 +9,7 @@
 #include "MeshSkinner/Tool/Brush.h"
 #include "MeshSkinner/Tool/Stroke.h"
 #include "MeshSkinner/Tool/Hierarchy.h"
+#include "MeshSkinner/Tool/AnimationControls.h"
 
 static Ref<VertexArray<uint32_t>> vao;
 static Ref<VertexBuffer<StaticVertex>> vbo;
@@ -58,6 +59,8 @@ MainScene::MainScene() : Scene()
     stroke->OnStrokeEmplaceSubscribe(onStrokeEmplaceCallback);
 
     hierarchy = MakeUnique<Hierarchy>("Hierarchy", sceneRoot);
+
+    animationControls = MakeUnique<AnimationControls>();
 }
 
 MainScene::~MainScene()
