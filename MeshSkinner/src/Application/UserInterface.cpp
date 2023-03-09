@@ -58,37 +58,6 @@ static void SetupImGuiStyle()
 	// MeshSkinnerDark style from ImThemes
 	ImGuiStyle &style = ImGui::GetStyle();
 
-	style.Alpha = 1.0f;
-	style.DisabledAlpha = 0.6000000238418579f;
-	style.WindowPadding = ImVec2(7.400000095367432f, 7.400000095367432f);
-	style.WindowRounding = 10.0f;
-	style.WindowBorderSize = 0.0f;
-	style.WindowMinSize = ImVec2(32.0f, 32.0f);
-	style.WindowTitleAlign = ImVec2(0.0f, 0.5f);
-	style.WindowMenuButtonPosition = ImGuiDir_Left;
-	style.ChildRounding = 5.0f;
-	style.ChildBorderSize = 1.0f;
-	style.PopupRounding = 0.0f;
-	style.PopupBorderSize = 0.0f;
-	style.FramePadding = ImVec2(5.0f, 3.0f);
-	style.FrameRounding = 5.199999809265137f;
-	style.FrameBorderSize = 0.0f;
-	style.ItemSpacing = ImVec2(8.0f, 4.0f);
-	style.ItemInnerSpacing = ImVec2(4.0f, 4.0f);
-	style.CellPadding = ImVec2(4.0f, 2.0f);
-	style.IndentSpacing = 21.0f;
-	style.ColumnsMinSpacing = 6.0f;
-	style.ScrollbarSize = 14.0f;
-	style.ScrollbarRounding = 9.0f;
-	style.GrabMinSize = 10.60000038146973f;
-	style.GrabRounding = 4.0f;
-	style.TabRounding = 4.0f;
-	style.TabBorderSize = 0.0f;
-	style.TabMinWidthForCloseButton = 0.0f;
-	style.ColorButtonPosition = ImGuiDir_Right;
-	style.ButtonTextAlign = ImVec2(0.5f, 0.5f);
-	style.SelectableTextAlign = ImVec2(0.0f, 0.0f);
-
 	style.Colors[ImGuiCol_Text] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 	style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.5708154439926147f, 0.5708097219467163f, 0.5708097219467163f, 1.0f);
 	style.Colors[ImGuiCol_WindowBg] = ImVec4(0.1330472230911255f, 0.1330458968877792f, 0.1330458968877792f, 0.9399999976158142f);
