@@ -10,3 +10,8 @@ Weak<Entity> EntityComponent::GetEntity() const
 {
     return entity;
 }
+
+void EntityComponent::DisplayUI()
+{
+    ImGui::Text(name.c_str());
+}

@@ -46,23 +46,14 @@ void Hierarchy::OnUpdateUI()
         ImGui::Text(selected->name.c_str());
         ImGui::Separator();
 
-        glm::vec3 positionCopy = selected->transform.GetPosition();
-        glm::vec3 rotationCopy = selected->transform.GetRotation();
-        glm::vec3 scaleCopy = selected->transform.GetScale();
-        ImGui::Text("Transform");
-        ImGui::DragFloat3("Position", glm::value_ptr(positionCopy), 1.f, -1000000000.f, 1000000000.f);
-        ImGui::DragFloat3("Rotation", glm::value_ptr(rotationCopy), 1.f, -1000000000.f, 1000000000.f);
-        ImGui::DragFloat3("Scale", glm::value_ptr(scaleCopy), 0.05f, -1000000000.f, 1000000000.f);
-        selected->transform.SetPosition(positionCopy);
-        selected->transform.SetRotation(rotationCopy);
-        selected->transform.SetScale(scaleCopy);
+        selected->transform.DisplayUI();
 
         ImGui::Separator();
         ImGui::Text("Components");
         ImGui::Separator();
         for (const auto &component : selected->GetComponents<EntityComponent>())
         {
-            ImGui::Text("\tSome component");
+            component->DisplayUI();
             ImGui::Separator();
         }
     }

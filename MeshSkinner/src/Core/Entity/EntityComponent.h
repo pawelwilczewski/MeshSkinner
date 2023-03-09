@@ -17,6 +17,9 @@ protected:
 	virtual void OnAttached() {}
 	virtual void OnDetached() {}
 
+public: // TODO: perhaps these DisplayUI functions shouldn't be public
+	virtual void DisplayUI();
+
 public:
 	std::string name;
 
