@@ -11,7 +11,7 @@ public:
 	virtual ~EntityComponent() = default;
 
 public:
-	Weak<Entity> GetEntity() const;
+	Weak<class Entity> GetEntity() const;
 
 protected:
 	virtual void OnAttached() {}
@@ -24,5 +24,5 @@ public:
 	std::string name;
 
 private:
-	Weak<Entity> entity;
+	Weak<class Entity> entity;
 };

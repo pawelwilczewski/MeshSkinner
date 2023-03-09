@@ -3,7 +3,7 @@
 
 namespace FileUtils
 {
-    std::string FileUtils::ReadFile(const std::string &filepath)
+    std::string ReadFile(const std::string &filepath)
     {
         std::ifstream file(filepath, std::ios::in | std::ios::binary);
         if (!file)
@@ -22,7 +22,7 @@ namespace FileUtils
         return result;
     }
 
-    bool FileUtils::WriteFile(const std::string &filepath, const std::string &text)
+    bool WriteFile(const std::string &filepath, const std::string &text)
     {
         std::fstream file(filepath, std::ios::out | std::ios::binary);
         if (!file)
@@ -35,7 +35,7 @@ namespace FileUtils
         return true;
     }
 
-    std::string FileUtils::FileParentPath(const std::string &path)
+    std::string FileParentPath(const std::string &path)
     {
         std::filesystem::path p(path);
         if (p.has_parent_path())
@@ -44,7 +44,7 @@ namespace FileUtils
             return "";
     }
 
-    std::string FileUtils::FileExtension(const std::string &path)
+    std::string FileExtension(const std::string &path)
     {
         std::filesystem::path p(path);
         if (p.has_extension())
@@ -53,7 +53,7 @@ namespace FileUtils
             return "";
     }
 
-    std::vector<std::string> FileUtils::ListDirectory(const std::string &path)
+    std::vector<std::string> ListDirectory(const std::string &path)
     {
         std::vector<std::string> files;
 
