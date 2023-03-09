@@ -13,7 +13,7 @@ public:
 	const std::vector<Animation> &GetAnimations() const;
 
 	Animation *GetCurrentAnimation();
-	float GetAnimationTime() const;
+	float GetPlaybackTime() const;
 
 protected:
 	virtual void OnUpdateUI() override;
@@ -24,7 +24,7 @@ private:
 	std::vector<Animation> animations;
 	std::vector<const char *> animationNames;
 
-	bool playBack = true;
-	float animationTime = 0.f;
+	bool play = true;
+	float playbackTime = 0.f;
 	int animationIndex = 0;
 };

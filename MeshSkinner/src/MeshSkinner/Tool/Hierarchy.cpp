@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Hierarchy.h"
 
-Hierarchy::Hierarchy(const std::string &toolWindowName, const Weak<Entity> &rootEntity) : Tool(toolWindowName), root(rootEntity)
+Hierarchy::Hierarchy(const std::string &toolWindowName, const Weak<Entity> &root) : Tool(toolWindowName), root(root)
 {
 
 }

@@ -6,7 +6,7 @@
 class Hierarchy : public Tool
 {
 public:
-	Hierarchy(const std::string &toolWindowName, const Weak<Entity> &rootEntity);
+	Hierarchy(const std::string &toolWindowName, const Weak<Entity> &root);
 	virtual ~Hierarchy() = default;
 
 public:

@@ -193,9 +193,9 @@ void MainScene::OnUpdate()
     {
         for (const auto &bone : skeletalMesh->skeleton->GetBones())
         {
-            bone->transform.SetPosition(anim->EvaluateTranslation(bone->name, animationControls->GetAnimationTime()));
-            bone->transform.SetRotation(glm::degrees(glm::eulerAngles(anim->EvaluateRotation(bone->name, animationControls->GetAnimationTime()))));
-            bone->transform.SetScale(anim->EvaluateScale(bone->name, animationControls->GetAnimationTime()));
+            bone->transform.SetPosition(anim->EvaluateTranslation(bone->name, animationControls->GetPlaybackTime()));
+            bone->transform.SetRotation(glm::degrees(glm::eulerAngles(anim->EvaluateRotation(bone->name, animationControls->GetPlaybackTime()))));
+            bone->transform.SetScale(anim->EvaluateScale(bone->name, animationControls->GetPlaybackTime()));
         }
     }
 }

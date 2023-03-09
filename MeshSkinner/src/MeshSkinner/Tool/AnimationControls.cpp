@@ -18,9 +18,9 @@ Animation *AnimationControls::GetCurrentAnimation()
 	return nullptr;
 }
 
-float AnimationControls::GetAnimationTime() const
+float AnimationControls::GetPlaybackTime() const
 {
-	return animationTime;
+	return playbackTime;
 }
 
 void AnimationControls::OnUpdateUI()
@@ -44,25 +44,25 @@ void AnimationControls::OnUpdateUI()
 			animationNames.push_back(animation.name.c_str());
 
 		animationIndex = 0;
-		animationTime = 0.f;
+		playbackTime = 0.f;
 	}
 
 	if (InteractiveWidget(ImGui::ListBox("Select animation", &animationIndex, animationNames.data(), animationNames.size())))
-		animationTime = 0.f;
+		playbackTime = 0.f;
 
 	auto current = GetCurrentAnimation();
 	if (current)
 	{
-		InteractiveWidget(ImGui::Checkbox("Play back", &playBack));
+		InteractiveWidget(ImGui::Checkbox("Play", &play));
 		InteractiveWidget(ImGui::Checkbox("Loop", &current->loop));
 
-		if (playBack)
+		if (play)
 		{
-			animationTime += Time::GetDeltaSeconds();
-			animationTime = current->GetTimeUsedForEvaluation(animationTime);
+			playbackTime += Time::GetDeltaSeconds();
+			playbackTime = current->GetTimeUsedForEvaluation(playbackTime);
 		}
 
-		ImGui::SliderFloat("Timeline", &animationTime, 0.f, current->GetDuration());
+		ImGui::SliderFloat("Timeline", &playbackTime, 0.f, current->GetDuration());
 	}
 
 	ImGui::End();
