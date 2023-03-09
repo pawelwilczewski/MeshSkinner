@@ -10,7 +10,7 @@ const std::vector<Animation> &AnimationControls::GetAnimations() const
 	return animations;
 }
 
-const Animation *AnimationControls::GetCurrentAnimation() const
+Animation *AnimationControls::GetCurrentAnimation()
 {
 	if (animationIndex < animations.size())
 		return &animations[animationIndex];
@@ -50,11 +50,12 @@ void AnimationControls::OnUpdateUI()
 	if (InteractiveWidget(ImGui::ListBox("Select animation", &animationIndex, animationNames.data(), animationNames.size())))
 		animationTime = 0.f;
 
-	InteractiveWidget(ImGui::Checkbox("Play back", &playBack));
-
 	auto current = GetCurrentAnimation();
 	if (current)
 	{
+		InteractiveWidget(ImGui::Checkbox("Play back", &playBack));
+		InteractiveWidget(ImGui::Checkbox("Loop", &current->loop));
+
 		if (playBack)
 		{
 			animationTime += Time::GetDeltaSeconds();

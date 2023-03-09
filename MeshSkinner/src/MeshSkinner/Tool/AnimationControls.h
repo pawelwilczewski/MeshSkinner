@@ -12,7 +12,7 @@ public:
 public:
 	const std::vector<Animation> &GetAnimations() const;
 
-	const Animation *GetCurrentAnimation() const;
+	Animation *GetCurrentAnimation();
 	float GetAnimationTime() const;
 
 protected:
