@@ -5,10 +5,10 @@
 
 struct StrokeQueryInfo
 {
-	StrokeQueryInfo(bool hitTarget = false, const glm::vec3 &worldPosition = glm::vec3(0.f), const glm::vec2 &viewportPosition = glm::vec2(0.f));
+	StrokeQueryInfo(bool hitTarget = false, const glm::vec3 &position = glm::vec3(0.f), const glm::vec2 &viewportPosition = glm::vec2(0.f));
 
 	bool hitTarget;
-	glm::vec3 worldPosition;
+	glm::vec3 position;
 	glm::vec2 viewportPosition;
 };
 

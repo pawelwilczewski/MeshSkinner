@@ -7,7 +7,7 @@
 class Entity : public std::enable_shared_from_this<Entity>
 {
 public:
-	Entity(const std::string &name = "entity", Transform transform = Transform());
+	Entity(const std::string &name = "entity", const Transform &transform = Transform());
 	virtual ~Entity();
 
 public:
@@ -24,14 +24,14 @@ public:
 		return result;
 	}
 
-	void AddComponent(Ref<EntityComponent> component);
-	void RemoveComponent(Ref<EntityComponent> component);
+	Ref<EntityComponent> AddComponent(const Ref<EntityComponent> &component);
+	void RemoveComponent(const Ref<EntityComponent> &component);
 
 public:
-	void SetParent(const Ref<Entity> &parent);
-	const Ref<Entity> &GetParent() const;
+	void SetParent(Entity *parent);
+	Entity *GetParent() const;
 
-	const std::unordered_set<Ref<Entity>> &GetChildren() const;
+	const std::unordered_set<Entity *> &GetChildren() const;
 
 public:
 	const glm::mat4 &GetWorldMatrix();
@@ -44,17 +44,16 @@ private:
 	void DirtyWorldMatrix();
 
 private:
-	std::unordered_set<Ref<EntityComponent>> components; // TODO: components need to be unique ptrs
-
-	std::unordered_set<Ref<Entity>> children;
+	std::unordered_set<Ref<EntityComponent>> components;
+	std::unordered_set<Entity *> children;
 
 public:
 	std::string name;
-	// TODO: this transform shouldn't be settable because of events it holds reference to (replace by GetTransform())
+	// TODO: this transform shouldn't be settable because of events it holds reference to (replace by Transform const &GetTransform())
 	Transform transform;
 
 private:
-	Ref<Entity> parent = nullptr;
+	Entity *parent = nullptr;
 
 	glm::mat4 worldMatrix;
 	bool isWorldMatrixUpdated = false;

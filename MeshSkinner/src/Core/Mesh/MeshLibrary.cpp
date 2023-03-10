@@ -249,7 +249,7 @@ bool MeshLibrary::Import(const std::string &path, Ref<SkeletalMeshComponent> &ou
 				if (it != skin.joints.end())
 				{
 					auto index = it - skin.joints.begin();
-					outMesh->skeleton->bones[index]->SetParent(bone);
+					outMesh->skeleton->bones[index]->SetParent(bone.get());
 				}
 			}
 

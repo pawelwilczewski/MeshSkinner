@@ -16,7 +16,7 @@ DrawCallInfo::DrawCallInfo() :
 
 }
 
-Ref<Camera> Renderer::activeCamera;
+Camera *Renderer::activeCamera;
 int Renderer::activeBone = 0;
 
 DrawCalls Renderer::staticMeshDrawCalls;
@@ -27,7 +27,7 @@ void Renderer::Init()
 
 }
 
-void Renderer::SubmitMesh(const Ref<Entity> &entity, const MeshComponent *mesh, DrawCalls &drawCalls, bool skeletal)
+void Renderer::SubmitMesh(Entity *entity, const MeshComponent *mesh, DrawCalls &drawCalls, bool skeletal)
 {
 	// insert new shader if necessary
 	if (drawCalls.find(mesh->material->shader) == drawCalls.end())
@@ -124,12 +124,12 @@ void Renderer::SubmitMesh(const Ref<Entity> &entity, const MeshComponent *mesh, 
 	vertexInfo->AppendData(ids.data(), ids.size());
 }
 
-void Renderer::SubmitMesh(const Ref<Entity> &entity, const Ref<StaticMeshComponent> &mesh)
+void Renderer::SubmitMesh(Entity *entity, const Ref<StaticMeshComponent> &mesh)
 {
 	SubmitMesh(entity, mesh.get(), staticMeshDrawCalls);
 }
 
-void Renderer::SubmitMesh(const Ref<Entity> &entity, const Ref<SkeletalMeshComponent> &mesh)
+void Renderer::SubmitMesh(Entity *entity, const Ref<SkeletalMeshComponent> &mesh)
 {
 	// submit the mesh
 	SubmitMesh(entity, mesh.get(), skeletalMeshDrawCalls, true);
@@ -137,16 +137,16 @@ void Renderer::SubmitMesh(const Ref<Entity> &entity, const Ref<SkeletalMeshCompo
 	// submit the skeleton (all bones)
 	auto &skeletons = skeletalMeshDrawCalls[mesh->material->shader]->skeletons;
 	auto &bones = skeletalMeshDrawCalls[mesh->material->shader]->bones;
-	if (skeletons.find(mesh->skeleton) == skeletons.end())
+	if (skeletons.find(mesh->skeleton.get()) == skeletons.end())
 	{
-		skeletons.insert({ mesh->skeleton, bones->GetLength() });
+		skeletons.insert({ mesh->skeleton.get(), bones->GetLength()});
 
 		auto inverseRoot = glm::inverse(mesh->skeleton->GetRootBone()->GetParent()->GetWorldMatrix());
 		for (auto &bone : mesh->skeleton->GetBones())
 		{
 			auto bonegpu = BoneGPU(*bone.get(), inverseRoot);
 			bones->AppendData(&bonegpu, 1);
-			Submit(bone);
+			Submit(bone.get());
 		}
 	}
 	else
@@ -157,7 +157,7 @@ void Renderer::SubmitMesh(const Ref<Entity> &entity, const Ref<SkeletalMeshCompo
 	}
 }
 
-void Renderer::Submit(const Ref<Entity> &entity)
+void Renderer::Submit(Entity *entity)
 {
 	// submit all static meshes
 	auto staticMeshes = entity->GetComponents<StaticMeshComponent>();
@@ -179,10 +179,10 @@ static void UpdateTransforms(const Ref<DrawCallInfo> &info, std::unordered_set<c
 	// update the transforms if necessary
 	for (auto &[entity, transformID] : info->entities)
 	{
-		if (!entity->GetIsWorldMatrixUpdated() || entitiesToUpdate.find(entity.get()) != entitiesToUpdate.end())
+		if (!entity->GetIsWorldMatrixUpdated() || entitiesToUpdate.find(entity) != entitiesToUpdate.end())
 		{
 			info->transforms->SetData(&entity->GetWorldMatrix(), 1, transformID);
-			entitiesToUpdate.insert(entity.get());
+			entitiesToUpdate.insert(entity);
 		}
 	}
 

@@ -6,21 +6,21 @@
 class Hierarchy : public Tool
 {
 public:
-	Hierarchy(const std::string &toolWindowName, const Weak<Entity> &root);
+	Hierarchy(const std::string &toolWindowName, Entity *root);
 	virtual ~Hierarchy() = default;
 
 public:
 	virtual void OnUpdateUI() override;
 
 private:
-	void DrawTree(const Ref<Entity> &entity);
+	void DrawTree(Entity *entity);
 
 public:
-	Ref<Entity> GetSelectedEntity() const;
+	Entity *GetSelectedEntity() const;
 
 public:
-	Weak<Entity> root;
+	Entity *root;
 
 private:
-	Weak<Entity> selectedEntity;
+	Entity *selectedEntity = nullptr;
 };

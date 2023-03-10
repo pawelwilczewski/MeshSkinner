@@ -29,9 +29,7 @@ private:
 	Unique<class AnimationControls> animationControls;
 	Unique<class SceneStats> sceneStats;
 
-	Ref<Entity> sceneRoot;
-
-	Ref<class Camera> camera; // TODO: make unique and use weak in renderer? that wont work though? figure it out..
+	Camera *camera;
 	Ref<class CameraControllerComponent> cameraController;
 
 private:

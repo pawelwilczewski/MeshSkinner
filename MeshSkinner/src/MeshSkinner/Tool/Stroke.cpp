@@ -3,8 +3,8 @@
 
 static constexpr std::array<const char *, 3> strokeUpdateTypeNames = { "Pixel Distance", "World Distance", "Each Frame" };
 
-StrokeQueryInfo::StrokeQueryInfo(bool hitTarget, const glm::vec3 &worldPosition, const glm::vec2 &viewportPosition)
-	: hitTarget(hitTarget), worldPosition(worldPosition), viewportPosition(viewportPosition)
+StrokeQueryInfo::StrokeQueryInfo(bool hitTarget, const glm::vec3 &position, const glm::vec2 &viewportPosition)
+	: hitTarget(hitTarget), position(position), viewportPosition(viewportPosition)
 {
 }
 
@@ -58,7 +58,7 @@ void Stroke::OnStrokeUpdate()
 
 		case Type::WorldDistance:
 			queryFunction(query);
-			shouldAttemptEmplace = glm::distance(lastWorldPosition, query.worldPosition) >= worldDistance;
+			shouldAttemptEmplace = glm::distance(lastWorldPosition, query.position) >= worldDistance;
 			break;
 
 		case Type::EachFrame:
@@ -75,7 +75,7 @@ void Stroke::OnStrokeUpdate()
 	{
 		onStrokeEmplace.Invoke(query);
 		lastViewportPosition = query.viewportPosition;
-		lastWorldPosition = query.worldPosition;
+		lastWorldPosition = query.position;
 	}
 }
 

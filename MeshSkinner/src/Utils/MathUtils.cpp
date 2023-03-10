@@ -22,7 +22,7 @@ bool MathUtils::RayMeshIntersectionLocalSpace(const Ray &ray, const MeshComponen
     auto stride = layout.GetStride();
     auto offset = layout["position"].offset;
 
-    const auto &matrix = mesh->GetEntity().lock()->GetWorldMatrix();
+    const auto &matrix = mesh->GetEntity()->GetWorldMatrix();
     auto invMatrix = glm::inverse(matrix);
     auto localRay = Ray(glm::vec3(invMatrix * glm::vec4(ray.origin, 1.f)), glm::mat3(invMatrix) * ray.direction);
 
@@ -61,7 +61,7 @@ bool MathUtils::RayMeshIntersection(const Ray &ray, const MeshComponent *mesh, g
 {
     auto result = RayMeshIntersectionLocalSpace(ray, mesh, closestIntersection);
 
-    const auto &matrix = mesh->GetEntity().lock()->GetWorldMatrix();
+    const auto &matrix = mesh->GetEntity()->GetWorldMatrix();
     closestIntersection = matrix * glm::vec4(closestIntersection, 1.f);
 
     return result;
@@ -89,7 +89,7 @@ std::vector<uint32_t> MathUtils::GetVerticesInRadiusLocalSpace(const MeshCompone
 
 std::vector<uint32_t> MathUtils::GetVerticesInRadius(const MeshComponent *mesh, const glm::vec3 &point, float radius)
 {
-    const auto &invMatrix = glm::inverse(mesh->GetEntity().lock()->GetWorldMatrix());
+    const auto &invMatrix = glm::inverse(mesh->GetEntity()->GetWorldMatrix());
     auto pointLocalSpace = glm::vec3(invMatrix * glm::vec4(point, 1.f));
 
     return GetVerticesInRadiusLocalSpace(mesh, pointLocalSpace, radius);

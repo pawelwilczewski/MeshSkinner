@@ -17,14 +17,15 @@ static Ref<VertexBuffer<StaticVertex>> vbo;
 static Ref<IndexBuffer<uint32_t>> ibo;
 static Ref<Shader> shader;
 
-static Ref<Entity> noneEntity;
-static Ref<Entity> staticEntity;
-static Ref<Entity> staticEntity2;
-static Ref<Entity> staticEntity3;
-static Ref<Entity> skeletalEntity;
-//static Ref<Entity> skeletalEntity2;
-//static Ref<Entity> staticSkeletalEntity;
+static Entity *noneEntity;
+static Entity *staticEntity;
+static Entity *staticEntity2;
+static Entity *staticEntity3;
+static Entity *skeletalEntity;
+
 static auto rootBone = Ref<Bone>();
+
+static Ref<SkeletalMeshComponent> skeletalMesh;
 
 static Ref<SkeletalMeshComponent> editedMesh;
 
@@ -33,26 +34,21 @@ static std::string targetFile;
 
 static std::vector<Animation> anims;
 
-static auto skeletalMesh = MakeRef<SkeletalMeshComponent>("SkeletalMeshComponent");
-
 MainScene::MainScene() : Scene()
 {
-    // scene root setup
-    sceneRoot = MakeRef<Entity>("Scene");
+    camera = static_cast<Camera *>(CreateEntity(new Camera("Main Camera")));
 
     // camera setup
-    camera = MakeRef<Camera>("MainCamera");
     cameraController = MakeRef<CameraControllerComponent>("CameraControllerComponent 0", 10.f);
     camera->AddComponent(cameraController);
-    camera->SetParent(sceneRoot);
     Renderer::activeCamera = camera;
 
     // tool initialisation
     brush = MakeUnique<Brush>("Brush Parameters");
     stroke = MakeUnique<Stroke>("Stroke Parameters", [&](StrokeQueryInfo &info) {
-        info.hitTarget = MathUtils::RayMeshIntersectionLocalSpace(camera->ProjectViewportToWorld(info.viewportPosition), editedMesh.get(), info.worldPosition);
+        info.hitTarget = MathUtils::RayMeshIntersectionLocalSpace(camera->ProjectViewportToWorld(info.viewportPosition), editedMesh.get(), info.position);
         });
-    hierarchy = MakeUnique<Hierarchy>("Hierarchy", sceneRoot);
+    hierarchy = MakeUnique<Hierarchy>("Hierarchy", GetRoot());
     animationControls = MakeUnique<AnimationControls>();
     sceneStats = MakeUnique<SceneStats>();
 
@@ -101,37 +97,27 @@ void MainScene::OnStart()
     indices.push_back(3);
     indices.push_back(0);
 
+    CreateEntity(new Entity("none"));
+
+    staticEntity = CreateEntity(new Entity("static", Transform(glm::vec3(0.f, 0.f, 2.f))));
+    staticEntity->AddComponent(MeshLibrary::GetCube());
+
+    auto staticMeshComponent = MakeRef<StaticMeshComponent>("StaticMeshComponent", staticVertices, indices, MaterialLibrary::GetDefault());
+    staticEntity2 = CreateEntity(new Entity("static2", Transform(glm::vec3(0.f, 0.f, -2.f))));
+    staticEntity2->AddComponent(staticMeshComponent);
+
+    staticEntity3 = CreateEntity(new Entity("static 3", Transform(glm::vec3(0.f, 1.f, 2.f))));
+    staticEntity3->AddComponent(staticMeshComponent);
+
+    skeletalEntity = CreateEntity(new Entity("skeletal entity"));
+
+    skeletalMesh = MakeRef<SkeletalMeshComponent>("SkeletalMeshComponent");
     MeshLibrary::Import("assets/models/shark.gltf", skeletalMesh, rootBone);
     skeletalMesh->material = MakeRef<Material>(ShaderLibrary::Get("WeightPaint"));
 
-    noneEntity = MakeRef<Entity>("none");
-    noneEntity->SetParent(sceneRoot);
-
-    staticEntity = MakeRef<Entity>("static", Transform(glm::vec3(0.f, 0.f, 2.f)));
-    staticEntity->AddComponent(MeshLibrary::GetCube());
-    staticEntity->SetParent(sceneRoot);
-
-    auto staticMesh = MakeRef<StaticMeshComponent>("StaticMeshComponent", staticVertices, indices, MaterialLibrary::GetDefault());
-    staticEntity2 = MakeRef<Entity>("static2", Transform(glm::vec3(0.f, 0.f, -2.f)));
-    staticEntity2->AddComponent(staticMesh);
-    staticEntity2->SetParent(sceneRoot);
-
-    staticEntity3 = MakeRef<Entity>("static 3", Transform(glm::vec3(0.f, 1.f, 2.f)));
-    staticEntity3->AddComponent(staticMesh);
-    staticEntity3->SetParent(sceneRoot);
-
-    //skeletalEntity = MakeRef<Entity>("skeletal", Transform(glm::vec3(15.f, 0.f, 2.f)));
-    
-    //skeletalEntity->transform.SetScale(glm::vec3(0.01f));
-    //skeletalEntity->SetParent(rootBone); // TODO: URGENT: it should be the other way around - make sure to use relative transformations in the shader (has to be fixed for animation nevertheless)
-    //rootBone->transform.SetScale(glm::vec3(0.01f));
-    //rootBone->transform.Translate(glm::vec3(-200.f, 0.f, 0.f));
-    //rootBone->transform.Translate(glm::vec3(-500.f, 0.f, 0.f));
-    //rootBone->transform.SetScale(glm::vec3(10.f, 10.f, 10.f));
-    rootBone->SetParent(sceneRoot);
-    skeletalEntity = MakeRef<Entity>("skeletal");
     skeletalEntity->AddComponent(skeletalMesh);
-    skeletalEntity->SetParent(sceneRoot);
+
+    rootBone->SetParent(skeletalEntity);
 
     // add bone meshes
     auto boneMat = MakeRef<Material>(ShaderLibrary::Get("Bone"));
@@ -141,27 +127,19 @@ void MainScene::OnStart()
         auto boneLength = 50.f;
         auto &children = bone->GetChildren();
         if (children.size() == 1)
-            boneLength = glm::length(bone->GetChildren().begin()->get()->transform.GetPosition());
+            boneLength = glm::length((*bone->GetChildren().begin())->transform.GetPosition());
 
         auto boneMesh = MeshLibrary::GetBone(boneLength);
         boneMesh->material = boneMat;
         bone->AddComponent(boneMesh);
     }
 
-    //skeletalEntity2 = MakeRef<Entity>("skeletal 2", Transform(glm::vec3(-2.f, 0.f, 0.f)));
-    //skeletalEntity2->AddComponent(skeletalMesh);
-
-    //staticSkeletalEntity = MakeRef<Entity>("static skeletal");
-    //staticSkeletalEntity->transform.SetPosition({ -2.f, 2.f, 0.f });
-    //staticSkeletalEntity->AddComponent(staticMesh);
-    //staticSkeletalEntity->AddComponent(skeletalMesh);
-
     // TODO: NOW: instead, have a sceneRoot entity and submit it in the renderer (recursively)
     //  also we should be able to remove currently submitted entities
     //  we may need to be able to update entities submitted in renderer
-    Renderer::Submit(rootBone);
+    Renderer::Submit(rootBone.get());
     Renderer::Submit(skeletalEntity);
-    Renderer::Submit(noneEntity);
+    //Renderer::Submit(noneEntity);
     Renderer::Submit(staticEntity);
     Renderer::Submit(staticEntity2);
     Renderer::Submit(staticEntity3);
@@ -252,7 +230,7 @@ void MainScene::OnEnd()
 
 void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
 {
-    auto verts = MathUtils::GetVerticesInRadiusLocalSpace(editedMesh.get(), info.worldPosition, brush->radius);
+    auto verts = MathUtils::GetVerticesInRadiusLocalSpace(editedMesh.get(), info.position, brush->radius);
 
     for (const auto &vIndex : verts)
     {
@@ -295,7 +273,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
         }
 
         // update the weight
-        (*toUpdate) = brush->Blend(*toUpdate, glm::distance(info.worldPosition, v.position));
+        (*toUpdate) = brush->Blend(*toUpdate, glm::distance(info.position, v.position));
 
         // the components of the result must add up to one
         auto sum = 0.f;

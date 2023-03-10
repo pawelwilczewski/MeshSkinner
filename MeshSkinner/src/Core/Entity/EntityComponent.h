@@ -11,11 +11,11 @@ public:
 	virtual ~EntityComponent() = default;
 
 public:
-	Weak<class Entity> GetEntity() const;
+	Entity *GetEntity() const;
 
 protected:
-	virtual void OnAttached() {}
-	virtual void OnDetached() {}
+	virtual void OnAttached();
+	virtual void OnDetached();
 
 public: // TODO: perhaps these DisplayUI functions shouldn't be public
 	virtual void DisplayUI();
@@ -24,5 +24,5 @@ public:
 	std::string name;
 
 private:
-	Weak<class Entity> entity;
+	Entity *entity = nullptr;
 };

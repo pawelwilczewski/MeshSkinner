@@ -35,6 +35,6 @@ public:
 	const std::vector<Ref<Bone>> &GetBones() const;
 
 private:
-	std::vector<Ref<Bone>> bones;
+	std::vector<Ref<Bone>> bones; // TODO: unique ptrs here
 	uint16_t root = -1;
 };

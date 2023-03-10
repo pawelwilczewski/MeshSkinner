@@ -6,9 +6,19 @@ EntityComponent::EntityComponent(const std::string &name) : name(name)
 {
 }
 
-Weak<Entity> EntityComponent::GetEntity() const
+Entity *EntityComponent::GetEntity() const
 {
     return entity;
+}
+
+void EntityComponent::OnAttached()
+{
+
+}
+
+void EntityComponent::OnDetached()
+{
+
 }
 
 void EntityComponent::DisplayUI()

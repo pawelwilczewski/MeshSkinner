@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Application/Core.h"
+#include "Core/Entity/Entity.h"
+
 class Scene
 {
 public:
@@ -13,6 +16,15 @@ protected:
 	virtual void OnUpdateUI() = 0;
 	virtual void OnLateUpdate() = 0;
 	virtual void OnEnd() = 0;
+
+protected:
+	Entity *CreateEntity(Entity *entity);
+	void DestroyEntity(const Entity *entity);
+
+	Entity *GetRoot() const;
+
+protected:
+	std::vector<Unique<Entity>> entities;
 
 private:
 	CallbackNoArgRef onStartCallback;
