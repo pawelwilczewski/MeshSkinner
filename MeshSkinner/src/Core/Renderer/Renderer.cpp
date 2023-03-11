@@ -141,7 +141,7 @@ void Renderer::SubmitMesh(Entity *entity, const Ref<SkeletalMeshComponent> &mesh
 	{
 		skeletons.insert({ mesh->skeleton.get(), bones->GetLength()});
 
-		auto inverseRoot = glm::inverse(mesh->skeleton->GetRootBone()->GetParent()->GetWorldMatrix());
+		auto inverseRoot = glm::inverse(mesh->skeleton->GetRootBone()->GetWorldMatrix());
 		for (auto &bone : mesh->skeleton->GetBones())
 		{
 			auto bonegpu = BoneGPU(*bone, inverseRoot);

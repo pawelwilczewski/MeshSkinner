@@ -26,6 +26,7 @@ Ref<StaticMeshComponent> MeshLibrary::GetBone(float length)
 	return mesh;
 }
 
+// TODO: need to make these local to functions so no duplication/whatever otehr issues (destructors need to be called accordingly)
 static tinygltf::Model model;
 static tinygltf::TinyGLTF loader;
 static std::string err;
@@ -222,6 +223,7 @@ Ref<SkeletalMeshComponent> MeshLibrary::Import(const std::string &path, Scene *s
 
 			// name
 			bone->name = refJoint.name;
+
 			// inverse bind matrix
 			bone->inverseBindMatrix = inverseBindMatricesMatData[i];
 

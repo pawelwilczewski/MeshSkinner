@@ -43,14 +43,10 @@ void main()
 
 	float transitionSize = 1.0 / 4;
 
-	if (weight < transitionSize)
-		io_Color = mix(blue, cyan, (weight - 0.0 * transitionSize) / transitionSize);
-	else if (weight < 2.0 * transitionSize)
-		io_Color = mix(cyan, green, (weight - 1.0 * transitionSize) / transitionSize);
-	else if (weight < 3.0 * transitionSize)
-		io_Color = mix(green, yellow, (weight - 2.0 * transitionSize) / transitionSize);
-	else
-		io_Color = mix(yellow, red, (weight - 3.0 * transitionSize) / transitionSize);
+	if		(weight < 1.0 * transitionSize)	io_Color = mix(blue,	cyan,	(weight - 0.0 * transitionSize) / transitionSize);
+	else if (weight < 2.0 * transitionSize)	io_Color = mix(cyan,	green,	(weight - 1.0 * transitionSize) / transitionSize);
+	else if (weight < 3.0 * transitionSize)	io_Color = mix(green,	yellow,	(weight - 2.0 * transitionSize) / transitionSize);
+	else									io_Color = mix(yellow,	red,	(weight - 3.0 * transitionSize) / transitionSize);
 
 	mat4 t = transforms[vertexInfo[gl_VertexID].transformID];
 
