@@ -26,19 +26,24 @@ Ref<StaticMeshComponent> MeshLibrary::GetBone(float length)
 	return mesh;
 }
 
-// TODO: need to make these local to functions so no duplication/whatever otehr issues (destructors need to be called accordingly)
-static tinygltf::Model model;
-static tinygltf::TinyGLTF loader;
+static tinygltf::Model *model = nullptr;
+static tinygltf::TinyGLTF *loader = nullptr;
 static std::string err;
 static std::string warn;
 
 static bool LoadGLTF(const std::string &path)
 {
+	delete loader;
+	loader = new tinygltf::TinyGLTF();
+
+	delete model;
+	model = new tinygltf::Model();
+
 	bool success = false;
 	auto extension = std::filesystem::path(path).extension();
 
-	if (extension == ".gltf")		success = loader.LoadASCIIFromFile(&model, &err, &warn, path);
-	else if (extension == ".glb")	success = loader.LoadBinaryFromFile(&model, &err, &warn, path);
+	if (extension == ".gltf")		success = loader->LoadASCIIFromFile(model, &err, &warn, path);
+	else if (extension == ".glb")	success = loader->LoadBinaryFromFile(model, &err, &warn, path);
 
 	if (!warn.empty())	Log::Warn("GLTF Import from file {}: Warning: {}", path, warn);
 	if (!err.empty())	Log::Error("GLTF Import from file {}: Error: {}", path, err);
@@ -69,9 +74,9 @@ static void *GetAttributeData(const tinygltf::Primitive &primitive, const std::s
 {
 	if (primitive.attributes.find(attribute) != primitive.attributes.end())
 	{
-		auto &accessor = model.accessors[primitive.attributes.at(attribute)];
-		auto &bufferView = model.bufferViews[accessor.bufferView];
-		return &(model.buffers[bufferView.buffer].data[accessor.byteOffset + bufferView.byteOffset]);
+		auto &accessor = model->accessors[primitive.attributes.at(attribute)];
+		auto &bufferView = model->bufferViews[accessor.bufferView];
+		return &(model->buffers[bufferView.buffer].data[accessor.byteOffset + bufferView.byteOffset]);
 	}
 
 	return nullptr;
@@ -80,8 +85,8 @@ static void *GetAttributeData(const tinygltf::Primitive &primitive, const std::s
 static bool UpdateIndices(const tinygltf::Primitive &primitive, const Ref<MeshComponent> &outMesh)
 {
 	// add indices
-	auto &indices = model.accessors[primitive.indices];
-	void *indicesData = &(model.buffers[model.bufferViews[indices.bufferView].buffer].data[indices.byteOffset + model.bufferViews[indices.bufferView].byteOffset]);
+	auto &indices = model->accessors[primitive.indices];
+	void *indicesData = &(model->buffers[model->bufferViews[indices.bufferView].buffer].data[indices.byteOffset + model->bufferViews[indices.bufferView].byteOffset]);
 
 	switch (indices.componentType)
 	{
@@ -117,7 +122,7 @@ Ref<StaticMeshComponent> MeshLibrary::Import(const std::string &path)
 	auto resultMesh = MakeRef<StaticMeshComponent>();
 
 	// for now, we just assume the imported file is .gltf
-	for (const auto &mesh : model.meshes)
+	for (const auto &mesh : model->meshes)
 	{
 		for (const auto &primitive : mesh.primitives)
 		{
@@ -128,7 +133,7 @@ Ref<StaticMeshComponent> MeshLibrary::Import(const std::string &path)
 			// create the vertices
 
 			// get the vert count (position should always be specified)
-			auto vertCount = model.accessors[primitive.attributes.at("POSITION")].count;
+			auto vertCount = model->accessors[primitive.attributes.at("POSITION")].count;
 
 			// append base vertices to the mesh
 			resultMesh->vertices.insert(resultMesh->vertices.end(), vertCount, StaticVertex());
@@ -197,7 +202,7 @@ Ref<SkeletalMeshComponent> MeshLibrary::Import(const std::string &path, Scene *s
 	auto resultMesh = MakeRef<SkeletalMeshComponent>();
 
 	// import the skeleton
-	for (const auto &skin : model.skins)
+	for (const auto &skin : model->skins)
 	{
 		// skeleton root
 		resultMesh->skeleton->root = -1;
@@ -210,15 +215,15 @@ Ref<SkeletalMeshComponent> MeshLibrary::Import(const std::string &path, Scene *s
 			bone = static_cast<Bone *>(scene->CreateEntity(new Bone()));
 
 		// get hold of inverse bind matrices data
-		auto &inverseBindMatricesAccessor = model.accessors[skin.inverseBindMatrices];
-		auto &inverseBindMatricesBufferView = model.bufferViews[inverseBindMatricesAccessor.bufferView];
-		void *inverseBindMatricesData = &(model.buffers[inverseBindMatricesBufferView.buffer].data[inverseBindMatricesAccessor.byteOffset + inverseBindMatricesBufferView.byteOffset]);
+		auto &inverseBindMatricesAccessor = model->accessors[skin.inverseBindMatrices];
+		auto &inverseBindMatricesBufferView = model->bufferViews[inverseBindMatricesAccessor.bufferView];
+		void *inverseBindMatricesData = &(model->buffers[inverseBindMatricesBufferView.buffer].data[inverseBindMatricesAccessor.byteOffset + inverseBindMatricesBufferView.byteOffset]);
 		glm::mat4 *inverseBindMatricesMatData = static_cast<glm::mat4 *>(inverseBindMatricesData);
 
 		int i = 0;
 		for (const auto &joint : skin.joints)
 		{
-			auto &refJoint = model.nodes[joint];
+			auto &refJoint = model->nodes[joint];
 			auto &bone = resultMesh->skeleton->bones[i];
 
 			// name
@@ -272,7 +277,7 @@ Ref<SkeletalMeshComponent> MeshLibrary::Import(const std::string &path, Scene *s
 	}
 
 	// import the mesh
-	for (const auto &mesh : model.meshes)
+	for (const auto &mesh : model->meshes)
 	{
 		for (const auto &primitive : mesh.primitives)
 		{
@@ -283,7 +288,7 @@ Ref<SkeletalMeshComponent> MeshLibrary::Import(const std::string &path, Scene *s
 			// create the vertices
 
 			// get the vert count (position should always be specified)
-			auto vertCount = model.accessors[primitive.attributes.at("POSITION")].count;
+			auto vertCount = model->accessors[primitive.attributes.at("POSITION")].count;
 
 			// append base vertices to the mesh
 			resultMesh->vertices.insert(resultMesh->vertices.end(), vertCount, SkeletalVertex());
@@ -335,7 +340,7 @@ Ref<SkeletalMeshComponent> MeshLibrary::Import(const std::string &path, Scene *s
 			data = GetAttributeData(primitive, "JOINTS_0");
 			if (data)
 			{
-				switch (model.accessors[primitive.attributes.at("JOINTS_0")].componentType)
+				switch (model->accessors[primitive.attributes.at("JOINTS_0")].componentType)
 				{
 				case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
 				{
@@ -376,7 +381,7 @@ bool MeshLibrary::Import(const std::string &path, std::vector<Animation> &outAni
 		return false;
 
 	// import the mesh
-	for (const auto &animation : model.animations)
+	for (const auto &animation : model->animations)
 	{
 		// init the animation
 		auto anim = Animation(animation.name);
@@ -384,7 +389,7 @@ bool MeshLibrary::Import(const std::string &path, std::vector<Animation> &outAni
 		for (const auto &channel : animation.channels)
 		{
 			// ensure the track is inserted
-			auto &boneName = model.nodes[channel.target_node].name;
+			auto &boneName = model->nodes[channel.target_node].name;
 			if (anim.tracks.find(boneName) == anim.tracks.end())
 				anim.tracks.insert({ boneName, AnimationTrack() });
 			auto &track = anim.tracks[boneName];
@@ -402,11 +407,11 @@ bool MeshLibrary::Import(const std::string &path, std::vector<Animation> &outAni
 
 			// get times bufferview
 			auto &timesBufferIndex = animation.samplers[channel.sampler].input;
-			auto &timesBufferAccessor = model.accessors[timesBufferIndex];
-			auto &timesBufferView = model.bufferViews[timesBufferAccessor.bufferView];
+			auto &timesBufferAccessor = model->accessors[timesBufferIndex];
+			auto &timesBufferView = model->bufferViews[timesBufferAccessor.bufferView];
 
 			// get times data and keyframes length
-			auto timesData = (float *)&(model.buffers[timesBufferView.buffer].data[timesBufferAccessor.byteOffset + timesBufferView.byteOffset]);
+			auto timesData = (float *)&(model->buffers[timesBufferView.buffer].data[timesBufferAccessor.byteOffset + timesBufferView.byteOffset]);
 
 			// add initial keyframes with time data
 			for (size_t i = 0; i < timesBufferAccessor.count; i++)
@@ -425,13 +430,13 @@ bool MeshLibrary::Import(const std::string &path, std::vector<Animation> &outAni
 
 			// get values buffer view
 			auto &valuesBufferIndex = animation.samplers[channel.sampler].output;
-			auto &valuesBufferAccessor = model.accessors[valuesBufferIndex];
-			auto &valuesBufferView = model.bufferViews[valuesBufferAccessor.bufferView];
+			auto &valuesBufferAccessor = model->accessors[valuesBufferIndex];
+			auto &valuesBufferView = model->bufferViews[valuesBufferAccessor.bufferView];
 
 			// update the keyframes
 			if (channel.target_path == "translation")
 			{
-				auto valuesData = (glm::vec3 *)&(model.buffers[valuesBufferView.buffer].data[valuesBufferAccessor.byteOffset + valuesBufferView.byteOffset]);
+				auto valuesData = (glm::vec3 *)&(model->buffers[valuesBufferView.buffer].data[valuesBufferAccessor.byteOffset + valuesBufferView.byteOffset]);
 
 				// update positions
 				for (size_t i = 0; i < valuesBufferAccessor.count; i++)
@@ -439,7 +444,7 @@ bool MeshLibrary::Import(const std::string &path, std::vector<Animation> &outAni
 			}
 			else if (channel.target_path == "rotation")
 			{
-				auto valuesData = (glm::quat *) &(model.buffers[valuesBufferView.buffer].data[valuesBufferAccessor.byteOffset + valuesBufferView.byteOffset]);
+				auto valuesData = (glm::quat *) &(model->buffers[valuesBufferView.buffer].data[valuesBufferAccessor.byteOffset + valuesBufferView.byteOffset]);
 
 				// update rotations
 				for (size_t i = 0; i < valuesBufferAccessor.count; i++)
@@ -447,7 +452,7 @@ bool MeshLibrary::Import(const std::string &path, std::vector<Animation> &outAni
 			}
 			else if (channel.target_path == "scale")
 			{
-				auto valuesData = (glm::vec3 *) &(model.buffers[valuesBufferView.buffer].data[valuesBufferAccessor.byteOffset + valuesBufferView.byteOffset]);
+				auto valuesData = (glm::vec3 *) &(model->buffers[valuesBufferView.buffer].data[valuesBufferAccessor.byteOffset + valuesBufferView.byteOffset]);
 
 				// update scale
 				for (size_t i = 0; i < valuesBufferAccessor.count; i++)
@@ -455,7 +460,7 @@ bool MeshLibrary::Import(const std::string &path, std::vector<Animation> &outAni
 			}
 			else if (channel.target_path == "weights")
 			{
-				auto valuesData = (float *) &(model.buffers[valuesBufferView.buffer].data[valuesBufferAccessor.byteOffset + valuesBufferView.byteOffset]);
+				auto valuesData = (float *) &(model->buffers[valuesBufferView.buffer].data[valuesBufferAccessor.byteOffset + valuesBufferView.byteOffset]);
 
 				for (size_t i = 0; i < valuesBufferAccessor.count; i++)
 					track.weightsKeyframes[i].value = valuesData[i];
@@ -489,7 +494,7 @@ void MeshLibrary::ExportUpdated(const std::string &source, const std::string &ta
 	LoadGLTF(source);
 
 	// import the mesh
-	for (const auto &mesh : model.meshes)
+	for (const auto &mesh : model->meshes)
 	{
 		for (const auto &primitive : mesh.primitives)
 		{
@@ -498,7 +503,7 @@ void MeshLibrary::ExportUpdated(const std::string &source, const std::string &ta
 			auto data = GetAttributeData(primitive, "JOINTS_0");
 			if (data)
 			{
-				switch (model.accessors[primitive.attributes.at("JOINTS_0")].componentType)
+				switch (model->accessors[primitive.attributes.at("JOINTS_0")].componentType)
 				{
 				case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
 				{
@@ -530,5 +535,5 @@ void MeshLibrary::ExportUpdated(const std::string &source, const std::string &ta
 		}
 	}
 
-	loader.WriteGltfSceneToFile(&model, target, true, true, true, FileUtils::FileExtension(target) == ".glb");
+	loader->WriteGltfSceneToFile(model, target, true, true, true, FileUtils::FileExtension(target) == ".glb");
 }
