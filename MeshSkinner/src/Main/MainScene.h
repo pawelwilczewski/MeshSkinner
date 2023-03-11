@@ -32,6 +32,11 @@ private:
 	Camera *camera;
 	Ref<class CameraControllerComponent> cameraController;
 
+	std::string sourceFile;
+	std::string targetFile;
+
+	Ref<Material> weightPaintMaterial;
+
 private:
 	CallbackRef<StrokeQueryInfo> onStrokeEmplaceCallback;
 	CallbackNoArgRef onDrawAdditionalViewportWidgetsCallback;

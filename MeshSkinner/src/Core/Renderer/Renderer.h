@@ -25,10 +25,10 @@ struct DrawCallInfo
 
 	Unique<VertexArray<uint32_t>> vao;
 	// key: entity already rendered, value: transform id to use for mesh
-	std::unordered_map<Entity *, const uint32_t> entities; // TODO: use weak ptrs for entities
+	std::unordered_map<Entity *, const uint32_t> entities;
 	// key: skeleton already rendered, value: id to use for bones transforms (start)
-	std::unordered_map<Skeleton *, const uint32_t> skeletons; // TODO: use weak ptrs for skeletons
-	std::unordered_map<const MeshComponent *, const uint32_t> meshes; // TODO: use weak ptrs for meshes
+	std::unordered_map<Skeleton *, const uint32_t> skeletons;
+	std::unordered_map<const MeshComponent *, const uint32_t> meshes;
 	Unique<StorageBuffer<glm::mat4>> transforms;
 	Unique<StorageBuffer<BoneGPU>> bones;
 	Unique<StorageBuffer<MaterialGPU>> materials;

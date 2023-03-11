@@ -18,6 +18,19 @@ private:
 public:
 	Entity *GetSelectedEntity() const;
 
+	template <typename T>
+	Ref<T> GetSelectedComponent() const
+	{
+		if (!selectedEntity)
+			return nullptr;
+
+		auto &components = selectedEntity->GetComponents<T>();
+		if (components.size() == 0)
+			return nullptr;
+
+		return *components.begin();
+	}
+
 public:
 	Entity *root;
 

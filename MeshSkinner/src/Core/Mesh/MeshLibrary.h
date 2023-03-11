@@ -9,8 +9,8 @@ public:
 	static Ref<StaticMeshComponent> GetBone(float length);
 
 public:
-	static bool Import(const std::string &path, Ref<StaticMeshComponent> &outMesh);
-	static bool Import(const std::string &path, Ref<SkeletalMeshComponent> &outMesh, Ref<Bone> &outRoot);
+	static Ref<StaticMeshComponent> Import(const std::string &path);
+	static Ref<SkeletalMeshComponent> Import(const std::string &path, Scene *scene, Entity *entity);
 	static bool Import(const std::string &path, std::vector<Animation> &outAnimations);
 
 public:

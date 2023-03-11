@@ -28,13 +28,13 @@ public:
 	Skeleton();
 
 public:
-	const Bone *operator[](const char *boneName) const;
-	const Bone *GetBoneByName(const char *boneName) const;
-	const Ref<Bone> &GetRootBone() const;
+	Bone *operator[](const char *boneName) const;
+	Bone *GetBoneByName(const char *boneName) const;
+	Bone *GetRootBone() const;
 
-	const std::vector<Ref<Bone>> &GetBones() const;
+	const std::vector<Bone *> &GetBones() const;
 
 private:
-	std::vector<Ref<Bone>> bones; // TODO: unique ptrs here
+	std::vector<Bone *> bones;
 	uint16_t root = -1;
 };

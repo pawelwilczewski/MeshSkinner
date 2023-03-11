@@ -144,9 +144,9 @@ void Renderer::SubmitMesh(Entity *entity, const Ref<SkeletalMeshComponent> &mesh
 		auto inverseRoot = glm::inverse(mesh->skeleton->GetRootBone()->GetParent()->GetWorldMatrix());
 		for (auto &bone : mesh->skeleton->GetBones())
 		{
-			auto bonegpu = BoneGPU(*bone.get(), inverseRoot);
+			auto bonegpu = BoneGPU(*bone, inverseRoot);
 			bones->AppendData(&bonegpu, 1);
-			Submit(bone.get());
+			Submit(bone);
 		}
 	}
 	else
@@ -194,9 +194,9 @@ static void UpdateTransforms(const Ref<DrawCallInfo> &info, std::unordered_set<c
 		{
 			if (!skeleton->GetBones()[i]->GetIsWorldMatrixUpdated())
 			{
-				auto bonegpu = BoneGPU(*skeleton->GetBones()[i].get(), inverseRoot);
+				auto bonegpu = BoneGPU(*skeleton->GetBones()[i], inverseRoot);
 				info->bones->SetData(&bonegpu, 1, skeletonID + i);
-				entitiesToUpdate.insert(skeleton->GetBones()[i].get());
+				entitiesToUpdate.insert(skeleton->GetBones()[i]);
 			}
 		}
 	}

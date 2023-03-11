@@ -17,7 +17,7 @@ protected:
 	virtual void OnLateUpdate() = 0;
 	virtual void OnEnd() = 0;
 
-protected:
+public:
 	Entity *CreateEntity(Entity *entity);
 	void DestroyEntity(const Entity *entity);
 

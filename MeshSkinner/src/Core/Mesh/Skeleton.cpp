@@ -10,26 +10,26 @@ Skeleton::Skeleton()
 {
 }
 
-const Bone *Skeleton::operator[](const char *boneName) const
+Bone *Skeleton::operator[](const char *boneName) const
 {
     return GetBoneByName(boneName);
 }
 
-const Bone *Skeleton::GetBoneByName(const char *boneName) const
+Bone *Skeleton::GetBoneByName(const char *boneName) const
 {
     for (const auto &bone : bones)
         if (bone->name == boneName)
-            return bone.get();
+            return bone;
 
     return nullptr;
 }
 
-const Ref<Bone> &Skeleton::GetRootBone() const
+Bone *Skeleton::GetRootBone() const
 {
     return bones[root];
 }
 
-const std::vector<Ref<Bone>> &Skeleton::GetBones() const
+const std::vector<Bone *> &Skeleton::GetBones() const
 {
     return bones;
 }
