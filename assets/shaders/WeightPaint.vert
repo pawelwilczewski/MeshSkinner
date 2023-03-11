@@ -13,10 +13,7 @@ layout(location = 4) in vec3 in_Color;
 layout(location = 5) in vec4 in_Bones;
 layout(location = 6) in vec4 in_Weights;
 
-layout (std430, binding = 0) buffer ss_VertexInfo { VertexInfo vertexInfo[]; };
-layout (std430, binding = 1) buffer ss_Transforms { mat4 transforms[]; };
-layout (std430, binding = 2) buffer ss_Bones { Bone bones[]; };
-//layout (std430, binding = 2) buffer ss_Materials { restrict readonly Material Materials[]; };
+#include "include/SSBOs.glsl"
 
 uniform mat4 u_ViewProjection;
 uniform int u_ActiveBone;
@@ -58,5 +55,7 @@ void main()
 	}
 
 	vec4 worldPosition = t * m * vec4(in_Position, 1.0);
+	positions[gl_VertexID] = vec3(worldPosition);
+
 	gl_Position = u_ViewProjection * worldPosition;
 }
