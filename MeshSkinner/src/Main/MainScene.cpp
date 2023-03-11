@@ -27,7 +27,7 @@ MainScene::MainScene() : Scene()
         auto selectedMesh = hierarchy->GetSelectedComponent<SkeletalMeshComponent>();
         if (!selectedMesh) return;
 
-        info.hitTarget = MathUtils::RayMeshIntersectionLocalSpace(camera->ProjectViewportToWorld(info.viewportPosition), selectedMesh.get(), info.position);
+        info.hitTarget = MathUtils::RayMeshIntersection(camera->ProjectViewportToWorld(info.viewportPosition), selectedMesh.get(), info.position);
         });
     hierarchy = MakeUnique<Hierarchy>("Hierarchy", GetRoot());
     animationControls = MakeUnique<AnimationControls>();
@@ -187,9 +187,14 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
     auto selectedMesh = hierarchy->GetSelectedComponent<SkeletalMeshComponent>();
     if (!selectedMesh) return;
 
-    auto verts = MathUtils::GetVerticesInRadiusLocalSpace(selectedMesh.get(), info.position, brush->radius);
+    auto &meshInfo = Renderer::skeletalMeshDrawCalls.at(selectedMesh.get()->material->shader);
+    auto length = selectedMesh.get()->GetVerticesLength();
+    auto verts = std::make_unique<glm::vec4[]>(length);
+    meshInfo->finalPos->ReadData(meshInfo->meshes.at(selectedMesh.get()), length, verts.get());
 
-    for (const auto &vIndex : verts)
+    auto vertIndices = MathUtils::GetVerticesInRadius(selectedMesh.get(), info.position, brush->radius);
+
+    for (const auto &vIndex : vertIndices)
     {
         auto &v = selectedMesh->vertices[vIndex];
 
@@ -214,7 +219,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
             auto minWeightBone = 0;
             auto minWeight = v.weights[0];
 
-            for (int i = 1; i < v.weights.length(); i++)
+            for (int i = v.weights.length() - 1; i > 0; i--)
             {
                 if (v.weights[i] < minWeight)
                 {
@@ -230,7 +235,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
         }
 
         // update the weight
-        (*toUpdate) = brush->Blend(*toUpdate, glm::distance(info.position, v.position));
+        (*toUpdate) = brush->Blend(*toUpdate, glm::distance(info.position, glm::vec3(verts[vIndex])));
 
         // the components of the result must add up to one
         auto sum = 0.f;

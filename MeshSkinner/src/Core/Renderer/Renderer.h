@@ -28,11 +28,13 @@ struct DrawCallInfo
 	std::unordered_map<Entity *, const uint32_t> entities;
 	// key: skeleton already rendered, value: id to use for bones transforms (start)
 	std::unordered_map<Skeleton *, const uint32_t> skeletons;
+	// key: mesh already rendered, value: offset in vbo where the vertices start
 	std::unordered_map<const MeshComponent *, const uint32_t> meshes;
 	Unique<StorageBuffer<glm::mat4>> transforms;
 	Unique<StorageBuffer<BoneGPU>> bones;
 	Unique<StorageBuffer<MaterialGPU>> materials;
 	Unique<StorageBuffer<VertexInfo>> vertexInfo;
+	Unique<StorageBuffer<glm::vec4>> finalPos;
 };
 
 using DrawCalls = std::map<Ref<Shader>, Ref<DrawCallInfo>>;
@@ -62,7 +64,7 @@ public:
 	static Camera *activeCamera;
 	static int activeBone;
 
-private:
+public:
 	static DrawCalls staticMeshDrawCalls;
 	static DrawCalls skeletalMeshDrawCalls;
 };

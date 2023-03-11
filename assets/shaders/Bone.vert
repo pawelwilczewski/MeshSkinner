@@ -21,5 +21,6 @@ void main()
 	io_Color = in_Color;
 
 	vec4 worldPosition = transforms[transformID] * vec4(in_Position, 1.0);
+	positions[gl_VertexID] = worldPosition;
 	gl_Position = u_ViewProjection * worldPosition;
 }

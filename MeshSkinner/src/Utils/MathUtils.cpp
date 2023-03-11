@@ -14,41 +14,38 @@ bool MathUtils::Ray::IntersectsTriangle(const glm::vec3 &v0, const glm::vec3 &v1
     return hit;
 }
 
-bool MathUtils::RayMeshIntersectionLocalSpace(const Ray &ray, const MeshComponent *mesh, glm::vec3 &closestIntersection)
+bool MathUtils::RayMeshIntersection(const Ray &ray, const MeshComponent *mesh, glm::vec3 &closestIntersection)
 {
+    // get verts as calculated on the gpu
+    auto &info = Renderer::skeletalMeshDrawCalls.at(mesh->material->shader);
+    auto length = mesh->GetVerticesLength();
+    auto verts = std::make_unique<glm::vec4[]>(length);
+    info->finalPos->ReadData(info->meshes.at(mesh), length, verts.get());
+
     float smallestDistance = -1.f;
 
-    const auto &layout = mesh->GetVertexBufferLayout();
-    auto stride = layout.GetStride();
-    auto offset = layout["position"].offset;
-
-    const auto &matrix = mesh->GetEntity()->GetWorldMatrix();
-    auto invMatrix = glm::inverse(matrix);
-    auto localRay = Ray(glm::vec3(invMatrix * glm::vec4(ray.origin, 1.f)), glm::mat3(invMatrix) * ray.direction);
-
-    auto vertBytes = (uint8_t *)mesh->GetVertices();
     for (size_t i = 0; i < mesh->indices.size(); i += 3)
     {
-        auto v0 = *(glm::vec3 *)(vertBytes + mesh->indices[i + 0] * stride + offset);
-        auto v1 = *(glm::vec3 *)(vertBytes + mesh->indices[i + 1] * stride + offset);
-        auto v2 = *(glm::vec3 *)(vertBytes + mesh->indices[i + 2] * stride + offset);
+        const auto &v0 = verts[mesh->indices[i + 0]];
+        const auto &v1 = verts[mesh->indices[i + 1]];
+        const auto &v2 = verts[mesh->indices[i + 2]];
 
         // intersection check and update closest intersection
-        glm::vec3 localIntersection;
-        if (localRay.IntersectsTriangle(v0, v1, v2, localIntersection))
+        glm::vec3 intersection;
+        if (ray.IntersectsTriangle(v0, v1, v2, intersection))
         {
-            auto distance = glm::distance(localRay.origin, localIntersection);
+            auto distance = glm::distance(ray.origin, intersection);
             if (smallestDistance >= 0.f)
             {
                 if (distance < smallestDistance)
                 {
-                    closestIntersection = localIntersection;
+                    closestIntersection = intersection;
                     smallestDistance = distance;
                 }
             }
             else
             {
-                closestIntersection = localIntersection;
+                closestIntersection = intersection;
                 smallestDistance = distance;
             }
         }
@@ -57,40 +54,21 @@ bool MathUtils::RayMeshIntersectionLocalSpace(const Ray &ray, const MeshComponen
     return smallestDistance >= 0.f;
 }
 
-bool MathUtils::RayMeshIntersection(const Ray &ray, const MeshComponent *mesh, glm::vec3 &closestIntersection)
+std::vector<uint32_t> MathUtils::GetVerticesInRadius(const MeshComponent *mesh, const glm::vec3 &point, float radius)
 {
-    auto result = RayMeshIntersectionLocalSpace(ray, mesh, closestIntersection);
+    // get verts as calculated on the gpu
+    auto &info = Renderer::skeletalMeshDrawCalls.at(mesh->material->shader);
+    auto length = mesh->GetVerticesLength();
+    auto verts = std::make_unique<glm::vec4[]>(length);
+    info->finalPos->ReadData(info->meshes.at(mesh), length, verts.get());
 
-    const auto &matrix = mesh->GetEntity()->GetWorldMatrix();
-    closestIntersection = matrix * glm::vec4(closestIntersection, 1.f);
-
-    return result;
-}
-
-std::vector<uint32_t> MathUtils::GetVerticesInRadiusLocalSpace(const MeshComponent *mesh, const glm::vec3 &point, float radius)
-{
     std::vector<uint32_t> result;
 
-    const auto &layout = mesh->GetVertexBufferLayout();
-    auto stride = layout.GetStride();
-    auto offset = layout["position"].offset;
-
-    auto vertBytes = (uint8_t *)mesh->GetVertices();
     for (size_t i = 0; i < mesh->GetVerticesLength(); i++)
     {
-        auto v = *(glm::vec3 *)(vertBytes + i * stride + offset);
-
-        if (glm::distance(point, v) <= radius)
+        if (glm::distance(point, glm::vec3(verts[i])) <= radius)
             result.push_back((uint32_t)i);
     }
 
     return result;
-}
-
-std::vector<uint32_t> MathUtils::GetVerticesInRadius(const MeshComponent *mesh, const glm::vec3 &point, float radius)
-{
-    const auto &invMatrix = glm::inverse(mesh->GetEntity()->GetWorldMatrix());
-    auto pointLocalSpace = glm::vec3(invMatrix * glm::vec4(point, 1.f));
-
-    return GetVerticesInRadiusLocalSpace(mesh, pointLocalSpace, radius);
 }

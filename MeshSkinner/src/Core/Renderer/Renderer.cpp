@@ -11,7 +11,8 @@ DrawCallInfo::DrawCallInfo() :
 	transforms(MakeUnique<StorageBuffer<glm::mat4>>()),
 	materials(MakeUnique<StorageBuffer<MaterialGPU>>()),
 	vertexInfo(MakeUnique<StorageBuffer<VertexInfo>>()),
-	bones(MakeUnique<StorageBuffer<BoneGPU>>())
+	bones(MakeUnique<StorageBuffer<BoneGPU>>()),
+	finalPos(MakeUnique<StorageBuffer<glm::vec4>>())
 {
 
 }
@@ -74,6 +75,7 @@ void Renderer::SubmitMesh(Entity *entity, const MeshComponent *mesh, DrawCalls &
 	auto &materials = drawCalls[mesh->material->shader]->materials;
 	auto &meshes = drawCalls[mesh->material->shader]->meshes;
 	auto &bones = drawCalls[mesh->material->shader]->bones;
+	auto &finalPos = drawCalls[mesh->material->shader]->finalPos;
 
 	// get the transform id
 	uint32_t transformID;
@@ -99,6 +101,11 @@ void Renderer::SubmitMesh(Entity *entity, const MeshComponent *mesh, DrawCalls &
 	auto vboOffsetLength = vbo->GetSizeBytes() / mesh->GetVertexBufferLayout().GetStride();
 	vbo->SetData(mesh->GetVertices(), (GLuint)(mesh->GetVerticesLength() * mesh->GetVertexBufferLayout().GetStride()), vbo->GetSizeBytes());
 
+	// init final pos
+	std::vector<glm::vec4> finalPosInit(vao->GetVertexBuffer(0)->GetLength(), glm::vec4(0.f));
+	finalPos->AppendData(finalPosInit.data(), finalPosInit.size());
+
+	// update meshes offset info
 	if (meshes.find(mesh) == meshes.end())
 	//	assert(false); // duplicate mesh added
 	//else
@@ -214,6 +221,7 @@ void Renderer::Render(const DrawCalls::iterator &it)
 	shader->SetupStorageBuffer("ss_VertexInfo", info->vertexInfo->GetID());
 	shader->SetupStorageBuffer("ss_Transforms", info->transforms->GetID());
 	shader->SetupStorageBuffer("ss_Bones", info->bones->GetID());
+	shader->SetupStorageBuffer("ss_FinalPos", info->finalPos->GetID());
 	//shader->SetupStorageBuffer("ss_Materials", info->materials->GetID());
 
 	info->vao->Bind();

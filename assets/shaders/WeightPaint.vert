@@ -55,7 +55,6 @@ void main()
 	}
 
 	vec4 worldPosition = t * m * vec4(in_Position, 1.0);
-	positions[gl_VertexID] = vec3(worldPosition);
-
+	positions[gl_VertexID] = worldPosition;
 	gl_Position = u_ViewProjection * worldPosition;
 }
