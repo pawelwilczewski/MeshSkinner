@@ -17,7 +17,11 @@ namespace MathUtils
 
 	bool RayMeshIntersection(const Ray &ray, const MeshComponent *mesh, glm::vec3 &closestIntersection);
 
+    bool RayMeshIntersection(const Ray &ray, const std::vector<glm::vec4> &verts, const std::vector<uint32_t> &indices, glm::vec3 &closestIntersection);
+
 	std::vector<uint32_t> GetVerticesInRadius(const MeshComponent *mesh, const glm::vec3 &point, float radius);
+
+    std::vector<uint32_t> GetVerticesInRadius(const std::vector<glm::vec4> &verts, const glm::vec3 &point, float radius);
 
     constexpr float BlendMix(float oldWeight, float goalWeight, float alpha)
     {

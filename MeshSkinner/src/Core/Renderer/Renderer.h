@@ -37,7 +37,7 @@ struct DrawCallInfo
 	Unique<StorageBuffer<glm::vec4>> finalPos;
 };
 
-using DrawCalls = std::map<Ref<Shader>, Ref<DrawCallInfo>>;
+using DrawCalls = std::map<Ref<Shader>, Ref<DrawCallInfo>>; // TODO: now: why Ref<DrawCallInfo> and not DrawCallInfo??
 
 class Renderer
 {
@@ -60,11 +60,13 @@ private:
 public:
 	static void UpdateMeshVertices(const MeshComponent *mesh);
 
+	static std::vector<glm::vec4> GetFinalVertPosData(const MeshComponent *mesh);
+
 public:
 	static Camera *activeCamera;
 	static int activeBone;
 
-public:
+private:
 	static DrawCalls staticMeshDrawCalls;
 	static DrawCalls skeletalMeshDrawCalls;
 };

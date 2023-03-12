@@ -27,7 +27,8 @@ MainScene::MainScene() : Scene()
         auto selectedMesh = hierarchy->GetSelectedComponent<SkeletalMeshComponent>();
         if (!selectedMesh) return;
 
-        info.hitTarget = MathUtils::RayMeshIntersection(camera->ProjectViewportToWorld(info.viewportPosition), selectedMesh.get(), info.position);
+        info.verts = Renderer::GetFinalVertPosData(selectedMesh.get());
+        info.hitTarget = MathUtils::RayMeshIntersection(camera->ProjectViewportToWorld(info.viewportPosition), info.verts, selectedMesh->indices, info.position);
         });
     hierarchy = MakeUnique<Hierarchy>("Hierarchy", GetRoot());
     animationControls = MakeUnique<AnimationControls>();
@@ -187,12 +188,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
     auto selectedMesh = hierarchy->GetSelectedComponent<SkeletalMeshComponent>();
     if (!selectedMesh) return;
 
-    auto &meshInfo = Renderer::skeletalMeshDrawCalls.at(selectedMesh.get()->material->shader);
-    auto length = selectedMesh.get()->GetVerticesLength();
-    auto verts = std::make_unique<glm::vec4[]>(length);
-    meshInfo->finalPos->ReadData(meshInfo->meshes.at(selectedMesh.get()), length, verts.get());
-
-    auto vertIndices = MathUtils::GetVerticesInRadius(selectedMesh.get(), info.position, brush->radius);
+    auto vertIndices = MathUtils::GetVerticesInRadius(info.verts, info.position, brush->radius);
 
     for (const auto &vIndex : vertIndices)
     {
@@ -235,7 +231,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
         }
 
         // update the weight
-        (*toUpdate) = brush->Blend(*toUpdate, glm::distance(info.position, glm::vec3(verts[vIndex])));
+        (*toUpdate) = brush->Blend(*toUpdate, glm::distance(info.position, glm::vec3(info.verts[vIndex])));
 
         // the components of the result must add up to one
         auto sum = 0.f;

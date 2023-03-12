@@ -16,19 +16,18 @@ bool MathUtils::Ray::IntersectsTriangle(const glm::vec3 &v0, const glm::vec3 &v1
 
 bool MathUtils::RayMeshIntersection(const Ray &ray, const MeshComponent *mesh, glm::vec3 &closestIntersection)
 {
-    // get verts as calculated on the gpu
-    auto &info = Renderer::skeletalMeshDrawCalls.at(mesh->material->shader);
-    auto length = mesh->GetVerticesLength();
-    auto verts = std::make_unique<glm::vec4[]>(length);
-    info->finalPos->ReadData(info->meshes.at(mesh), length, verts.get());
+    return RayMeshIntersection(ray, Renderer::GetFinalVertPosData(mesh), mesh->indices, closestIntersection);
+}
 
+bool MathUtils::RayMeshIntersection(const Ray &ray, const std::vector<glm::vec4> &verts, const std::vector<uint32_t> &indices, glm::vec3 &closestIntersection)
+{
     float smallestDistance = -1.f;
 
-    for (size_t i = 0; i < mesh->indices.size(); i += 3)
+    for (size_t i = 0; i < indices.size(); i += 3)
     {
-        const auto &v0 = verts[mesh->indices[i + 0]];
-        const auto &v1 = verts[mesh->indices[i + 1]];
-        const auto &v2 = verts[mesh->indices[i + 2]];
+        const auto &v0 = verts[indices[i + 0]];
+        const auto &v1 = verts[indices[i + 1]];
+        const auto &v2 = verts[indices[i + 2]];
 
         // intersection check and update closest intersection
         glm::vec3 intersection;
@@ -56,19 +55,16 @@ bool MathUtils::RayMeshIntersection(const Ray &ray, const MeshComponent *mesh, g
 
 std::vector<uint32_t> MathUtils::GetVerticesInRadius(const MeshComponent *mesh, const glm::vec3 &point, float radius)
 {
-    // get verts as calculated on the gpu
-    auto &info = Renderer::skeletalMeshDrawCalls.at(mesh->material->shader);
-    auto length = mesh->GetVerticesLength();
-    auto verts = std::make_unique<glm::vec4[]>(length);
-    info->finalPos->ReadData(info->meshes.at(mesh), length, verts.get());
+    return GetVerticesInRadius(Renderer::GetFinalVertPosData(mesh), point, radius);
+}
 
+std::vector<uint32_t> MathUtils::GetVerticesInRadius(const std::vector<glm::vec4> &verts, const glm::vec3 &point, float radius)
+{
     std::vector<uint32_t> result;
 
-    for (size_t i = 0; i < mesh->GetVerticesLength(); i++)
-    {
+    for (size_t i = 0; i < verts.size(); i++)
         if (glm::distance(point, glm::vec3(verts[i])) <= radius)
             result.push_back((uint32_t)i);
-    }
 
     return result;
 }

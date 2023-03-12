@@ -304,3 +304,26 @@ void Renderer::FrameEnd()
 		glClear(GL_DEPTH_BUFFER_BIT);
 	}
 }
+
+std::vector<glm::vec4> Renderer::GetFinalVertPosData(const MeshComponent *mesh)
+{
+	DrawCallInfo *info;
+	switch (mesh->GetVertexType())
+	{
+	case MeshComponent::VertexType::Static:
+		info = staticMeshDrawCalls[mesh->material->shader].get();
+		break;
+	case MeshComponent::VertexType::Skeletal:
+		info = skeletalMeshDrawCalls[mesh->material->shader].get();
+		break;
+	default:
+		assert(false);
+	}
+
+	std::vector<glm::vec4> result;
+	result.resize(mesh->GetVerticesLength());
+	info->finalPos->CopyData(info->meshes[mesh], mesh->GetVerticesLength(), result.data());
+
+	return result;
+}
+

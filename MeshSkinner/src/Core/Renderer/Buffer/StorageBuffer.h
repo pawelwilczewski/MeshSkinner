@@ -10,7 +10,7 @@ public:
 	virtual ~StorageBuffer() = default;
 
 public:
-	void ReadData(GLintptr offsetCount, GLsizeiptr count, T *data) const
+	void CopyData(GLintptr offsetCount, GLsizeiptr count, T *data) const
 	{
 		glGetNamedBufferSubData(id, offsetCount * sizeof T, count * sizeof T, data);
 	}
