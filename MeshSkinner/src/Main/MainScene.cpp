@@ -307,6 +307,8 @@ void MainScene::OnMouseButtonPressed(int button)
         auto ray = camera->ProjectViewportToWorld(Input::GetMouseViewportPosition());
 
         int i = 0;
+        // TODO: two bones can be selected at once
+        // TODO: just set the color of previous to white and new to highlight color
         for (const auto &bone : mesh->skeleton->GetBones())
         {
             auto boneMesh = (*bone->GetComponents<StaticMeshComponent>().begin()).get();
@@ -317,8 +319,15 @@ void MainScene::OnMouseButtonPressed(int button)
             if (MathUtils::RayMeshIntersection(ray, verts, boneMesh->indices, pos))
             {
                 Renderer::activeBone = i;
-                break;
+
+                for (auto &vert : boneMesh->vertices)
+                    vert.color = glm::vec3(0.8f, 0.2f, 0.7f);
             }
+            else
+                for (auto &vert : boneMesh->vertices)
+                    vert.color = glm::vec3(1.f, 1.f, 1.f);
+
+            Renderer::UpdateMeshVertices(boneMesh);
 
             i++;
         }
