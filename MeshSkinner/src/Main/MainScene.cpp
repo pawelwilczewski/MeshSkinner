@@ -295,34 +295,32 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
 
 void MainScene::OnMouseButtonPressed(int button)
 {
-    //// bone select
-    //if (Input::IsKeyPressed(KEY_LEFT_CONTROL))
-    //{
-    //    auto ent = hierarchy->GetSelectedEntity();
-    //    if (!ent) return;
-    //    auto components = ent->GetComponents<SkeletalMeshComponent>();
-    //    if (components.size() == 0) return;
+    // bone select
+    if (Input::IsKeyPressed(KEY_LEFT_CONTROL))
+    {
+        auto ent = hierarchy->GetSelectedEntity();
+        if (!ent) return;
+        auto components = ent->GetComponents<SkeletalMeshComponent>();
+        if (components.size() == 0) return;
 
-    //    auto mesh = (*components.begin()).get();
-    //    auto ray = camera->ProjectViewportToWorld(Input::GetMouseViewportPosition());
+        auto mesh = (*components.begin()).get();
+        auto ray = camera->ProjectViewportToWorld(Input::GetMouseViewportPosition());
 
-    //    auto closest = -1;
-    //    auto smallestDistance = std::numeric_limits<float>::max();
-    //    int i = 0;
-    //    for (const auto &bone : mesh->skeleton->GetBones())
-    //    {
-    //        auto boneMesh = (*bone->GetComponents<StaticMeshComponent>().begin()).get();
+        int i = 0;
+        for (const auto &bone : mesh->skeleton->GetBones())
+        {
+            auto boneMesh = (*bone->GetComponents<StaticMeshComponent>().begin()).get();
 
-    //        auto verts = Renderer::GetFinalVertPosData(boneMesh);
+            auto verts = Renderer::GetFinalVertPosData(boneMesh);
 
-    //        auto dist = MathUtils::distanceToMesh(ray.origin, ray.direction, verts, boneMesh->indices);
+            glm::vec3 pos;
+            if (MathUtils::RayMeshIntersection(ray, verts, boneMesh->indices, pos))
+            {
+                Renderer::activeBone = i;
+                break;
+            }
 
-    //        if (dist < smallestDistance)
-    //        {
-    //            closest = i;
-    //            smallestDistance = dist;
-    //        }
-    //    }
-    //    Renderer::activeBone = closest;
-    //}
+            i++;
+        }
+    }
 }
