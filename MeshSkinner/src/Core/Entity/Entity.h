@@ -37,6 +37,8 @@ public:
 	const glm::mat4 &GetWorldMatrix();
 	bool GetIsWorldMatrixUpdated() const;
 
+	Transform GetWorldTransform();
+
 protected:
 	void RecalculateWorldMatrix();
 

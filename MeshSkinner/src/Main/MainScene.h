@@ -22,6 +22,8 @@ protected:
 private:
 	void OnStrokeEmplace(const StrokeQueryInfo &info);
 
+	void OnMouseButtonPressed(int button);
+
 private:
 	Unique<class Brush> brush;
 	Unique<Stroke> stroke;
@@ -40,4 +42,6 @@ private:
 private:
 	CallbackRef<StrokeQueryInfo> onStrokeEmplaceCallback;
 	CallbackNoArgRef onDrawAdditionalViewportWidgetsCallback;
+
+	CallbackRef<int> onMouseButtonPressedCallback;
 };

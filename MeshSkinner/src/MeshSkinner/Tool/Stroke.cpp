@@ -29,7 +29,7 @@ Stroke::~Stroke()
 
 void Stroke::OnStrokeUpdate()
 {
-	if (!Input::IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || !UserInterface::GetClickedInViewport())
+	if (!Input::IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || !UserInterface::GetClickedInViewport() || Input::IsKeyPressed(KEY_LEFT_CONTROL))
 		return;
 
 	auto query = StrokeQueryInfo();

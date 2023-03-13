@@ -10,6 +10,16 @@ Transform::Transform(const glm::vec3 &position, const glm::vec3 &rotation, const
 	RecalculateMatrix();
 }
 
+Transform::Transform(const glm::mat4 &mat)
+{
+	assert(false);
+
+	// this is not fully correct so needs to be reimplemented
+	SetPosition(glm::vec3(mat[3][0], mat[3][1], mat[3][2]));
+	SetScale(glm::vec3(glm::length(glm::vec3(mat[0])) * glm::sign(mat[0][0]), glm::length(glm::vec3(mat[1])) * glm::sign(mat[1][1]), glm::length(glm::vec3(mat[2])) * glm::sign(mat[2][2])));
+	SetRotation(glm::degrees(glm::eulerAngles(glm::quat(glm::mat3(mat[0] / scale.x, mat[1] / scale.y, mat[2]/scale.z)))));
+}
+
 const glm::vec3 &Transform::GetPosition() const	{ return position; }
 const glm::vec3 &Transform::GetRotation() const	{ return rotation; }
 const glm::vec3 &Transform::GetScale() const	{ return scale; }
@@ -54,6 +64,24 @@ void Transform::Scale(const glm::vec3 &scaleMultiplier)	{ SetScale(GetScale() * 
 const glm::vec3 Transform::GetForwardVector() const	{ return glm::quat(glm::radians(rotation)) * vectorForward; }
 const glm::vec3 Transform::GetRightVector() const	{ return glm::quat(glm::radians(rotation)) * vectorRight; }
 const glm::vec3 Transform::GetUpVector() const		{ return glm::quat(glm::radians(rotation)) * vectorUp; }
+
+Transform Transform::operator*(Transform &other)
+{
+	// the scale may be off but it's kinda complicated to  get this right
+	auto pos = glm::vec3(this->GetMatrix() * glm::vec4(other.GetPosition(), 1.f));
+	auto rotQ = glm::quat(glm::radians(this->GetRotation())) * glm::quat(glm::radians(other.GetRotation()));
+	auto rot = glm::degrees(glm::eulerAngles(rotQ));
+	auto sca = this->GetScale() * other.GetScale();
+
+	// the below doesn't give correct results
+	//auto rotScale = glm::mat3(this->GetMatrix()) * glm::mat3(other.GetMatrix());
+	//auto justRot = glm::toMat3(rotQ);
+	//auto scaleMat = rotScale * glm::inverse(justRot);
+	//sca = glm::vec3(glm::length(scaleMat[0]), glm::length(scaleMat[1]), glm::length(scaleMat[2]));
+	//Log::Info("the scale would be {}", sca);
+
+	return Transform(pos, rot, sca);
+}
 
 bool Transform::IsMatrixUpdated() const
 {

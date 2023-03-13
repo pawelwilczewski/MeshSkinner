@@ -51,12 +51,17 @@ MainScene::MainScene() : Scene()
     ShaderLibrary::Load("WeightPaint", "assets/shaders/WeightPaint.vert", "assets/shaders/WeightPaint.frag", 0);
 
     weightPaintMaterial = MakeRef<Material>(ShaderLibrary::Get("WeightPaint"));
+
+    onMouseButtonPressedCallback = MakeCallbackRef<int>([&](int button) { OnMouseButtonPressed(button); });
+    Input::OnMouseButtonPressedSubscribe(onMouseButtonPressedCallback);
 }
 
 MainScene::~MainScene()
 {
     UserInterface::OnDrawAdditionalViewportWidgetsUnsubscribe(onDrawAdditionalViewportWidgetsCallback);
     stroke->OnStrokeEmplaceUnsubscribe(onStrokeEmplaceCallback);
+
+    Input::OnMouseButtonPressedUnsubscribe(onMouseButtonPressedCallback);
 }
 
 void MainScene::OnStart()
@@ -100,7 +105,7 @@ void MainScene::OnUpdateUI()
     ImGui::End();
 
     ImGui::Begin("Import Export");
-    InteractiveWidget(ImGui::InputText("Input file path", &sourceFile)); // TODO: for text inputs: unfocus if clicked in the viewport
+    InteractiveWidget(ImGui::InputText("Input file path", &sourceFile));
 
     auto dropped = Input::GetDroppedFiles();
     if (ImGui::IsItemHovered() && dropped && dropped->size() > 0)
@@ -165,6 +170,51 @@ void MainScene::OnUpdateUI()
 
         Log::Info("Exporting finished");
     }
+
+    static float boneRadius = 5.f;
+    if (selectedMesh && InteractiveWidget(ImGui::DragFloat("Bone radius", &boneRadius, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)))
+    {
+        auto &bones = selectedMesh->skeleton->GetBones();
+        for (auto &bone : bones)
+        {
+            auto &boneMeshes = bone->GetComponents<StaticMeshComponent>();
+            if (boneMeshes.size() == 0) continue;
+
+            auto &boneMesh = *boneMeshes.begin();
+            if (!boneMesh) continue;
+
+            for (auto &vertex : boneMesh->vertices)
+            {
+                vertex.position.x = glm::sign(vertex.position.x) * boneRadius;
+                vertex.position.z = glm::sign(vertex.position.z) * boneRadius;
+            }
+
+            Renderer::UpdateMeshVertices(boneMesh.get());
+        }
+    }
+
+    static float tipBoneLength = 10.f;
+    if (selectedMesh && InteractiveWidget(ImGui::DragFloat("Tip bone length", &tipBoneLength, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)))
+    {
+        auto &bones = selectedMesh->skeleton->GetBones();
+        for (auto &bone : bones)
+        {
+            if (bone->GetChildren().size() > 0) continue;
+
+            auto &boneMeshes = bone->GetComponents<StaticMeshComponent>();
+            if (boneMeshes.size() == 0) continue;
+
+            auto &boneMesh = *boneMeshes.begin();
+            if (!boneMesh) continue;
+
+            for (auto &vertex : boneMesh->vertices)
+                if (vertex.position.y > glm::epsilon<float>())
+                    vertex.position.y = tipBoneLength;
+
+            Renderer::UpdateMeshVertices(boneMesh.get());
+        }
+    }
+
     ImGui::End();
 
     // settings
@@ -241,4 +291,38 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
     }
 
     Renderer::UpdateMeshVertices(selectedMesh.get());
+}
+
+void MainScene::OnMouseButtonPressed(int button)
+{
+    //// bone select
+    //if (Input::IsKeyPressed(KEY_LEFT_CONTROL))
+    //{
+    //    auto ent = hierarchy->GetSelectedEntity();
+    //    if (!ent) return;
+    //    auto components = ent->GetComponents<SkeletalMeshComponent>();
+    //    if (components.size() == 0) return;
+
+    //    auto mesh = (*components.begin()).get();
+    //    auto ray = camera->ProjectViewportToWorld(Input::GetMouseViewportPosition());
+
+    //    auto closest = -1;
+    //    auto smallestDistance = std::numeric_limits<float>::max();
+    //    int i = 0;
+    //    for (const auto &bone : mesh->skeleton->GetBones())
+    //    {
+    //        auto boneMesh = (*bone->GetComponents<StaticMeshComponent>().begin()).get();
+
+    //        auto verts = Renderer::GetFinalVertPosData(boneMesh);
+
+    //        auto dist = MathUtils::distanceToMesh(ray.origin, ray.direction, verts, boneMesh->indices);
+
+    //        if (dist < smallestDistance)
+    //        {
+    //            closest = i;
+    //            smallestDistance = dist;
+    //        }
+    //    }
+    //    Renderer::activeBone = closest;
+    //}
 }

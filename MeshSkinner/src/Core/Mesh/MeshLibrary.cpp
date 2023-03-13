@@ -17,9 +17,9 @@ Ref<StaticMeshComponent> MeshLibrary::GetBone(float length)
 	// offset to correct the origin
 	for (auto &vertex : mesh->vertices)
 	{
-		vertex.position += 0.5;
+		vertex.position.y += 0.5f;
 
-		if (vertex.position.y > 0.5f)
+		if (vertex.position.y > 0.6f)
 			vertex.position.y += length - 1.f;
 	}
 

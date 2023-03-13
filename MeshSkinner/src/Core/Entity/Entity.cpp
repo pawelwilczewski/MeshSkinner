@@ -80,6 +80,23 @@ bool Entity::GetIsWorldMatrixUpdated() const
 	return isWorldMatrixUpdated;
 }
 
+Transform Entity::GetWorldTransform()
+{
+	assert(false);
+
+	// this doesn't work quite right because the * operator is not correct (scale is troublesome)
+	Transform t = transform;
+
+	auto p = GetParent();
+	while (p != nullptr)
+	{
+		t = p->transform * t;
+		p = p->GetParent();
+	}
+
+	return t;
+}
+
 void Entity::RecalculateWorldMatrix()
 {
 	worldMatrix = transform.GetMatrix();
