@@ -19,6 +19,9 @@ public:
 
 	virtual void SetupStorageBuffer(const std::string &name, uint32_t ssbo);
 
+public:
+	const std::string &GetDisplayedName() const;
+
 private:
 	void Compile(const std::unordered_map<GLenum, std::string> &source);
 	GLint GetUniformLocation(const std::string &name);

@@ -15,6 +15,10 @@ static uint32_t GetShaderDataTypeSize(ShaderDataType type)
 	case ShaderDataType::Int2:				return 4 * 2;
 	case ShaderDataType::Int3:				return 4 * 3;
 	case ShaderDataType::Int4:				return 4 * 4;
+	case ShaderDataType::UnsignedInt:		return 4;
+	case ShaderDataType::UnsignedInt2:		return 4 * 2;
+	case ShaderDataType::UnsignedInt3:		return 4 * 3;
+	case ShaderDataType::UnsignedInt4:		return 4 * 4;
 	case ShaderDataType::Short:				return 2;
 	case ShaderDataType::Short2:			return 2 * 2;
 	case ShaderDataType::Short3:			return 2 * 3;
@@ -47,6 +51,10 @@ uint32_t BufferElement::GetComponentCount() const
 	case ShaderDataType::Int2:				return 2;
 	case ShaderDataType::Int3:				return 3;
 	case ShaderDataType::Int4:				return 4;
+	case ShaderDataType::UnsignedInt:		return 1;
+	case ShaderDataType::UnsignedInt2:		return 2;
+	case ShaderDataType::UnsignedInt3:		return 3;
+	case ShaderDataType::UnsignedInt4:		return 4;
 	case ShaderDataType::Short:				return 1;
 	case ShaderDataType::Short2:			return 2;
 	case ShaderDataType::Short3:			return 3;

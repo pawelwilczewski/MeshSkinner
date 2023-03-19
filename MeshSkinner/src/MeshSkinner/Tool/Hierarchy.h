@@ -16,10 +16,10 @@ private:
 	void DrawTree(Entity *entity);
 
 public:
-	Entity *GetSelectedEntity() const;
+	static Entity *GetSelectedEntity();
 
 	template <typename T>
-	Ref<T> GetSelectedComponent() const
+	static Ref<T> GetSelectedComponent()
 	{
 		if (!selectedEntity)
 			return nullptr;
@@ -35,5 +35,5 @@ public:
 	Entity *root;
 
 private:
-	Entity *selectedEntity = nullptr;
+	static Entity *selectedEntity;
 };

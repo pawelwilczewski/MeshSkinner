@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Hierarchy.h"
 
+Entity *Hierarchy::selectedEntity = nullptr;
+
 Hierarchy::Hierarchy(const std::string &toolWindowName, Entity *root) : Tool(toolWindowName), root(root)
 {
 
@@ -26,7 +28,7 @@ void Hierarchy::DrawTree(Entity *entity)
     }
 }
 
-Entity *Hierarchy::GetSelectedEntity() const
+Entity *Hierarchy::GetSelectedEntity()
 {
     return selectedEntity;
 }
@@ -56,6 +58,4 @@ void Hierarchy::OnUpdateUI()
         }
     }
     ImGui::End();
-
-    // TODO: entity details (transform widget, component names); maybe add some ui function which can be customised in components and will be called for each component
 }

@@ -280,3 +280,8 @@ void Shader::SetupStorageBuffer(const std::string &name, uint32_t ssbo)
 	glShaderStorageBlockBinding(id, index, binding);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, binding, ssbo);
 }
+
+const std::string &Shader::GetDisplayedName() const
+{
+	return displayedName;
+}

@@ -26,6 +26,9 @@ const glm::vec3 &Transform::GetScale() const	{ return scale; }
 
 void Transform::SetPosition(const glm::vec3 &position)
 {
+	if (position == this->position)
+		return;
+
 	this->position = position;
 
 	if (isMatrixUpdated)
@@ -37,6 +40,9 @@ void Transform::SetPosition(const glm::vec3 &position)
 
 void Transform::SetRotation(const glm::vec3 &rotation)
 {
+	if (rotation == this->rotation)
+		return;
+
 	this->rotation = rotation;
 
 	if (isMatrixUpdated)
@@ -48,6 +54,9 @@ void Transform::SetRotation(const glm::vec3 &rotation)
 
 void Transform::SetScale(const glm::vec3 &scale)
 {
+	if (scale == this->scale)
+		return;
+
 	this->scale = scale;
 
 	if (isMatrixUpdated)

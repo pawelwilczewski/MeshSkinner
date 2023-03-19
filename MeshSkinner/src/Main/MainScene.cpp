@@ -24,7 +24,7 @@ MainScene::MainScene() : Scene()
     // tool initialisation
     brush = MakeUnique<Brush>("Brush Parameters");
     stroke = MakeUnique<Stroke>("Stroke Parameters", [&](StrokeQueryInfo &info) {
-        auto selectedMesh = hierarchy->GetSelectedComponent<SkeletalMeshComponent>();
+        auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
         if (!selectedMesh) return;
 
         info.verts = Renderer::GetFinalVertPosData(selectedMesh.get());
@@ -78,7 +78,7 @@ void MainScene::OnEarlyUpdate()
 
 void MainScene::OnUpdate()
 {
-    auto selectedMesh = hierarchy->GetSelectedComponent<SkeletalMeshComponent>();
+    auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
     auto anim = animationControls->GetCurrentAnimation();
 
     if (selectedMesh && anim)
@@ -99,12 +99,49 @@ void MainScene::OnUpdateUI()
     
     // edited mesh
     ImGui::Begin("Weight Painting");
-    auto selectedMesh = hierarchy->GetSelectedComponent<SkeletalMeshComponent>();
+
+    auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
     if (selectedMesh)
-        InteractiveWidget(ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, selectedMesh->skeleton->GetBones().size() - 1));
+        InteractiveWidget(ImGui::SliderInt("ActiveBone", &Renderer::selectedBone, 0, selectedMesh->skeleton->GetBones().size() - 1));
+
+    ImGui::End();
+
+    // settings
+    ImGui::Begin("Settings");
+
+    InteractiveWidget(ImGui::DragFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.0001f, 0.0f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput));
+
+    Ref<SkeletalMeshComponent> updateBoneRadiusSkeletalMesh = nullptr;
+    static float boneRadius = 5.f;
+    if (selectedMesh && InteractiveWidget(ImGui::DragFloat("Bone radius", &boneRadius, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)))
+        updateBoneRadiusSkeletalMesh = selectedMesh;
+
+    static float tipBoneLength = 10.f;
+    if (selectedMesh && InteractiveWidget(ImGui::DragFloat("Tip bone length", &tipBoneLength, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)))
+    {
+        auto &bones = selectedMesh->skeleton->GetBones();
+        for (auto &bone : bones)
+        {
+            if (bone->GetChildren().size() > 0) continue;
+
+            auto &boneMeshes = bone->GetComponents<StaticMeshComponent>();
+            if (boneMeshes.size() == 0) continue;
+
+            auto &boneMesh = *boneMeshes.begin();
+            if (!boneMesh) continue;
+
+            for (auto &vertex : boneMesh->vertices)
+                if (vertex.position.y > glm::epsilon<float>())
+                    vertex.position.y = tipBoneLength;
+
+            Renderer::UpdateMeshVertices(boneMesh.get());
+        }
+    }
+
     ImGui::End();
 
     ImGui::Begin("Import Export");
+
     InteractiveWidget(ImGui::InputText("Input file path", &sourceFile));
 
     auto dropped = Input::GetDroppedFiles();
@@ -143,7 +180,7 @@ void MainScene::OnUpdateUI()
             Renderer::Submit(bone);
 
             // calculate the bone length with some default for tip bones
-            auto boneLength = 50.f;
+            auto boneLength = tipBoneLength;
             auto &children = bone->GetChildren();
             if (children.size() == 1)
                 boneLength = glm::length((*bone->GetChildren().begin())->transform.GetPosition());
@@ -152,6 +189,8 @@ void MainScene::OnUpdateUI()
             boneMesh->material = boneMat;
             bone->AddComponent(boneMesh);
         }
+
+        updateBoneRadiusSkeletalMesh = mesh;
 
         Renderer::Submit(entity);
 
@@ -171,10 +210,11 @@ void MainScene::OnUpdateUI()
         Log::Info("Exporting finished");
     }
 
-    static float boneRadius = 5.f;
-    if (selectedMesh && InteractiveWidget(ImGui::DragFloat("Bone radius", &boneRadius, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)))
+    ImGui::End();
+
+    if (updateBoneRadiusSkeletalMesh)
     {
-        auto &bones = selectedMesh->skeleton->GetBones();
+        auto &bones = updateBoneRadiusSkeletalMesh->skeleton->GetBones();
         for (auto &bone : bones)
         {
             auto &boneMeshes = bone->GetComponents<StaticMeshComponent>();
@@ -192,35 +232,6 @@ void MainScene::OnUpdateUI()
             Renderer::UpdateMeshVertices(boneMesh.get());
         }
     }
-
-    static float tipBoneLength = 10.f;
-    if (selectedMesh && InteractiveWidget(ImGui::DragFloat("Tip bone length", &tipBoneLength, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)))
-    {
-        auto &bones = selectedMesh->skeleton->GetBones();
-        for (auto &bone : bones)
-        {
-            if (bone->GetChildren().size() > 0) continue;
-
-            auto &boneMeshes = bone->GetComponents<StaticMeshComponent>();
-            if (boneMeshes.size() == 0) continue;
-
-            auto &boneMesh = *boneMeshes.begin();
-            if (!boneMesh) continue;
-
-            for (auto &vertex : boneMesh->vertices)
-                if (vertex.position.y > glm::epsilon<float>())
-                    vertex.position.y = tipBoneLength;
-
-            Renderer::UpdateMeshVertices(boneMesh.get());
-        }
-    }
-
-    ImGui::End();
-
-    // settings
-    ImGui::Begin("Settings");
-    InteractiveWidget(ImGui::DragFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.0001f, 0.0f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput));
-    ImGui::End();
 }
 
 void MainScene::OnLateUpdate()
@@ -235,7 +246,7 @@ void MainScene::OnEnd()
 
 void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
 {
-    auto selectedMesh = hierarchy->GetSelectedComponent<SkeletalMeshComponent>();
+    auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
     if (!selectedMesh) return;
 
     auto vertIndices = MathUtils::GetVerticesInRadius(info.verts, info.position, brush->radius);
@@ -250,7 +261,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
         for (size_t i = 0; i < v.bones.length(); i++)
         {
             // the bone is one of the 
-            if (v.bones[i] == Renderer::activeBone)
+            if (v.bones[i] == Renderer::selectedBone)
             {
                 toUpdate = &v.weights[i];
                 updated = true;
@@ -275,7 +286,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
             }
 
             // update the weights
-            v.bones[minWeightBone] = Renderer::activeBone;
+            v.bones[minWeightBone] = Renderer::selectedBone;
             v.weights[minWeightBone] = 0.f;
             toUpdate = &v.weights[minWeightBone];
         }
@@ -298,18 +309,11 @@ void MainScene::OnMouseButtonPressed(int button)
     // bone select
     if (Input::IsKeyPressed(KEY_LEFT_CONTROL))
     {
-        auto ent = hierarchy->GetSelectedEntity();
-        if (!ent) return;
-        auto components = ent->GetComponents<SkeletalMeshComponent>();
-        if (components.size() == 0) return;
-
-        auto mesh = (*components.begin()).get();
+        auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
         auto ray = camera->ProjectViewportToWorld(Input::GetMouseViewportPosition());
 
         int i = 0;
-        // TODO: two bones can be selected at once
-        // TODO: just set the color of previous to white and new to highlight color
-        for (const auto &bone : mesh->skeleton->GetBones())
+        for (const auto &bone : selectedMesh->skeleton->GetBones())
         {
             auto boneMesh = (*bone->GetComponents<StaticMeshComponent>().begin()).get();
 
@@ -317,17 +321,7 @@ void MainScene::OnMouseButtonPressed(int button)
 
             glm::vec3 pos;
             if (MathUtils::RayMeshIntersection(ray, verts, boneMesh->indices, pos))
-            {
-                Renderer::activeBone = i;
-
-                for (auto &vert : boneMesh->vertices)
-                    vert.color = glm::vec3(0.8f, 0.2f, 0.7f);
-            }
-            else
-                for (auto &vert : boneMesh->vertices)
-                    vert.color = glm::vec3(1.f, 1.f, 1.f);
-
-            Renderer::UpdateMeshVertices(boneMesh);
+                Renderer::selectedBone = i;
 
             i++;
         }

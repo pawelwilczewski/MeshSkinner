@@ -5,7 +5,7 @@ Entity::Entity(const std::string &name, const Transform &transform) : name(name)
 {
 	RecalculateWorldMatrix();
 
-	// setup the dirty matrxi callback
+	// setup the dirty matrix callback
 	onDirtyMatrixCallback = MakeCallbackNoArgRef([&]() { DirtyWorldMatrix(); });
 	this->transform.OnMatrixDirtySubscribe(onDirtyMatrixCallback);
 }

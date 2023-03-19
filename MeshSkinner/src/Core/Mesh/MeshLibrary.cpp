@@ -33,6 +33,7 @@ static std::string warn;
 
 static bool LoadGLTF(const std::string &path)
 {
+	// why not static unique ptr for loader and model?
 	delete loader;
 	loader = new tinygltf::TinyGLTF();
 
