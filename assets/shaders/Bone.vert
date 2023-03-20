@@ -16,7 +16,7 @@ out vec3 io_Color;
 
 void main()
 {
-	if (u_SelectedBone == in_TransformIndex - in_SkeletonTransformsIndex)
+	if (u_SelectedEntity == in_SkeletonTransformsIndex - 1 && u_SelectedBone == in_TransformIndex - in_SkeletonTransformsIndex)
 		io_Color = vec3(0.7, 0.1, 0.8);
 	else
 		io_Color = vec3(0.8);
