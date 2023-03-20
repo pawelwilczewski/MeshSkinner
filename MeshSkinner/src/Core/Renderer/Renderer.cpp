@@ -18,7 +18,6 @@ void Renderer::Init()
 {
 	transforms = MakeUnique<StorageBuffer<glm::mat4>>();
 	bones = MakeUnique<StorageBuffer<BoneGPU>>();
-	finalPos = MakeUnique<StorageBuffer<glm::vec4>>();
 }
 
 void Renderer::SubmitMesh(Entity *entity, const MeshComponent *mesh, DrawCalls &drawCalls)
@@ -61,10 +60,11 @@ void Renderer::SubmitMesh(Entity *entity, const MeshComponent *mesh, DrawCalls &
 			insertIndex++;
 		}
 
-		drawCalls.insert(insertIndex, { mesh->material->shader, vao });
+		drawCalls.insert(insertIndex, { mesh->material->shader, DrawCallInfo(vao, MakeRef<StorageBuffer<glm::vec4>>()) });
 	}
 
-	auto &vao = drawCalls[mesh->material->shader];
+	auto &vao = drawCalls[mesh->material->shader].vao;
+	auto &finalPos = drawCalls[mesh->material->shader].finalPos;
 
 	// get the transform index
 	GLuint transformIndex;
@@ -155,18 +155,8 @@ void Renderer::FrameBegin()
 void Renderer::Render(const DrawCalls::iterator &it)
 {
 	const auto &shader = it->first;
-	const auto &vao = it->second;
-
-	//if (shader->GetDisplayedName() == "Bone")
-	//{
-	//	auto l = vao->GetVertexBuffer(0)->GetLength();
-	//	std::vector<VertexInfo> testData(l, VertexInfo());
-	//	vertexInfo->CopyData(0, l, testData.data());
-	//	Log::Info("Vertex info for shader {}", shader->GetDisplayedName());
-	//	for (size_t i = 0; i < l; i++)
-	//		Log::Info("{}: t = {}, sb = {}, st = {}", i, testData[i].transformIndex, testData[i].skeletonBonesIndex, testData[i].skeletonTransformsIndex);
-	//	Log::Info("------------------------------");
-	//}
+	const auto &vao = it->second.vao;
+	const auto &finalPos = it->second.finalPos;
 
 	shader->Bind();
 	shader->UploadUniformMat4("u_ViewProjection", activeCamera->GetViewProjectionMatrix());
@@ -196,13 +186,13 @@ void Renderer::UpdateMeshVertices(const MeshComponent *mesh)
 		break;
 	}
 
-	auto &vao = drawCalls[mesh->material->shader];
-
-	if (!vao)
+	if (drawCalls.find(mesh->material->shader) == drawCalls.end())
 	{
 		Log::Warn("Mesh not rendered yet but attempting to update vertices!");
 		return;
 	}
+
+	auto &vao = drawCalls[mesh->material->shader].vao;
 
 	// update the vertices
 	auto vbo = dynamic_cast<GenericBuffer *>(vao->GetVertexBuffer(0).get());
@@ -267,9 +257,26 @@ void Renderer::FrameEnd()
 
 std::vector<glm::vec4> Renderer::GetFinalVertPosData(const MeshComponent *mesh)
 {
+	DrawCallInfo *info;
+	switch (mesh->GetVertexType())
+	{
+	case MeshComponent::VertexType::Static:
+		info = &staticMeshDrawCalls[mesh->material->shader];
+		break;
+	case MeshComponent::VertexType::Skeletal:
+		info = &skeletalMeshDrawCalls[mesh->material->shader];
+		break;
+	default:
+		assert(false);
+	}
+
 	std::vector<glm::vec4> result;
 	result.resize(mesh->GetVerticesLength());
-	finalPos->CopyData(meshes[mesh], mesh->GetVerticesLength(), result.data());
+	info->finalPos->CopyData(meshes[mesh], mesh->GetVerticesLength(), result.data());
 
 	return result;
+}
+
+DrawCallInfo::DrawCallInfo(const Ref<VertexArray<uint32_t>> &vao, const Ref<StorageBuffer<glm::vec4>> &finalPos) : vao(vao), finalPos(finalPos)
+{
 }

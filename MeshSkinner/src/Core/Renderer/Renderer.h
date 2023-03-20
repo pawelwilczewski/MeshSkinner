@@ -21,7 +21,15 @@ struct VertexInfo
 	static const BufferLayout &layout;
 };
 
-using DrawCalls = std::map<Ref<Shader>, Ref<VertexArray<uint32_t>>>;
+struct DrawCallInfo
+{
+	DrawCallInfo(const Ref<VertexArray<uint32_t>> &vao = MakeRef<VertexArray<uint32_t>>(), const Ref<StorageBuffer<glm::vec4>> &finalPos = MakeRef<StorageBuffer<glm::vec4>>());
+
+	Ref<VertexArray<uint32_t>> vao;
+	Ref<StorageBuffer<glm::vec4>> finalPos;
+};
+
+using DrawCalls = std::map<Ref<Shader>, DrawCallInfo>;
 
 class Renderer
 {
@@ -61,7 +69,7 @@ private:
 	// key: mesh already rendered, value: offset in vbo where the vertices start
 	inline static std::unordered_map<const MeshComponent *, const uint32_t> meshes;
 
+	// TODO: don't need unique ptrs? - these objects can be stored on stack (possibly issues with operator=?)
 	inline static Unique<StorageBuffer<glm::mat4>> transforms;
 	inline static Unique<StorageBuffer<BoneGPU>> bones;
-	inline static Unique<StorageBuffer<glm::vec4>> finalPos; // todo: needs to be there per vao
 };
