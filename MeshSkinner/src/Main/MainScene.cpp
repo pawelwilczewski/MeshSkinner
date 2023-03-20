@@ -78,18 +78,7 @@ void MainScene::OnEarlyUpdate()
 
 void MainScene::OnUpdate()
 {
-    auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
-    auto anim = animationControls->GetCurrentAnimation();
 
-    if (selectedMesh && anim)
-    {
-        for (const auto &bone : selectedMesh->skeleton->GetBones())
-        {
-            bone->transform.SetPosition(anim->EvaluateTranslation(bone->name, animationControls->GetPlaybackTime()));
-            bone->transform.SetRotation(glm::degrees(glm::eulerAngles(anim->EvaluateRotation(bone->name, animationControls->GetPlaybackTime()))));
-            bone->transform.SetScale(anim->EvaluateScale(bone->name, animationControls->GetPlaybackTime()));
-        }
-    }
 }
 
 void MainScene::OnUpdateUI()
@@ -116,7 +105,7 @@ void MainScene::OnUpdateUI()
     if (selectedMesh && InteractiveWidget(ImGui::DragFloat("Bone radius", &boneRadius, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)))
         updateBoneRadiusSkeletalMesh = selectedMesh;
 
-    static float tipBoneLength = 10.f;
+    static float tipBoneLength = 50.f;
     if (selectedMesh && InteractiveWidget(ImGui::DragFloat("Tip bone length", &tipBoneLength, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)))
     {
         auto &bones = selectedMesh->skeleton->GetBones();
