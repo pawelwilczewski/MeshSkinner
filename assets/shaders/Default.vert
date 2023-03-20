@@ -5,11 +5,9 @@ layout(location = 1) in vec3 in_Normal;
 layout(location = 2) in vec4 in_Tangent;
 layout(location = 3) in vec2 in_TexCoord;
 layout(location = 4) in vec3 in_Color;
-layout(location = 5) in vec4 in_Bones;
-layout(location = 6) in vec4 in_Weights;
-layout(location = 7) in uint in_TransformIndex;
-layout(location = 8) in uint in_SkeletonBonesIndex;
-layout(location = 9) in uint in_SkeletonTransformsIndex;
+layout(location = 5) in uint in_TransformIndex;
+layout(location = 6) in uint in_SkeletonBonesIndex;
+layout(location = 7) in uint in_SkeletonTransformsIndex;
 
 #include "include/SSBOs.glsl"
 #include "include/Uniforms.glsl"

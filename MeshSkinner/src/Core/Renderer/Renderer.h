@@ -10,7 +10,7 @@
 #include "Core/Camera/Camera.h"
 #include "Core/Renderer/Buffer/StorageBuffer.h"
 
-struct VertexInfo
+struct VertexInfo // TODO: these could be just 2 separate vbos (one for transformIndex and another for skeletonBones and skeletonTransforms indices) - could also be 3 separate vbos which could save us unused data transfer (just add use what needed)
 {
 	VertexInfo(GLuint transformIndex = -1, GLuint skeletonBonesIndex = -1, GLuint skeletonTransformsIndex = -1);
 
@@ -72,4 +72,7 @@ private:
 	// TODO: don't need unique ptrs? - these objects can be stored on stack (possibly issues with operator=?)
 	inline static Unique<StorageBuffer<glm::mat4>> transforms;
 	inline static Unique<StorageBuffer<BoneGPU>> bones;
+
+	inline static uint32_t currentSkeletonBonesIndex = -1;
+	inline static uint32_t currentSkeletonTransformsIndex = -1;
 };

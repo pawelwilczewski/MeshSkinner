@@ -92,7 +92,7 @@ void Renderer::SubmitMesh(Entity *entity, const MeshComponent *mesh, DrawCalls &
 
 	// append the vertex info
 	auto vboInfo = dynamic_cast<GenericBuffer *>(vao->GetVertexBuffer(1).get());
-	auto infoData = std::vector<VertexInfo>(vao->GetVertexBuffer(0)->GetLength() - indexOffset, VertexInfo(transformIndex, bones->GetLength(), transforms->GetLength()));
+	auto infoData = std::vector<VertexInfo>(vao->GetVertexBuffer(0)->GetLength() - indexOffset, VertexInfo(transformIndex, currentSkeletonBonesIndex, currentSkeletonTransformsIndex));
 	vboInfo->SetData(infoData.data(), (GLuint)(mesh->GetVerticesLength() * VertexInfo::layout.GetStride()), vboInfo->GetSizeBytes());
 
 	// init final pos
@@ -124,6 +124,18 @@ void Renderer::SubmitMesh(Entity *entity, const Ref<StaticMeshComponent> &mesh)
 void Renderer::SubmitMesh(Entity *entity, const Ref<SkeletalMeshComponent> &mesh)
 {
 	// submit the mesh
+	switch (mesh->GetVertexType())
+	{
+	case MeshComponent::VertexType::Static:
+		break;
+	case MeshComponent::VertexType::Skeletal:
+		currentSkeletonBonesIndex = bones->GetLength();
+		currentSkeletonTransformsIndex = transforms->GetLength() + 1;
+		break;
+	default:
+		assert(false);
+	}
+
 	SubmitMesh(entity, mesh.get(), skeletalMeshDrawCalls);
 
 	// submit the skeleton (all bones)
@@ -133,6 +145,9 @@ void Renderer::SubmitMesh(Entity *entity, const Ref<SkeletalMeshComponent> &mesh
 		bones->AppendData(&bonegpu, 1);
 		Submit(bone);
 	}
+
+	currentSkeletonBonesIndex = -1;
+	currentSkeletonTransformsIndex = -1;
 }
 
 void Renderer::Submit(Entity *entity)
