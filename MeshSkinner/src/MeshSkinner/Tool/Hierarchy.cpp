@@ -20,7 +20,34 @@ void Hierarchy::DrawTree(Entity *entity)
     if (ImGui::TreeNodeEx(entity->name.c_str(), flag))
     {
         if (ImGui::IsItemActivated())
-            selectedEntity = entity;
+        {
+            auto bone = dynamic_cast<Bone *>(entity);
+
+            // if selected a bone - update selectedBone and select the skeletal mesh entity instead
+            if (bone)
+            {
+                auto p = bone->GetParent();
+
+                while (true)
+                {
+                    auto components = p->GetComponents<SkeletalMeshComponent>();
+                    if (components.size() > 0)
+                    {
+                        selectedEntity = p; // TODO: this shouldn't do this (but we would like to expand the bone's panel still - yet remain in the painting mode)
+
+                        auto &bones = (*components.begin())->skeleton->GetBones();
+                        Renderer::selectedBone = std::find(bones.begin(), bones.end(), entity) - bones.begin();
+                        break;
+                    }
+
+                    p = p->GetParent();
+                }
+            }
+            else
+            {
+                selectedEntity = entity;
+            }
+        }
 
         for (const auto &child : children)
             DrawTree(child);
