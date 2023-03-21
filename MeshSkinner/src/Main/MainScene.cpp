@@ -39,7 +39,7 @@ MainScene::MainScene() : Scene()
         if (Window::GetCursorVisibility())
         {
             auto mousePos = Input::GetMouseScreenPosition();
-            ImGui::GetWindowDrawList()->AddCircle(ImVec2(mousePos.x, mousePos.y), 10.f, ImColor(0.8f, 0.8f, 0.8f, 1.f));
+            ImGui::GetWindowDrawList()->AddCircle(ImVec2(mousePos.x, mousePos.y), brushCircleSize, ImColor(0.8f, 0.8f, 0.8f, 1.f));
         }
         });
     UserInterface::OnDrawAdditionalViewportWidgetsSubscribe(onDrawAdditionalViewportWidgetsCallback);
@@ -78,7 +78,19 @@ void MainScene::OnEarlyUpdate()
 
 void MainScene::OnUpdate()
 {
+    auto mesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>().get();
 
+    if (mesh)
+    {
+        glm::vec3 intersect;
+        if (MathUtils::RayMeshIntersection(camera->ProjectViewportToWorld(Input::GetMouseViewportPosition()), mesh, intersect))
+        {
+            auto offset = camera->transform.GetUpVector() * brush->radius;
+            auto screenPos = camera->DeprojectWorldToViewport(intersect + offset);
+            auto mousePos = Input::GetMouseViewportPosition();
+            brushCircleSize = glm::distance(mousePos, screenPos);
+        }
+    }
 }
 
 void MainScene::OnUpdateUI()

@@ -23,6 +23,7 @@ public:
 
 public:
 	MathUtils::Ray ProjectViewportToWorld(const glm::vec2 &viewportPos);
+	glm::vec2 DeprojectWorldToViewport(const glm::vec3 &worldPos);
 
 protected:
 	virtual void OnWindowResized(const glm::ivec2 &newSize);

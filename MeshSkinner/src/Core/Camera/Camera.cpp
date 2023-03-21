@@ -89,3 +89,16 @@ MathUtils::Ray Camera::ProjectViewportToWorld(const glm::vec2 &viewportPos)
 
 	return MathUtils::Ray(transform.GetPosition(), normalize(dir));
 }
+
+glm::vec2 Camera::DeprojectWorldToViewport(const glm::vec3 &worldPos)
+{
+	// transform world position into clip space (-1 to 1)
+	glm::vec4 clipPos = GetViewProjectionMatrix() * glm::vec4(worldPos, 1.f);
+
+	// normalized device coordinates (-1 to 1 on x and y axes)
+	glm::vec3 ndcPos = glm::vec3(clipPos) / clipPos.w;
+
+	//  screen space (0 to screenWidth on x axis, 0 to screenHeight on y axis)
+	auto viewportSize = UserInterface::GetViewportSize();
+	return glm::vec2((ndcPos.x + 1.f) * 0.5f * viewportSize.x, (ndcPos.y + 1.f) * 0.5f * viewportSize.y);
+}

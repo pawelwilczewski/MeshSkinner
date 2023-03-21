@@ -39,6 +39,8 @@ private:
 
 	Ref<Material> weightPaintMaterial;
 
+	float brushCircleSize = 10.f;
+
 private:
 	CallbackRef<StrokeQueryInfo> onStrokeEmplaceCallback;
 	CallbackNoArgRef onDrawAdditionalViewportWidgetsCallback;
