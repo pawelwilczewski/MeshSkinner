@@ -75,14 +75,52 @@ public:
 		for (const auto &element : vertexBuffer->layout)
 		{
 			glEnableVertexArrayAttrib(id, attributeIndex);
-			if (element.type == ShaderDataType::Int || element.type == ShaderDataType::UnsignedInt) // TODO: more cases
-			{
-				glVertexArrayAttribIFormat(id, attributeIndex, element.GetComponentCount(), ShaderTypeToGL(element.type), element.offset);
-			}
+
+			if (
+				element.type == ShaderDataType::Float ||
+				element.type == ShaderDataType::Float2 ||
+				element.type == ShaderDataType::Float3 ||
+				element.type == ShaderDataType::Float4 ||
+				element.type == ShaderDataType::Mat3 ||
+				element.type == ShaderDataType::Mat4
+				)
+				glVertexArrayAttribFormat(
+					id,
+					attributeIndex,
+					element.GetComponentCount(),
+					ShaderTypeToGL(element.type),
+					element.normalized ? GL_TRUE : GL_FALSE,
+					element.offset
+				);
+			else if (
+				element.type == ShaderDataType::Int ||
+				element.type == ShaderDataType::Int2 ||
+				element.type == ShaderDataType::Int3 ||
+				element.type == ShaderDataType::Int4 ||
+				element.type == ShaderDataType::UnsignedInt ||
+				element.type == ShaderDataType::UnsignedInt2 ||
+				element.type == ShaderDataType::UnsignedInt3 ||
+				element.type == ShaderDataType::UnsignedInt4 ||
+				element.type == ShaderDataType::Short ||
+				element.type == ShaderDataType::Short2 ||
+				element.type == ShaderDataType::Short3 ||
+				element.type == ShaderDataType::Short4 ||
+				element.type == ShaderDataType::UnsignedShort ||
+				element.type == ShaderDataType::UnsignedShort2 ||
+				element.type == ShaderDataType::UnsignedShort3 ||
+				element.type == ShaderDataType::UnsignedShort4 ||
+				element.type == ShaderDataType::Bool
+				)
+				glVertexArrayAttribIFormat(
+					id,
+					attributeIndex,
+					element.GetComponentCount(),
+					ShaderTypeToGL(element.type),	
+					element.offset
+				);
 			else
-			{
-				glVertexArrayAttribFormat(id, attributeIndex, element.GetComponentCount(), ShaderTypeToGL(element.type), element.normalized ? GL_TRUE : GL_FALSE, element.offset);
-			}
+				assert(false);
+
 			glVertexArrayAttribBinding(id, attributeIndex, bindingIndex);
 			attributeIndex++;
 		}

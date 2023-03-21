@@ -5,7 +5,7 @@ layout(location = 1) in vec3 in_Normal;
 layout(location = 2) in vec4 in_Tangent;
 layout(location = 3) in vec2 in_TexCoord;
 layout(location = 4) in vec3 in_Color;
-layout(location = 5) in vec4 in_Bones;
+layout(location = 5) in uvec4 in_Bones;
 layout(location = 6) in vec4 in_Weights;
 layout(location = 7) in uint in_TransformIndex;
 layout(location = 8) in uint in_SkeletonBonesIndex;
@@ -53,8 +53,8 @@ void main()
 		if (in_Weights[i] < 0.000001)
 			continue;
 
-		Bone bone = bones[in_SkeletonBonesIndex + int(in_Bones[i])];
-		mat4 boneModelTransform = inverseRootTransform * transforms[in_SkeletonTransformsIndex + int(in_Bones[i])];
+		Bone bone = bones[in_SkeletonBonesIndex + in_Bones[i]];
+		mat4 boneModelTransform = inverseRootTransform * transforms[in_SkeletonTransformsIndex + in_Bones[i]];
 		poseMatrix += boneModelTransform * bone.inverseBindMatrix * in_Weights[i];
 	}
 
