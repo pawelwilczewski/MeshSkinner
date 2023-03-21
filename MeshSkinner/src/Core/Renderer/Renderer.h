@@ -58,6 +58,12 @@ public:
 	inline static Camera *activeCamera = nullptr;
 	inline static int selectedBone = 0; // TODO: make this available as static field in Hierarchy
 
+	inline static glm::vec3 color000 = glm::vec3(0.f, 0.f, 1.f);
+	inline static glm::vec3 color025 = glm::vec3(0.f, 1.f, 1.f);
+	inline static glm::vec3 color050 = glm::vec3(0.f, 1.f, 0.f);
+	inline static glm::vec3 color075 = glm::vec3(1.f, 1.f, 0.f);
+	inline static glm::vec3 color100 = glm::vec3(1.f, 0.f, 0.f);
+
 private:
 	inline static DrawCalls staticMeshDrawCalls;
 	inline static DrawCalls skeletalMeshDrawCalls;

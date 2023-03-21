@@ -14,6 +14,12 @@ layout(location = 9) in uint in_SkeletonTransformsIndex;
 #include "include/SSBOs.glsl"
 #include "include/Uniforms.glsl"
 
+uniform vec3 u_Color000;
+uniform vec3 u_Color025;
+uniform vec3 u_Color050;
+uniform vec3 u_Color075;
+uniform vec3 u_Color100;
+
 out vec3 io_Color;
 
 void main()
@@ -40,10 +46,10 @@ void main()
 
 		float transitionSize = 1.0 / 4;
 
-		if	(weight < 1.0 * transitionSize)		io_Color = mix(blue,	cyan,	(weight - 0.0 * transitionSize) / transitionSize);
-		else if (weight < 2.0 * transitionSize)	io_Color = mix(cyan,	green,	(weight - 1.0 * transitionSize) / transitionSize);
-		else if (weight < 3.0 * transitionSize)	io_Color = mix(green,	yellow,	(weight - 2.0 * transitionSize) / transitionSize);
-		else									io_Color = mix(yellow,	red,	(weight - 3.0 * transitionSize) / transitionSize);
+		if	(weight < 1.0 * transitionSize)		io_Color = mix(u_Color000,	u_Color025,	(weight - 0.0 * transitionSize) / transitionSize);
+		else if (weight < 2.0 * transitionSize)	io_Color = mix(u_Color025,	u_Color050,	(weight - 1.0 * transitionSize) / transitionSize);
+		else if (weight < 3.0 * transitionSize)	io_Color = mix(u_Color050,	u_Color075,	(weight - 2.0 * transitionSize) / transitionSize);
+		else									io_Color = mix(u_Color075,	u_Color100,	(weight - 3.0 * transitionSize) / transitionSize);
 	}
 
 	mat4 inverseRootTransform = inverse(transforms[in_SkeletonTransformsIndex]);
