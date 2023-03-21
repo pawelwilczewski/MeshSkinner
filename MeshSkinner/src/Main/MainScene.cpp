@@ -12,47 +12,25 @@
 #include "MeshSkinner/Tool/AnimationControls.h"
 #include "MeshSkinner/Tool/SceneStats.h"
 
-static Ref<VertexArray<uint32_t>> vao;
-static Ref<VertexBuffer<StaticVertex>> vbo;
-static Ref<IndexBuffer<uint32_t>> ibo;
-static Ref<Shader> shader;
-
-static Ref<Entity> noneEntity;
-static Ref<Entity> staticEntity;
-static Ref<Entity> staticEntity2;
-static Ref<Entity> staticEntity3;
-static Ref<Entity> skeletalEntity;
-//static Ref<Entity> skeletalEntity2;
-//static Ref<Entity> staticSkeletalEntity;
-static auto rootBone = Ref<Bone>();
-
-static Ref<SkeletalMeshComponent> editedMesh;
-
-static std::string sourceFile;
-static std::string targetFile;
-
-static std::vector<Animation> anims;
-
-static auto skeletalMesh = MakeRef<SkeletalMeshComponent>("SkeletalMeshComponent");
-
 MainScene::MainScene() : Scene()
 {
-    // scene root setup
-    sceneRoot = MakeRef<Entity>("Scene");
+    camera = static_cast<Camera *>(CreateEntity(new Camera("Main Camera")));
 
     // camera setup
-    camera = MakeRef<Camera>("MainCamera");
     cameraController = MakeRef<CameraControllerComponent>("CameraControllerComponent 0", 10.f);
     camera->AddComponent(cameraController);
-    camera->SetParent(sceneRoot);
     Renderer::activeCamera = camera;
 
     // tool initialisation
     brush = MakeUnique<Brush>("Brush Parameters");
     stroke = MakeUnique<Stroke>("Stroke Parameters", [&](StrokeQueryInfo &info) {
-        info.hitTarget = MathUtils::RayMeshIntersectionLocalSpace(camera->ProjectViewportToWorld(info.viewportPosition), editedMesh.get(), info.worldPosition);
+        auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
+        if (!selectedMesh) return;
+
+        info.verts = Renderer::GetFinalVertPosData(selectedMesh.get());
+        info.hitTarget = MathUtils::RayMeshIntersection(camera->ProjectViewportToWorld(info.viewportPosition), info.verts, selectedMesh->indices, info.position);
         });
-    hierarchy = MakeUnique<Hierarchy>("Hierarchy", sceneRoot);
+    hierarchy = MakeUnique<Hierarchy>("Hierarchy", GetRoot());
     animationControls = MakeUnique<AnimationControls>();
     sceneStats = MakeUnique<SceneStats>();
 
@@ -61,7 +39,7 @@ MainScene::MainScene() : Scene()
         if (Window::GetCursorVisibility())
         {
             auto mousePos = Input::GetMouseScreenPosition();
-            ImGui::GetWindowDrawList()->AddCircle(ImVec2(mousePos.x, mousePos.y), 10.f, ImColor(0.8f, 0.8f, 0.8f, 1.f));
+            ImGui::GetWindowDrawList()->AddCircle(ImVec2(mousePos.x, mousePos.y), brushCircleSize, ImColor(0.8f, 0.8f, 0.8f, 1.f));
         }
         });
     UserInterface::OnDrawAdditionalViewportWidgetsSubscribe(onDrawAdditionalViewportWidgetsCallback);
@@ -71,106 +49,26 @@ MainScene::MainScene() : Scene()
 
     ShaderLibrary::Load("Bone", "assets/shaders/Bone.vert", "assets/shaders/Bone.frag", 1);
     ShaderLibrary::Load("WeightPaint", "assets/shaders/WeightPaint.vert", "assets/shaders/WeightPaint.frag", 0);
+
+    weightPaintMaterial = MakeRef<Material>(ShaderLibrary::Get("WeightPaint"));
+
+    onMouseButtonPressedCallback = MakeCallbackRef<int>([&](int button) { OnMouseButtonPressed(button); });
+    Input::OnMouseButtonPressedSubscribe(onMouseButtonPressedCallback);
 }
 
 MainScene::~MainScene()
 {
     UserInterface::OnDrawAdditionalViewportWidgetsUnsubscribe(onDrawAdditionalViewportWidgetsCallback);
     stroke->OnStrokeEmplaceUnsubscribe(onStrokeEmplaceCallback);
+
+    Input::OnMouseButtonPressedUnsubscribe(onMouseButtonPressedCallback);
 }
 
 void MainScene::OnStart()
 {
-    std::vector<StaticVertex> staticVertices;
-    staticVertices.push_back(StaticVertex(glm::vec3(-0.6f, -0.4f, -0.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(0.f, 0.5f, 1.f)));
-    staticVertices.push_back(StaticVertex(glm::vec3(0.6f, -0.4f, 0.3f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.f, 0.3f, 0.f)));
-    staticVertices.push_back(StaticVertex(glm::vec3(0.f, 0.6f, 0.5f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.f, 0.f, 0.8f)));
-    staticVertices.push_back(StaticVertex(glm::vec3(0.4f, -0.6f, -0.4f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(0.f, 0.3f, 1.f)));
-
-    std::vector<SkeletalVertex> skeletalVertices;
-    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-2.8f, -0.5f, -1.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(0.0f, 1.0f, 0.f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
-    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-1.6f, -0.7f, -2.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
-    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-0.6f, 3.4f, -1.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
-    skeletalVertices.push_back(SkeletalVertex(glm::vec3(-1.2f, 0.4f, -4.1f), glm::vec3(0.f), glm::vec4(0.f), glm::vec2(0.f), glm::vec3(0.0f, 0.0f, 1.f), glm::vec<4, uint16_t>(0, 1, 2, 3), glm::vec4(0.25f)));
-
-    std::vector<uint32_t> indices;
-    indices.push_back(0);
-    indices.push_back(1);
-    indices.push_back(2);
-    indices.push_back(2);
-    indices.push_back(3);
-    indices.push_back(0);
-
-    MeshLibrary::Import("assets/models/shark.gltf", skeletalMesh, rootBone);
-    skeletalMesh->material = MakeRef<Material>(ShaderLibrary::Get("WeightPaint"));
-
-    noneEntity = MakeRef<Entity>("none");
-    noneEntity->SetParent(sceneRoot);
-
-    staticEntity = MakeRef<Entity>("static", Transform(glm::vec3(0.f, 0.f, 2.f)));
-    staticEntity->AddComponent(MeshLibrary::GetCube());
-    staticEntity->SetParent(sceneRoot);
-
-    auto staticMesh = MakeRef<StaticMeshComponent>("StaticMeshComponent", staticVertices, indices, MaterialLibrary::GetDefault());
-    staticEntity2 = MakeRef<Entity>("static2", Transform(glm::vec3(0.f, 0.f, -2.f)));
-    staticEntity2->AddComponent(staticMesh);
-    staticEntity2->SetParent(sceneRoot);
-
-    staticEntity3 = MakeRef<Entity>("static 3", Transform(glm::vec3(0.f, 1.f, 2.f)));
-    staticEntity3->AddComponent(staticMesh);
-    staticEntity3->SetParent(sceneRoot);
-
-    //skeletalEntity = MakeRef<Entity>("skeletal", Transform(glm::vec3(15.f, 0.f, 2.f)));
-    
-    //skeletalEntity->transform.SetScale(glm::vec3(0.01f));
-    //skeletalEntity->SetParent(rootBone); // TODO: URGENT: it should be the other way around - make sure to use relative transformations in the shader (has to be fixed for animation nevertheless)
-    //rootBone->transform.SetScale(glm::vec3(0.01f));
-    //rootBone->transform.Translate(glm::vec3(-200.f, 0.f, 0.f));
-    //rootBone->transform.Translate(glm::vec3(-500.f, 0.f, 0.f));
-    //rootBone->transform.SetScale(glm::vec3(10.f, 10.f, 10.f));
-    rootBone->SetParent(sceneRoot);
-    skeletalEntity = MakeRef<Entity>("skeletal");
-    skeletalEntity->AddComponent(skeletalMesh);
-    skeletalEntity->SetParent(sceneRoot);
-
-    // add bone meshes
-    auto boneMat = MakeRef<Material>(ShaderLibrary::Get("Bone"));
-    for (auto &bone : skeletalMesh->skeleton->GetBones())
-    {
-        // calculate the bone length with some default for tip bones
-        auto boneLength = 50.f;
-        auto &children = bone->GetChildren();
-        if (children.size() == 1)
-            boneLength = glm::length(bone->GetChildren().begin()->get()->transform.GetPosition());
-
-        auto boneMesh = MeshLibrary::GetBone(boneLength);
-        boneMesh->material = boneMat;
-        bone->AddComponent(boneMesh);
-    }
-
-    //skeletalEntity2 = MakeRef<Entity>("skeletal 2", Transform(glm::vec3(-2.f, 0.f, 0.f)));
-    //skeletalEntity2->AddComponent(skeletalMesh);
-
-    //staticSkeletalEntity = MakeRef<Entity>("static skeletal");
-    //staticSkeletalEntity->transform.SetPosition({ -2.f, 2.f, 0.f });
-    //staticSkeletalEntity->AddComponent(staticMesh);
-    //staticSkeletalEntity->AddComponent(skeletalMesh);
-
     // TODO: NOW: instead, have a sceneRoot entity and submit it in the renderer (recursively)
     //  also we should be able to remove currently submitted entities
     //  we may need to be able to update entities submitted in renderer
-    Renderer::Submit(rootBone);
-    Renderer::Submit(skeletalEntity);
-    Renderer::Submit(noneEntity);
-    Renderer::Submit(staticEntity);
-    Renderer::Submit(staticEntity2);
-    Renderer::Submit(staticEntity3);
-    //Renderer::Submit(skeletalEntity2);
-    //Renderer::Submit(staticSkeletalEntity);
-
-    editedMesh = skeletalMesh;
-
-    MeshLibrary::Import("assets/models/shark.gltf", anims);
 }
 
 void MainScene::OnEarlyUpdate()
@@ -180,22 +78,17 @@ void MainScene::OnEarlyUpdate()
 
 void MainScene::OnUpdate()
 {
-    staticEntity->transform.Translate(glm::vec3(0.1f) * Time::GetDeltaSeconds());
-    staticEntity2->transform.Translate(glm::vec3(0.1f) * Time::GetDeltaSeconds());
-    staticEntity3->transform.Translate(glm::vec3(-0.1f) * Time::GetDeltaSeconds());
-    //staticSkeletalEntity->transform.Translate(glm::vec3(-0.1f) * Time::GetDeltaSeconds());
-    //skeletalEntity->transform.Translate(glm::vec3(0.f, -1.f, 0.f) * Time::GetDeltaSeconds());
-    //skeletalEntity->transform.Rotate(glm::vec3(30.f, 0.f, 0.f) * Time::GetDeltaSeconds());
-    staticEntity->transform.SetScale(glm::vec3(glm::sin(Time::GetTimeSeconds())));
+    auto mesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>().get();
 
-    auto anim = animationControls->GetCurrentAnimation();
-    if (anim)
+    if (mesh)
     {
-        for (const auto &bone : skeletalMesh->skeleton->GetBones())
+        glm::vec3 intersect;
+        if (MathUtils::RayMeshIntersection(camera->ProjectViewportToWorld(Input::GetMouseViewportPosition()), mesh, intersect))
         {
-            bone->transform.SetPosition(anim->EvaluateTranslation(bone->name, animationControls->GetAnimationTime()));
-            bone->transform.SetRotation(glm::degrees(glm::eulerAngles(anim->EvaluateRotation(bone->name, animationControls->GetAnimationTime()))));
-            bone->transform.SetScale(anim->EvaluateScale(bone->name, animationControls->GetAnimationTime()));
+            auto offset = camera->transform.GetUpVector() * brush->radius;
+            auto screenPos = camera->DeprojectWorldToViewport(intersect + offset);
+            auto mousePos = Input::GetMouseViewportPosition();
+            brushCircleSize = glm::distance(mousePos, screenPos);
         }
     }
 }
@@ -204,39 +97,149 @@ void MainScene::OnUpdateUI()
 {
     // TODO: all of these can be Tools - make that happen
 
+    
     // edited mesh
-    ImGui::Begin("Edited Mesh");
-    InteractiveWidget(ImGui::SliderInt("ActiveBone", &Renderer::activeBone, 0, editedMesh->skeleton->GetBones().size() - 1));
-    InteractiveWidget(ImGui::InputText("Input file path", &sourceFile)); // TODO: for text inputs: unfocus if clicked in the viewport
+    ImGui::Begin("Weight Painting");
 
-    auto &dropped = Input::GetDroppedFiles();
-    if (ImGui::IsItemHovered() && dropped.size() > 0)
-        sourceFile = dropped[0];
+    auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
+    if (selectedMesh)
+        InteractiveWidget(ImGui::SliderInt("ActiveBone", &Renderer::selectedBone, 0, selectedMesh->skeleton->GetBones().size() - 1));
 
-    if (InteractiveWidget(ImGui::Button("Import file")))
+    ImGui::End();
+
+    // settings
+    ImGui::Begin("Settings");
+
+    InteractiveWidget(ImGui::DragFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.0001f, 0.0f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput));
+
+    Ref<SkeletalMeshComponent> updateBoneRadiusSkeletalMesh = nullptr;
+    static float boneRadius = 5.f;
+    if (selectedMesh && InteractiveWidget(ImGui::DragFloat("Bone radius", &boneRadius, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)))
+        updateBoneRadiusSkeletalMesh = selectedMesh;
+
+    static float tipBoneLength = 50.f;
+    if (selectedMesh && InteractiveWidget(ImGui::DragFloat("Tip bone length", &tipBoneLength, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)))
     {
-        Log::Info("TODO: IMPLEMENT Importing file {}", sourceFile);
+        auto &bones = selectedMesh->skeleton->GetBones();
+        for (auto &bone : bones)
+        {
+            if (bone->GetChildren().size() > 0) continue;
 
+            auto &boneMeshes = bone->GetComponents<StaticMeshComponent>();
+            if (boneMeshes.size() == 0) continue;
 
+            auto &boneMesh = *boneMeshes.begin();
+            if (!boneMesh) continue;
+
+            for (auto &vertex : boneMesh->vertices)
+                if (vertex.position.y > glm::epsilon<float>())
+                    vertex.position.y = tipBoneLength;
+
+            Renderer::UpdateMeshVertices(boneMesh.get());
+        }
+    }
+
+    ImGui::End();
+
+    ImGui::Begin("Import Export");
+
+    InteractiveWidget(ImGui::InputText("Input file path", &sourceFile));
+
+    auto dropped = Input::GetDroppedFiles();
+    if (ImGui::IsItemHovered() && dropped && dropped->size() > 0)
+        sourceFile = dropped->at(0);
+
+    if (InteractiveWidget(ImGui::Button("Import as static")))
+    {
+        Log::Info("Importing static mesh from file {}", sourceFile);
+
+        auto entity = CreateEntity(new Entity());
+        entity->AddComponent(MeshLibrary::Import(sourceFile));
+        entity->name = std::filesystem::path(sourceFile).filename().string();
+
+        Renderer::Submit(entity);
+
+        Log::Info("Importing static mesh finished");
+    }
+
+    if (InteractiveWidget(ImGui::Button("Import as skeletal")))
+    {
+        Log::Info("Importing skeletal mesh from file {}", sourceFile);
+
+        auto entity = CreateEntity(new Entity());
+
+        auto mesh = MeshLibrary::Import(sourceFile, this, entity);
+        mesh->material = weightPaintMaterial;
+
+        entity->AddComponent(mesh);
+        entity->name = std::filesystem::path(sourceFile).filename().string();
+
+        // add bone meshes
+        auto boneMat = MakeRef<Material>(ShaderLibrary::Get("Bone"));
+        for (auto &bone : mesh->skeleton->GetBones())
+        {
+            Renderer::Submit(bone);
+
+            // calculate the bone length with some default for tip bones
+            auto boneLength = tipBoneLength;
+            auto &children = bone->GetChildren();
+            if (children.size() == 1)
+                boneLength = glm::length((*bone->GetChildren().begin())->transform.GetPosition());
+
+            auto boneMesh = MeshLibrary::GetBone(boneLength);
+            boneMesh->material = boneMat;
+            bone->AddComponent(boneMesh);
+        }
+
+        updateBoneRadiusSkeletalMesh = mesh;
+
+        Renderer::Submit(entity);
+
+        Log::Info("Importing skeletal mesh finished");
     }
 
     InteractiveWidget(ImGui::InputText("Export file path", &targetFile));
-    if (ImGui::IsItemHovered() && dropped.size() > 0)
-        targetFile = dropped[0];
+    if (ImGui::IsItemHovered() && dropped && dropped->size() > 0)
+        targetFile = dropped->at(0);
 
     if (InteractiveWidget(ImGui::Button("Export file")))
     {
         Log::Info("Exporting updated mesh from {} to {}", sourceFile, targetFile);
 
-        MeshLibrary::ExportUpdated(sourceFile, targetFile, editedMesh);
+        MeshLibrary::ExportUpdated(sourceFile, targetFile, selectedMesh);
 
         Log::Info("Exporting finished");
     }
+
     ImGui::End();
 
-    // settings
-    ImGui::Begin("Settings");
-    InteractiveWidget(ImGui::DragFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.0001f, 0.0f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput));
+    if (updateBoneRadiusSkeletalMesh)
+    {
+        auto &bones = updateBoneRadiusSkeletalMesh->skeleton->GetBones();
+        for (auto &bone : bones)
+        {
+            auto &boneMeshes = bone->GetComponents<StaticMeshComponent>();
+            if (boneMeshes.size() == 0) continue;
+
+            auto &boneMesh = *boneMeshes.begin();
+            if (!boneMesh) continue;
+
+            for (auto &vertex : boneMesh->vertices)
+            {
+                vertex.position.x = glm::sign(vertex.position.x) * boneRadius;
+                vertex.position.z = glm::sign(vertex.position.z) * boneRadius;
+            }
+
+            Renderer::UpdateMeshVertices(boneMesh.get());
+        }
+    }
+
+    ImGui::Begin("Color scheme");
+    ImGui::ColorEdit3("Colour   0%", glm::value_ptr(Renderer::color000));
+    ImGui::ColorEdit3("Colour  25%", glm::value_ptr(Renderer::color025));
+    ImGui::ColorEdit3("Colour  50%", glm::value_ptr(Renderer::color050));
+    ImGui::ColorEdit3("Colour  75%", glm::value_ptr(Renderer::color075));
+    ImGui::ColorEdit3("Colour 100%", glm::value_ptr(Renderer::color100));
     ImGui::End();
 }
 
@@ -252,11 +255,14 @@ void MainScene::OnEnd()
 
 void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
 {
-    auto verts = MathUtils::GetVerticesInRadiusLocalSpace(editedMesh.get(), info.worldPosition, brush->radius);
+    auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
+    if (!selectedMesh) return;
 
-    for (const auto &vIndex : verts)
+    auto vertIndices = MathUtils::GetVerticesInRadius(info.verts, info.position, brush->radius);
+
+    for (const auto &vIndex : vertIndices)
     {
-        auto &v = editedMesh->vertices[vIndex];
+        auto &v = selectedMesh->vertices[vIndex];
 
         // try to update an already existing weight
         float *toUpdate;
@@ -264,7 +270,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
         for (size_t i = 0; i < v.bones.length(); i++)
         {
             // the bone is one of the 
-            if (v.bones[i] == Renderer::activeBone)
+            if (v.bones[i] == Renderer::selectedBone)
             {
                 toUpdate = &v.weights[i];
                 updated = true;
@@ -279,7 +285,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
             auto minWeightBone = 0;
             auto minWeight = v.weights[0];
 
-            for (int i = 1; i < v.weights.length(); i++)
+            for (int i = v.weights.length() - 1; i > 0; i--)
             {
                 if (v.weights[i] < minWeight)
                 {
@@ -289,13 +295,13 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
             }
 
             // update the weights
-            v.bones[minWeightBone] = Renderer::activeBone;
+            v.bones[minWeightBone] = Renderer::selectedBone;
             v.weights[minWeightBone] = 0.f;
             toUpdate = &v.weights[minWeightBone];
         }
 
         // update the weight
-        (*toUpdate) = brush->Blend(*toUpdate, glm::distance(info.worldPosition, v.position));
+        (*toUpdate) = brush->Blend(*toUpdate, glm::distance(info.position, glm::vec3(info.verts[vIndex])));
 
         // the components of the result must add up to one
         auto sum = 0.f;
@@ -304,5 +310,29 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
         v.weights /= sum;
     }
 
-    Renderer::UpdateMeshVertices(editedMesh.get());
+    Renderer::UpdateMeshVertices(selectedMesh.get());
+}
+
+void MainScene::OnMouseButtonPressed(int button)
+{
+    // bone select
+    if (Input::IsKeyPressed(KEY_LEFT_CONTROL))
+    {
+        auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
+        auto ray = camera->ProjectViewportToWorld(Input::GetMouseViewportPosition());
+
+        int i = 0;
+        for (const auto &bone : selectedMesh->skeleton->GetBones())
+        {
+            auto boneMesh = (*bone->GetComponents<StaticMeshComponent>().begin()).get();
+
+            auto verts = Renderer::GetFinalVertPosData(boneMesh);
+
+            glm::vec3 pos;
+            if (MathUtils::RayMeshIntersection(ray, verts, boneMesh->indices, pos))
+                Renderer::selectedBone = i;
+
+            i++;
+        }
+    }
 }

@@ -1,11 +1,11 @@
 #include "pch.h"
 #include "Entity.h"
 
-Entity::Entity(const std::string &name, Transform transform) : name(name), transform(transform)
+Entity::Entity(const std::string &name, const Transform &transform) : name(name), transform(transform)
 {
 	RecalculateWorldMatrix();
 
-	// setup the dirty matrxi callback
+	// setup the dirty matrix callback
 	onDirtyMatrixCallback = MakeCallbackNoArgRef([&]() { DirtyWorldMatrix(); });
 	this->transform.OnMatrixDirtySubscribe(onDirtyMatrixCallback);
 }
@@ -15,55 +15,54 @@ Entity::~Entity()
 	// cleanup dirty matrix callback
 	transform.OnMatrixDirtyUnsubscribe(onDirtyMatrixCallback);
 
-	// TODO: this is causing read access violation upon exit (obviously)
-	// remove self from parent's children
 	if (parent)
-		parent->children.erase(shared_from_this());
+		parent->children.erase(this);
 
 	// reset parent for all children
 	for (const auto &child : children)
-		child->parent.reset();
+		child->parent = nullptr;
 }
 
-void Entity::AddComponent(Ref<EntityComponent> component)
+Ref<EntityComponent> Entity::AddComponent(const Ref<EntityComponent> &component)
 {
 	components.insert(component);
 
-	component->entity = weak_from_this();
+	component->entity = this;
 	component->OnAttached();
+
+	return component;
 }
 
-void Entity::RemoveComponent(Ref<EntityComponent> component)
+void Entity::RemoveComponent(const Ref<EntityComponent> &component)
 {
-	components.erase(component);
-
-	component->entity.reset();
 	component->OnDetached();
+
+	components.erase(component);
 }
 
-void Entity::SetParent(const Ref<Entity> &parent)
+void Entity::SetParent(Entity *parent)
 {
 	// remove this from parent's children
 	if (this->parent)
-		this->parent->children.erase(shared_from_this());
+		this->parent->children.erase(this);
 
 	// update the parent, dirty world matrix
 	this->parent = parent;
 
 	// add to new parent's children
 	if (this->parent)
-		parent->children.insert(shared_from_this());
+		parent->children.insert(this);
 
 	// dirty world matrix for this entity
 	DirtyWorldMatrix();
 }
 
-const Ref<Entity> &Entity::GetParent() const
+Entity *Entity::GetParent() const
 {
 	return this->parent;
 }
 
-const std::unordered_set<Ref<Entity>> &Entity::GetChildren() const
+const std::unordered_set<Entity *> &Entity::GetChildren() const
 {
 	return children;
 }
@@ -81,12 +80,29 @@ bool Entity::GetIsWorldMatrixUpdated() const
 	return isWorldMatrixUpdated;
 }
 
+Transform Entity::GetWorldTransform()
+{
+	assert(false);
+
+	// this doesn't work quite right because the * operator is not correct (scale is troublesome)
+	Transform t = transform;
+
+	auto p = GetParent();
+	while (p != nullptr)
+	{
+		t = p->transform * t;
+		p = p->GetParent();
+	}
+
+	return t;
+}
+
 void Entity::RecalculateWorldMatrix()
 {
 	worldMatrix = transform.GetMatrix();
 
 	// no recursion because it's just unnecessary
-	Ref<Entity> p = this->parent;
+	auto p = this->parent;
 	while (p != nullptr)
 	{
 		worldMatrix = p->transform.GetMatrix() * worldMatrix;

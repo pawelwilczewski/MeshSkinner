@@ -16,6 +16,6 @@ public:
 	virtual VertexType GetVertexType() const override;
 
 public:
-	Ref<Skeleton> skeleton;
+	Unique<Skeleton> skeleton;
 	std::vector<SkeletalVertex> vertices;
 };

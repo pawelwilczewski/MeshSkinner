@@ -1,69 +1,92 @@
 #include "pch.h"
 #include "AnimationControls.h"
 
+#include "Hierarchy.h"
+
 AnimationControls::AnimationControls(const std::string &toolWindowName) : Tool(toolWindowName)
 {
+	onUpdateCallback = MakeCallbackNoArgRef([&]() { OnUpdate(); });
+
+	Application::OnUpdateSubscribe(onUpdateCallback);
+}
+
+AnimationControls::~AnimationControls()
+{
+	Application::OnUpdateUnsubscribe(onUpdateCallback);
 }
 
 const std::vector<Animation> &AnimationControls::GetAnimations() const
 {
-	return animations;
-}
+	auto mesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>().get();
+	if (mesh)
+		return animations.at(mesh).animations;
 
-Animation *AnimationControls::GetCurrentAnimation()
-{
-	if (animationIndex < animations.size())
-		return &animations[animationIndex];
-	
-	return nullptr;
-}
-
-float AnimationControls::GetAnimationTime() const
-{
-	return animationTime;
+	return std::vector<Animation>();
 }
 
 void AnimationControls::OnUpdateUI()
 {
+	auto mesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>().get();
+	if (!mesh)
+		return;
+
+	if (animations.find(mesh) == animations.end())
+		animations.insert({ mesh, AnimationInfo() });
+
+	auto &info = animations[mesh];
+
 	ImGui::Begin(toolWindowName.c_str());
 
 	InteractiveWidget(ImGui::InputText("Animations file path", &sourceFile)); // TODO: for text inputs: unfocus if clicked in the viewport
 
-	auto &dropped = Input::GetDroppedFiles();
-	if (ImGui::IsItemHovered() && dropped.size() > 0)
-		sourceFile = dropped[0];
+	auto dropped = Input::GetDroppedFiles();
+	if (ImGui::IsItemHovered() && dropped && dropped->size() > 0)
+		sourceFile = dropped->at(0);
 
 	if (InteractiveWidget(ImGui::Button("Import animations")))
 	{
 		Log::Info("Importing animations from file {}", sourceFile);
 
-		MeshLibrary::Import(sourceFile, animations);
-
-		animationNames.clear();
-		for (const auto &animation : animations)
-			animationNames.push_back(animation.name.c_str());
-
-		animationIndex = 0;
-		animationTime = 0.f;
+		MeshLibrary::Import(sourceFile, info.animations);
 	}
 
-	if (InteractiveWidget(ImGui::ListBox("Select animation", &animationIndex, animationNames.data(), animationNames.size())))
-		animationTime = 0.f;
+	std::vector<const char *> animationNames;
+	for (const auto &animation : info.animations)
+		animationNames.push_back(animation.name.c_str());
 
-	auto current = GetCurrentAnimation();
-	if (current)
+	if (InteractiveWidget(ImGui::ListBox("Select animation", &info.animationIndex, animationNames.data(), animationNames.size())))
+		info.playbackTime = 0.f;
+
+	if (info.animationIndex < info.animations.size())
 	{
-		InteractiveWidget(ImGui::Checkbox("Play back", &playBack));
-		InteractiveWidget(ImGui::Checkbox("Loop", &current->loop));
+		auto &current = info.animations[info.animationIndex];
 
-		if (playBack)
-		{
-			animationTime += Time::GetDeltaSeconds();
-			animationTime = current->GetTimeUsedForEvaluation(animationTime);
-		}
+		InteractiveWidget(ImGui::Checkbox("Play", &info.play));
+		InteractiveWidget(ImGui::Checkbox("Loop", &current.loop));
 
-		ImGui::SliderFloat("Timeline", &animationTime, 0.f, current->GetDuration());
+		ImGui::SliderFloat("Timeline", &info.playbackTime, 0.f, current.GetDuration());
 	}
 
 	ImGui::End();
+}
+
+void AnimationControls::OnUpdate()
+{
+	for (auto &[mesh, info] : animations)
+	{
+		if (info.animationIndex < info.animations.size())
+		{
+			auto &anim = info.animations[info.animationIndex];
+
+			if (info.play)
+				info.playbackTime = anim.GetTimeUsedForEvaluation(info.playbackTime + Time::GetDeltaSeconds());
+
+			for (const auto &bone : mesh->skeleton->GetBones())
+			{
+				bone->transform.SetPosition(anim.EvaluateTranslation(bone->name, info.playbackTime));
+				bone->transform.SetRotation(glm::degrees(glm::eulerAngles(anim.EvaluateRotation(bone->name, info.playbackTime))));
+				bone->transform.SetScale(anim.EvaluateScale(bone->name, info.playbackTime));
+			}
+		}
+	}
 }

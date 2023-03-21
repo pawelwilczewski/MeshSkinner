@@ -5,11 +5,12 @@
 
 struct StrokeQueryInfo
 {
-	StrokeQueryInfo(bool hitTarget = false, const glm::vec3 &worldPosition = glm::vec3(0.f), const glm::vec2 &viewportPosition = glm::vec2(0.f));
+	StrokeQueryInfo(bool hitTarget = false, const glm::vec3 &position = glm::vec3(0.f), const glm::vec2 &viewportPosition = glm::vec2(0.f));
 
-	bool hitTarget;
-	glm::vec3 worldPosition;
-	glm::vec2 viewportPosition;
+	bool hitTarget; // calculated in queryFunction
+	glm::vec3 position; // // calculated in queryFunction
+	glm::vec2 viewportPosition; // pre-set
+	std::vector<glm::vec4> verts; // final verts positions, calculated in queryFunction
 };
 
 // TODO: potentially add radius type (world - fixed in world / pixel - fixed in viewport)

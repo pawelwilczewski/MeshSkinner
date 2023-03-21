@@ -23,7 +23,7 @@ public:
 	float mouseSensitivity = 0.05f;
 
 protected:
-	Ref<Camera> camera;
+	Camera *camera;
 	bool active = false;
 
 	float moveSpeedMultiplier;

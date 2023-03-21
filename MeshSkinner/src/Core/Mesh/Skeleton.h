@@ -14,9 +14,7 @@ public:
 
 struct BoneGPU
 {
-	BoneGPU(Bone &bone, const glm::mat4 &inverseRootWorldMatrix);
-
-	glm::mat4 modelMatrix;
+	BoneGPU(Bone &bone);
 	glm::mat4 inverseBindMatrix;
 };
 
@@ -28,13 +26,13 @@ public:
 	Skeleton();
 
 public:
-	const Ref<Bone> &operator[](const char *boneName) const;
-	const Ref<Bone> &GetBoneByName(const char *boneName) const;
-	const Ref<Bone> &GetRootBone() const;
+	Bone *operator[](const char *boneName) const;
+	Bone *GetBoneByName(const char *boneName) const;
+	Bone *GetRootBone() const;
 
-	const std::vector<Ref<Bone>> &GetBones() const;
+	const std::vector<Bone *> &GetBones() const;
 
 private:
-	std::vector<Ref<Bone>> bones;
+	std::vector<Bone *> bones;
 	uint16_t root = -1;
 };

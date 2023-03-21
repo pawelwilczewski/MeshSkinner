@@ -77,18 +77,22 @@ static std::string ResolveIncludes(const std::string &filePath, const std::strin
 		std::string before = ParseToken("#include", toParse, [&](const std::string &arg, const std::string &next) {
 			auto argFileStr = FileUtils::FileParentPath(filePath) + "/" + arg;
 
-		// skip if file already included
-		if (std::find(filesIncluded.begin(), filesIncluded.end(), argFileStr) != filesIncluded.end())
-		{
-			result += next;
-			return;
-		}
-		else
-			filesIncluded.push_back(argFileStr);
+			std::string text;
 
-		result += FileUtils::ReadFile(argFileStr) + next;
-		//finalSrc += "\r\n" + next; // just to be safe, ensure the newline as well
-			});
+			// skip if file already included
+			if (std::find(filesIncluded.begin(), filesIncluded.end(), argFileStr) != filesIncluded.end())
+			{
+				text = "";
+			}
+			else
+			{
+				filesIncluded.push_back(argFileStr);
+				text = ResolveIncludes(argFileStr, FileUtils::ReadFile(argFileStr));
+			}
+
+			result += text + next;
+		});
+
 		result = before + result;
 		toParse = result;
 	}
@@ -275,4 +279,9 @@ void Shader::SetupStorageBuffer(const std::string &name, uint32_t ssbo)
 	auto binding = ssboLocations[name];
 	glShaderStorageBlockBinding(id, index, binding);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, binding, ssbo);
+}
+
+const std::string &Shader::GetDisplayedName() const
+{
+	return displayedName;
 }

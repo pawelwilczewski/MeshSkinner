@@ -3,28 +3,30 @@
 #include "Application/Core.h"
 #include "Tool.h"
 
+struct AnimationInfo
+{
+	std::vector<Animation> animations;
+	bool play = true;
+	float playbackTime = 0.f;
+	int animationIndex = 0;
+};
+
 class AnimationControls : public Tool
 {
 public:
 	AnimationControls(const std::string &toolWindowName = "Animation Controls");
-	virtual ~AnimationControls() = default;
+	virtual ~AnimationControls();
 
 public:
 	const std::vector<Animation> &GetAnimations() const;
 
-	Animation *GetCurrentAnimation();
-	float GetAnimationTime() const;
-
 protected:
 	virtual void OnUpdateUI() override;
+	void OnUpdate();
 
 private:
 	std::string sourceFile;
 
-	std::vector<Animation> animations;
-	std::vector<const char *> animationNames;
-
-	bool playBack = true;
-	float animationTime = 0.f;
-	int animationIndex = 0;
+	std::unordered_map<SkeletalMeshComponent *, AnimationInfo> animations;
+	CallbackNoArgRef onUpdateCallback;
 };

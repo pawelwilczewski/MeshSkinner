@@ -11,6 +11,7 @@ public:
 
 public:
 	Transform(const glm::vec3 &position = glm::vec3(0.f), const glm::vec3 &rotation = glm::vec3(0.f), const glm::vec3 &scale = glm::vec3(1.f));
+	Transform(const glm::mat4 &mat);
 	virtual ~Transform() = default;
 
 public:
@@ -30,6 +31,9 @@ public:
 	const glm::vec3 GetForwardVector() const;
 	const glm::vec3 GetRightVector() const;
 	const glm::vec3 GetUpVector() const;
+
+public:
+	Transform operator*(Transform &other);
 
 public:
 	const glm::mat4 &GetMatrix();

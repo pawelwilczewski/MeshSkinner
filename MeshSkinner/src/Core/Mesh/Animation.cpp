@@ -9,6 +9,9 @@ glm::vec3 Animation::EvaluateTranslation(const std::string &boneName, float time
 {
 	// TODO: switch on interpolation mode and use this as a reference: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#appendix-c-interpolation
 
+	if (tracks.find(boneName) == tracks.end())
+		return glm::vec3(0.f);
+
 	auto &track = tracks.at(boneName);
 	auto &positions = track.translationKeyframes;
 
@@ -20,7 +23,6 @@ glm::vec3 Animation::EvaluateTranslation(const std::string &boneName, float time
 		if (time <= positions[i].time)
 		{
 			auto alpha = (time - positions[i - 1].time) / (positions[i].time - positions[i - 1].time);
-
 			return glm::mix(positions[i - 1].value, positions[i].value, alpha);
 		}
 	}
@@ -31,6 +33,9 @@ glm::vec3 Animation::EvaluateTranslation(const std::string &boneName, float time
 glm::quat Animation::EvaluateRotation(const std::string &boneName, float time) const
 {
 	// TODO: switch on interpolation mode and use this as a reference: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#appendix-c-interpolation
+
+	if (tracks.find(boneName) == tracks.end())
+		return glm::vec3(0.f);
 
 	auto &track = tracks.at(boneName);
 	auto &rotations = track.rotationKeyframes;
@@ -43,7 +48,6 @@ glm::quat Animation::EvaluateRotation(const std::string &boneName, float time) c
 		if (time <= rotations[i].time)
 		{
 			auto alpha = (time - rotations[i - 1].time) / (rotations[i].time - rotations[i - 1].time);
-
 			return glm::lerp(rotations[i - 1].value, rotations[i].value, alpha);
 		}
 	}
@@ -54,6 +58,9 @@ glm::quat Animation::EvaluateRotation(const std::string &boneName, float time) c
 glm::vec3 Animation::EvaluateScale(const std::string &boneName, float time) const
 {
 	// TODO: switch on interpolation mode and use this as a reference: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#appendix-c-interpolation
+
+	if (tracks.find(boneName) == tracks.end())
+		return glm::vec3(0.f);
 
 	auto &track = tracks.at(boneName);
 	auto &scales = track.scaleKeyframes;
@@ -66,7 +73,6 @@ glm::vec3 Animation::EvaluateScale(const std::string &boneName, float time) cons
 		if (time <= scales[i].time)
 		{
 			auto alpha = (time - scales[i - 1].time) / (scales[i].time - scales[i - 1].time);
-
 			return glm::mix(scales[i - 1].value, scales[i].value, alpha);
 		}
 	}

@@ -22,6 +22,8 @@ protected:
 private:
 	void OnStrokeEmplace(const StrokeQueryInfo &info);
 
+	void OnMouseButtonPressed(int button);
+
 private:
 	Unique<class Brush> brush;
 	Unique<Stroke> stroke;
@@ -29,12 +31,19 @@ private:
 	Unique<class AnimationControls> animationControls;
 	Unique<class SceneStats> sceneStats;
 
-	Ref<Entity> sceneRoot;
-
-	Ref<class Camera> camera; // TODO: make unique and use weak in renderer? that wont work though? figure it out..
+	Camera *camera;
 	Ref<class CameraControllerComponent> cameraController;
+
+	std::string sourceFile;
+	std::string targetFile;
+
+	Ref<Material> weightPaintMaterial;
+
+	float brushCircleSize = 10.f;
 
 private:
 	CallbackRef<StrokeQueryInfo> onStrokeEmplaceCallback;
 	CallbackNoArgRef onDrawAdditionalViewportWidgetsCallback;
+
+	CallbackRef<int> onMouseButtonPressedCallback;
 };

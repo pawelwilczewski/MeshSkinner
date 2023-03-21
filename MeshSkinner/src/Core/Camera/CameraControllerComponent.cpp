@@ -63,7 +63,7 @@ void CameraControllerComponent::OnMouseMoved(const glm::vec2 &position)
 
 void CameraControllerComponent::OnAttached()
 {
-	camera.reset(dynamic_cast<Camera *>(GetEntity().lock().get())); // lol
+	camera = dynamic_cast<Camera *>(GetEntity());
 
 	if (!camera)
 		Log::Error("Trying to attach camera controller to non-camera entity!");

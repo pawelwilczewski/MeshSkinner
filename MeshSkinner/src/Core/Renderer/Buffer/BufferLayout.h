@@ -4,7 +4,7 @@
 
 enum class ShaderDataType
 {
-	None = 0, Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4, Short, Short2, Short3, Short4, UnsignedShort, UnsignedShort2, UnsignedShort3, UnsignedShort4, Bool
+	None = 0, Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4, UnsignedInt, UnsignedInt2, UnsignedInt3, UnsignedInt4, Short, Short2, Short3, Short4, UnsignedShort, UnsignedShort2, UnsignedShort3, UnsignedShort4, Bool
 };
 
 class BufferElement

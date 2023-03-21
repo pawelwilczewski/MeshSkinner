@@ -2,20 +2,22 @@
 
 #include "Application/Core.h"
 
+class Entity;
+
 class EntityComponent
 {
-	friend class Entity;
+	friend Entity;
 
 public:
 	EntityComponent(const std::string &name);
 	virtual ~EntityComponent() = default;
 
 public:
-	Weak<Entity> GetEntity() const;
+	Entity *GetEntity() const;
 
 protected:
-	virtual void OnAttached() {}
-	virtual void OnDetached() {}
+	virtual void OnAttached();
+	virtual void OnDetached();
 
 public: // TODO: perhaps these DisplayUI functions shouldn't be public
 	virtual void DisplayUI();
@@ -24,5 +26,5 @@ public:
 	std::string name;
 
 private:
-	Weak<Entity> entity;
+	Entity *entity = nullptr;
 };
