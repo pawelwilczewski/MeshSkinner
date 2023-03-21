@@ -6,6 +6,7 @@
 # Custom ignores
 **/bin/
 **/intermediate/
+**/imgui.ini
 **/Makefile
 test
 *.blend*
