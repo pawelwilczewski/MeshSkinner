@@ -12,6 +12,6 @@ public:
 public:
 	void CopyData(GLintptr offsetCount, GLsizeiptr count, T *data) const
 	{
-		glGetNamedBufferSubData(id, offsetCount * sizeof T, count * sizeof T, data);
+		glGetNamedBufferSubData(GenericBuffer::id, offsetCount * sizeof(T), count * sizeof(T), data);
 	}
 };

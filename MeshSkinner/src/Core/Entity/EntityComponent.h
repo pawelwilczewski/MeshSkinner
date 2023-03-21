@@ -2,9 +2,11 @@
 
 #include "Application/Core.h"
 
+class Entity;
+
 class EntityComponent
 {
-	friend class Entity;
+	friend Entity;
 
 public:
 	EntityComponent(const std::string &name);
