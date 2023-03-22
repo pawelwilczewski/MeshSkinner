@@ -25,14 +25,16 @@ private:
 	void OnMouseButtonPressed(int button);
 
 private:
+	Camera *camera;
+	Ref<class CameraControllerComponent> cameraController;
+
+private:
 	Unique<class Brush> brush;
 	Unique<Stroke> stroke;
 	Unique<class Hierarchy> hierarchy;
 	Unique<class AnimationControls> animationControls;
 	Unique<class SceneStats> sceneStats;
-
-	Camera *camera;
-	Ref<class CameraControllerComponent> cameraController;
+	Unique<class Settings> settings;
 
 	std::string sourceFile;
 	std::string targetFile;

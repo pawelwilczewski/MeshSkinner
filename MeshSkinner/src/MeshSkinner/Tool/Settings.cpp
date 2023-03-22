@@ -1,25 +1,45 @@
 #include "pch.h"
 #include "Settings.h"
 
-Settings::Settings(const std::string &toolWindowName) : Tool(toolWindowName)
+#include "Hierarchy.h"
+#include "Core/Camera/CameraControllerComponent.h"
+
+Settings::Settings(const std::string &toolWindowName, CameraControllerComponent *controller) : Tool(toolWindowName), cameraController(controller)
 {
 }
 
 void Settings::OnUpdateUI()
 {
-    // debug fps info
-    static float avgFps = 60.0;
-    static float avgFrametime = 0.1667;
-    static float decayAlpha = 0.99f;
+    auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
 
-    avgFps = decayAlpha * avgFps + (1.0 - decayAlpha) * Time::GetFPS();
-    avgFrametime = decayAlpha * avgFrametime + (1.0 - decayAlpha) * Time::GetDeltaSeconds();
+    // settings
+    ImGui::Begin("Settings");
 
-    // scene stats
-    ImGui::Begin("Scene Stats");
-    ImGui::Text("FPS:            %f", Time::GetFPS());
-    ImGui::Text("Frame time:     %f ms", Time::GetDeltaSeconds() * 1000.f);
-    ImGui::Text("Avg FPS:        %f", avgFps);
-    ImGui::Text("Avg frame time: %f ms", avgFrametime * 1000.f);
+    InteractiveWidget(ImGui::DragFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.0001f, 0.0f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput));
+
+    if (InteractiveWidget(ImGui::DragFloat("Bone radius", &boneRadius, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)) && selectedMesh)
+        Renderer::UpdateBoneRadius(selectedMesh.get());
+
+    if (InteractiveWidget(ImGui::DragFloat("Tip bone length", &tipBoneLength, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)) && selectedMesh)
+    {
+        auto &bones = selectedMesh->skeleton->GetBones();
+        for (auto &bone : bones)
+        {
+            if (bone->GetChildren().size() > 0) continue;
+
+            auto &boneMeshes = bone->GetComponents<StaticMeshComponent>();
+            if (boneMeshes.size() == 0) continue;
+
+            auto &boneMesh = *boneMeshes.begin();
+            if (!boneMesh) continue;
+
+            for (auto &vertex : boneMesh->vertices)
+                if (vertex.position.y > glm::epsilon<float>())
+                    vertex.position.y = tipBoneLength;
+
+            Renderer::UpdateMeshVertices(boneMesh.get());
+        }
+    }
+
     ImGui::End();
 }

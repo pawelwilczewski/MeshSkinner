@@ -11,13 +11,13 @@
 #include "MeshSkinner/Tool/Hierarchy.h"
 #include "MeshSkinner/Tool/AnimationControls.h"
 #include "MeshSkinner/Tool/SceneStats.h"
+#include "MeshSkinner/Tool/Settings.h"
 
 MainScene::MainScene() : Scene()
 {
-    camera = static_cast<Camera *>(CreateEntity(new Camera("Main Camera")));
-
     // camera setup
-    cameraController = MakeRef<CameraControllerComponent>("CameraControllerComponent 0", 10.f);
+    camera = static_cast<Camera *>(CreateEntity(new Camera("Main Camera")));
+    cameraController = MakeRef<CameraControllerComponent>();
     camera->AddComponent(cameraController);
     Renderer::activeCamera = camera;
 
@@ -32,9 +32,16 @@ MainScene::MainScene() : Scene()
         });
     hierarchy = MakeUnique<Hierarchy>("Hierarchy", GetRoot());
     animationControls = MakeUnique<AnimationControls>();
-    sceneStats = MakeUnique<SceneStats>();
+    sceneStats = MakeUnique<SceneStats>("Scene Stats");
+    settings = MakeUnique<Settings>("Settings", cameraController.get());
 
-    // callbacks
+    // materials
+    ShaderLibrary::Load("Bone", "assets/shaders/Bone.vert", "assets/shaders/Bone.frag", 1);
+    ShaderLibrary::Load("WeightPaint", "assets/shaders/WeightPaint.vert", "assets/shaders/WeightPaint.frag", 0);
+
+    weightPaintMaterial = MakeRef<Material>(ShaderLibrary::Get("WeightPaint"));
+
+    // events
     onDrawAdditionalViewportWidgetsCallback = MakeCallbackNoArgRef([&]() {
         if (Window::GetCursorVisibility())
         {
@@ -46,11 +53,6 @@ MainScene::MainScene() : Scene()
 
     onStrokeEmplaceCallback = MakeCallbackRef<StrokeQueryInfo>([&](const StrokeQueryInfo &info) { OnStrokeEmplace(info); });
     stroke->OnStrokeEmplaceSubscribe(onStrokeEmplaceCallback);
-
-    ShaderLibrary::Load("Bone", "assets/shaders/Bone.vert", "assets/shaders/Bone.frag", 1);
-    ShaderLibrary::Load("WeightPaint", "assets/shaders/WeightPaint.vert", "assets/shaders/WeightPaint.frag", 0);
-
-    weightPaintMaterial = MakeRef<Material>(ShaderLibrary::Get("WeightPaint"));
 
     onMouseButtonPressedCallback = MakeCallbackRef<int>([&](int button) { OnMouseButtonPressed(button); });
     Input::OnMouseButtonPressedSubscribe(onMouseButtonPressedCallback);
@@ -99,40 +101,6 @@ void MainScene::OnUpdateUI()
 
     auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
 
-    // settings
-    ImGui::Begin("Settings");
-
-    InteractiveWidget(ImGui::DragFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.0001f, 0.0f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput));
-
-    Ref<SkeletalMeshComponent> updateBoneRadiusSkeletalMesh = nullptr;
-    static float boneRadius = 5.f;
-    if (selectedMesh && InteractiveWidget(ImGui::DragFloat("Bone radius", &boneRadius, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)))
-        updateBoneRadiusSkeletalMesh = selectedMesh;
-
-    static float tipBoneLength = 50.f;
-    if (selectedMesh && InteractiveWidget(ImGui::DragFloat("Tip bone length", &tipBoneLength, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)))
-    {
-        auto &bones = selectedMesh->skeleton->GetBones();
-        for (auto &bone : bones)
-        {
-            if (bone->GetChildren().size() > 0) continue;
-
-            auto &boneMeshes = bone->GetComponents<StaticMeshComponent>();
-            if (boneMeshes.size() == 0) continue;
-
-            auto &boneMesh = *boneMeshes.begin();
-            if (!boneMesh) continue;
-
-            for (auto &vertex : boneMesh->vertices)
-                if (vertex.position.y > glm::epsilon<float>())
-                    vertex.position.y = tipBoneLength;
-
-            Renderer::UpdateMeshVertices(boneMesh.get());
-        }
-    }
-
-    ImGui::End();
-
     ImGui::Begin("Import Export");
 
     InteractiveWidget(ImGui::InputText("Input file path", &sourceFile));
@@ -173,7 +141,7 @@ void MainScene::OnUpdateUI()
             Renderer::Submit(bone);
 
             // calculate the bone length with some default for tip bones
-            auto boneLength = tipBoneLength;
+            auto boneLength = Settings::tipBoneLength;
             auto &children = bone->GetChildren();
             if (children.size() == 1)
                 boneLength = glm::length((*bone->GetChildren().begin())->transform.GetPosition());
@@ -183,7 +151,7 @@ void MainScene::OnUpdateUI()
             bone->AddComponent(boneMesh);
         }
 
-        updateBoneRadiusSkeletalMesh = mesh;
+        Renderer::UpdateBoneRadius(mesh.get());
 
         Renderer::Submit(entity);
 
@@ -204,27 +172,6 @@ void MainScene::OnUpdateUI()
     }
 
     ImGui::End();
-
-    if (updateBoneRadiusSkeletalMesh)
-    {
-        auto &bones = updateBoneRadiusSkeletalMesh->skeleton->GetBones();
-        for (auto &bone : bones)
-        {
-            auto &boneMeshes = bone->GetComponents<StaticMeshComponent>();
-            if (boneMeshes.size() == 0) continue;
-
-            auto &boneMesh = *boneMeshes.begin();
-            if (!boneMesh) continue;
-
-            for (auto &vertex : boneMesh->vertices)
-            {
-                vertex.position.x = glm::sign(vertex.position.x) * boneRadius;
-                vertex.position.z = glm::sign(vertex.position.z) * boneRadius;
-            }
-
-            Renderer::UpdateMeshVertices(boneMesh.get());
-        }
-    }
 
     ImGui::Begin("Color scheme");
     ImGui::ColorEdit3("Colour   0%", glm::value_ptr(Renderer::color000));

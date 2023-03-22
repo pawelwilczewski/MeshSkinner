@@ -2,6 +2,7 @@
 #include "Renderer.h"
 
 #include "MeshSkinner/Tool/Hierarchy.h"
+#include "MeshSkinner/Tool/Settings.h"
 
 const BufferLayout &VertexInfo::layout = BufferLayout({
 	{ "transformIndex", ShaderDataType::UnsignedInt },
@@ -10,6 +11,11 @@ const BufferLayout &VertexInfo::layout = BufferLayout({
 	});
 
 VertexInfo::VertexInfo(GLuint transformIndex, GLuint skeletonBonesIndex, GLuint skeletonTransformsIndex) : transformIndex(transformIndex), skeletonBonesIndex(skeletonBonesIndex), skeletonTransformsIndex(skeletonTransformsIndex)
+{
+
+}
+
+DrawCallInfo::DrawCallInfo(const Ref<VertexArray<uint32_t>> &vao, const Ref<StorageBuffer<glm::vec4>> &finalPos) : vao(vao), finalPos(finalPos)
 {
 
 }
@@ -297,6 +303,23 @@ std::vector<glm::vec4> Renderer::GetFinalVertPosData(const MeshComponent *mesh)
 	return result;
 }
 
-DrawCallInfo::DrawCallInfo(const Ref<VertexArray<uint32_t>> &vao, const Ref<StorageBuffer<glm::vec4>> &finalPos) : vao(vao), finalPos(finalPos)
+void Renderer::UpdateBoneRadius(const SkeletalMeshComponent *mesh)
 {
+	auto &bones = mesh->skeleton->GetBones();
+	for (auto &bone : bones)
+	{
+		auto &boneMeshes = bone->GetComponents<StaticMeshComponent>();
+		if (boneMeshes.size() == 0) continue;
+
+		auto &boneMesh = *boneMeshes.begin();
+		if (!boneMesh) continue;
+
+		for (auto &vertex : boneMesh->vertices)
+		{
+			vertex.position.x = glm::sign(vertex.position.x) * Settings::boneRadius;
+			vertex.position.z = glm::sign(vertex.position.z) * Settings::boneRadius;
+		}
+
+		Renderer::UpdateMeshVertices(boneMesh.get());
+	}
 }

@@ -51,8 +51,9 @@ private:
 
 public:
 	static void UpdateMeshVertices(const MeshComponent *mesh);
-
 	static std::vector<glm::vec4> GetFinalVertPosData(const MeshComponent *mesh);
+
+	static void UpdateBoneRadius(const SkeletalMeshComponent *mesh);
 
 public:
 	inline static Camera *activeCamera = nullptr;
