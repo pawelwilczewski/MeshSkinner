@@ -35,6 +35,7 @@ private:
 	Unique<class AnimationControls> animationControls;
 	Unique<class SceneStats> sceneStats;
 	Unique<class Settings> settings;
+	Unique<class WeightColorScheme> weightColorScheme;
 
 	std::string sourceFile;
 	std::string targetFile;

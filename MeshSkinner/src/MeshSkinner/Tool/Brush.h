@@ -25,5 +25,4 @@ public:
 	float radius;
 	float falloff;
 	float strength;
-	// TODO: falloff radius
 };

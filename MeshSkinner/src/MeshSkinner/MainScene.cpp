@@ -12,6 +12,7 @@
 #include "MeshSkinner/Tool/AnimationControls.h"
 #include "MeshSkinner/Tool/SceneStats.h"
 #include "MeshSkinner/Tool/Settings.h"
+#include "MeshSkinner/Tool/WeightColorScheme.h"
 
 MainScene::MainScene() : Scene()
 {
@@ -34,6 +35,7 @@ MainScene::MainScene() : Scene()
     animationControls = MakeUnique<AnimationControls>();
     sceneStats = MakeUnique<SceneStats>("Scene Stats");
     settings = MakeUnique<Settings>("Settings", cameraController.get());
+    weightColorScheme = MakeUnique<WeightColorScheme>("Weight Color Scheme");
 
     // materials
     ShaderLibrary::Load("Bone", "assets/shaders/Bone.vert", "assets/shaders/Bone.frag", 1);
@@ -171,14 +173,6 @@ void MainScene::OnUpdateUI()
         Log::Info("Exporting finished");
     }
 
-    ImGui::End();
-
-    ImGui::Begin("Color scheme");
-    ImGui::ColorEdit3("Colour   0%", glm::value_ptr(Renderer::color000));
-    ImGui::ColorEdit3("Colour  25%", glm::value_ptr(Renderer::color025));
-    ImGui::ColorEdit3("Colour  50%", glm::value_ptr(Renderer::color050));
-    ImGui::ColorEdit3("Colour  75%", glm::value_ptr(Renderer::color075));
-    ImGui::ColorEdit3("Colour 100%", glm::value_ptr(Renderer::color100));
     ImGui::End();
 }
 
