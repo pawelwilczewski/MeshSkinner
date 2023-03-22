@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Application/Core.h"
-#include "Application/Scene.h"
+#include "Core/Entity/Scene.h"
 
 #include "MeshSkinner/Tool/Stroke.h"
 

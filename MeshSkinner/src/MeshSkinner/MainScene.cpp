@@ -97,15 +97,7 @@ void MainScene::OnUpdateUI()
 {
     // TODO: all of these can be Tools - make that happen
 
-    
-    // edited mesh
-    ImGui::Begin("Weight Painting");
-
     auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
-    if (selectedMesh)
-        InteractiveWidget(ImGui::SliderInt("ActiveBone", &Renderer::selectedBone, 0, selectedMesh->skeleton->GetBones().size() - 1));
-
-    ImGui::End();
 
     // settings
     ImGui::Begin("Settings");
