@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Stroke.h"
+#include "StrokeTool.h"
 
 static constexpr std::array<const char *, 3> strokeUpdateTypeNames = { "Pixel Distance", "World Distance", "Each Frame" };
 
@@ -8,7 +8,7 @@ StrokeQueryInfo::StrokeQueryInfo(bool hitTarget, const glm::vec3 &position, cons
 {
 }
 
-Stroke::Stroke(const std::string &toolWindowName, const std::function<void(StrokeQueryInfo &)> &queryFunction, Type type, float pixelDistance, float worldDistance, float fixedIntervalTime)
+StrokeTool::StrokeTool(const std::string &toolWindowName, const std::function<void(StrokeQueryInfo &)> &queryFunction, Type type, float pixelDistance, float worldDistance, float fixedIntervalTime)
 	: Tool(toolWindowName), queryFunction(queryFunction), type(type), pixelDistance(pixelDistance), worldDistance(worldDistance), fixedIntervalTime(fixedIntervalTime)
 {
 	onStrokeUpdateCallback = MakeCallbackNoArgRef([&]() { OnStrokeUpdate(); });
@@ -20,14 +20,14 @@ Stroke::Stroke(const std::string &toolWindowName, const std::function<void(Strok
 	UpdateSubscribe();
 }
 
-Stroke::~Stroke()
+StrokeTool::~StrokeTool()
 {
 	UpdateUnsubscribe();
 
 	Input::OnMouseButtonReleasedUnsubscribe(onMouseButtonUpCallback);
 }
 
-void Stroke::OnStrokeUpdate()
+void StrokeTool::OnStrokeUpdate()
 {
 	if (!Input::IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || !UserInterface::GetClickedInViewport() || Input::IsKeyPressed(KEY_LEFT_CONTROL))
 		return;
@@ -79,12 +79,12 @@ void Stroke::OnStrokeUpdate()
 	}
 }
 
-void Stroke::OnMouseButtonUp(int button)
+void StrokeTool::OnMouseButtonUp(int button)
 {
 	initialContact = true;
 }
 
-void Stroke::UpdateSubscribe() const
+void StrokeTool::UpdateSubscribe() const
 {
 	switch (type)
 	{
@@ -102,7 +102,7 @@ void Stroke::UpdateSubscribe() const
 	}
 }
 
-void Stroke::UpdateUnsubscribe() const
+void StrokeTool::UpdateUnsubscribe() const
 {
 	switch (type)
 	{
@@ -120,7 +120,7 @@ void Stroke::UpdateUnsubscribe() const
 	}
 }
 
-void Stroke::OnUpdateUI()
+void StrokeTool::OnUpdateUI()
 {
 	ImGui::Begin(toolWindowName.c_str());
 
@@ -145,17 +145,17 @@ void Stroke::OnUpdateUI()
 	ImGui::End();
 }
 
-void Stroke::OnStrokeEmplaceSubscribe(const CallbackRef<StrokeQueryInfo> &callback)
+void StrokeTool::OnStrokeEmplaceSubscribe(const CallbackRef<StrokeQueryInfo> &callback)
 {
 	onStrokeEmplace.Subscribe(callback);
 }
 
-void Stroke::OnStrokeEmplaceUnsubscribe(const CallbackRef<StrokeQueryInfo> &callback)
+void StrokeTool::OnStrokeEmplaceUnsubscribe(const CallbackRef<StrokeQueryInfo> &callback)
 {
 	onStrokeEmplace.Unsubscribe(callback);
 }
 
-void Stroke::SetType(Type newType)
+void StrokeTool::SetType(Type newType)
 {
 	UpdateUnsubscribe();
 	type = newType;

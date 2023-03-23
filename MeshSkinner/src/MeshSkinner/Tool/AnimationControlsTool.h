@@ -11,11 +11,11 @@ struct AnimationInfo
 	int animationIndex = 0;
 };
 
-class AnimationControls : public Tool
+class AnimationControlsTool : public Tool
 {
 public:
-	AnimationControls(const std::string &toolWindowName = "Animation Controls");
-	virtual ~AnimationControls();
+	AnimationControlsTool(const std::string &toolWindowName = "Animation Controls");
+	virtual ~AnimationControlsTool();
 
 public:
 	const std::vector<Animation> &GetAnimations() const;

@@ -3,11 +3,11 @@
 #include "Application/Core.h"
 #include "Tool.h"
 
-class Hierarchy : public Tool
+class HierarchyTool : public Tool
 {
 public:
-	Hierarchy(const std::string &toolWindowName, Entity *root);
-	virtual ~Hierarchy() = default;
+	HierarchyTool(const std::string &toolWindowName, Entity *root);
+	virtual ~HierarchyTool() = default;
 
 public:
 	virtual void OnUpdateUI() override;

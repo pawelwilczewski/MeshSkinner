@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "Renderer.h"
 
-#include "MeshSkinner/Tool/Hierarchy.h"
-#include "MeshSkinner/Tool/Settings.h"
+#include "MeshSkinner/Tool/HierarchyTool.h"
+#include "MeshSkinner/Tool/SettingsTool.h"
 
 const BufferLayout &VertexInfo::layout = BufferLayout({
 	{ "transformIndex", ShaderDataType::UnsignedInt },
@@ -182,8 +182,8 @@ void Renderer::Render(const DrawCalls::iterator &it)
 	shader->Bind();
 	shader->UploadUniformMat4("u_ViewProjection", activeCamera->GetViewProjectionMatrix());
 	GLint selected = -1;
-	if (Hierarchy::GetSelectedEntity())
-		selected = entities[Hierarchy::GetSelectedEntity()];
+	if (HierarchyTool::GetSelectedEntity())
+		selected = entities[HierarchyTool::GetSelectedEntity()];
 	shader->UploadUniformInt("u_SelectedEntity", selected);
 	shader->UploadUniformInt("u_SelectedBone", selectedBone);
 	shader->UploadUniformFloat3("u_Color000", color000);
@@ -316,8 +316,8 @@ void Renderer::UpdateBoneRadius(const SkeletalMeshComponent *mesh)
 
 		for (auto &vertex : boneMesh->vertices)
 		{
-			vertex.position.x = glm::sign(vertex.position.x) * Settings::boneRadius;
-			vertex.position.z = glm::sign(vertex.position.z) * Settings::boneRadius;
+			vertex.position.x = glm::sign(vertex.position.x) * SettingsTool::boneRadius;
+			vertex.position.z = glm::sign(vertex.position.z) * SettingsTool::boneRadius;
 		}
 
 		Renderer::UpdateMeshVertices(boneMesh.get());

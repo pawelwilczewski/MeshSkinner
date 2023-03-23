@@ -3,15 +3,15 @@
 #include "Application/Core.h"
 #include "Tool.h"
 
-class Brush : Tool
+class BrushTool : Tool
 {
 public:
-	// NOTE: upon updating any of these, ALSO update the strings array at the top of Brush.cpp
+	// NOTE: upon updating any of these, ALSO update the strings array at the top of BrushTool.cpp
 	enum class BlendMode { Mix = 0, Add, Subtract, Lighten, Darken, ColorDodge, Difference, Screen, HardLight, Overlay, SoftLight, Exclusion };
 
 public:
-	Brush(const std::string &toolWindowName, BlendMode blendMode = BlendMode::Mix, float weight = 1.f, float radius = 10.f, float falloff = 0.5f, float strength = 1.f);
-	virtual ~Brush();
+	BrushTool(const std::string &toolWindowName, BlendMode blendMode = BlendMode::Mix, float weight = 1.f, float radius = 10.f, float falloff = 0.5f, float strength = 1.f);
+	virtual ~BrushTool();
 
 protected:
 	void OnUpdate();

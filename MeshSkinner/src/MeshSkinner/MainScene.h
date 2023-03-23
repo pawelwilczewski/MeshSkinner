@@ -3,7 +3,7 @@
 #include "Application/Core.h"
 #include "Core/Entity/Scene.h"
 
-#include "MeshSkinner/Tool/Stroke.h"
+struct StrokeQueryInfo;
 
 class MainScene : public Scene
 {
@@ -29,14 +29,14 @@ private:
 	Ref<class CameraControllerComponent> cameraController;
 
 private:
-	Unique<class Brush> brush;
-	Unique<Stroke> stroke;
-	Unique<class Hierarchy> hierarchy;
-	Unique<class AnimationControls> animationControls;
-	Unique<class SceneStats> sceneStats;
-	Unique<class Settings> settings;
-	Unique<class WeightColorScheme> weightColorScheme;
-	Unique<class ImportExport> importExport;
+	Unique<class BrushTool> brush;
+	Unique<class StrokeTool> stroke;
+	Unique<class HierarchyTool> hierarchy;
+	Unique<class AnimationControlsTool> animationControls;
+	Unique<class SceneStatsTool> sceneStats;
+	Unique<class SettingsTool> settings;
+	Unique<class WeightColorSchemeTool> weightColorScheme;
+	Unique<class ImportExportTool> importExport;
 
 private:
 	CallbackRef<StrokeQueryInfo> onStrokeEmplaceCallback;

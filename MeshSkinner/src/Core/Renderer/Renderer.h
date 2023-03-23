@@ -57,7 +57,7 @@ public:
 
 public:
 	inline static Camera *activeCamera = nullptr;
-	inline static int selectedBone = 0; // TODO: make this available as static field in Hierarchy
+	inline static int selectedBone = 0; // TODO: make this available as static field in HierarchyTool
 
 	inline static glm::vec3 color000 = glm::vec3(0.f, 0.f, 1.f);
 	inline static glm::vec3 color025 = glm::vec3(0.f, 1.f, 1.f);

@@ -1,11 +1,11 @@
 #include "pch.h"
-#include "Brush.h"
+#include "BrushTool.h"
 
-#include "Hierarchy.h"
+#include "HierarchyTool.h"
 
 static constexpr std::array<const char *, 12> BrushBlendModeNames = { "Mix", "Add", "Subtract", "Lighten", "Darken", "Color Dodge", "Difference", "Screen", "Hard Light", "Overlay", "Soft Light", "Exclusion" };
 
-Brush::Brush(const std::string &toolWindowName, BlendMode blendMode, float weight, float radius, float falloff, float strength) :
+BrushTool::BrushTool(const std::string &toolWindowName, BlendMode blendMode, float weight, float radius, float falloff, float strength) :
     Tool(toolWindowName), blendMode(blendMode), weight(weight), radius(radius), falloff(falloff), strength(strength)
 {
     onUpdateCallback = MakeCallbackNoArgRef([&]() { OnUpdate(); });
@@ -21,15 +21,15 @@ Brush::Brush(const std::string &toolWindowName, BlendMode blendMode, float weigh
     UserInterface::OnDrawAdditionalViewportWidgetsSubscribe(onDrawAdditionalViewportWidgetsCallback);
 }
 
-Brush::~Brush()
+BrushTool::~BrushTool()
 {
     Application::OnUpdateUnsubscribe(onUpdateCallback);
     UserInterface::OnDrawAdditionalViewportWidgetsUnsubscribe(onDrawAdditionalViewportWidgetsCallback);
 }
 
-void Brush::OnUpdate()
+void BrushTool::OnUpdate()
 {
-    auto mesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>().get();
+    auto mesh = HierarchyTool::GetSelectedComponent<SkeletalMeshComponent>().get();
 
     if (mesh)
     {
@@ -44,7 +44,7 @@ void Brush::OnUpdate()
     }
 }
 
-void Brush::OnUpdateUI()
+void BrushTool::OnUpdateUI()
 {
     ImGui::Begin(toolWindowName.c_str());
 
@@ -60,7 +60,7 @@ void Brush::OnUpdateUI()
     ImGui::End();
 }
 
-float Brush::Blend(float oldWeight, float distance)
+float BrushTool::Blend(float oldWeight, float distance)
 {
     auto alpha = glm::smoothstep(0.f, 1.f, glm::pow(1.f - distance / radius, falloff));
 

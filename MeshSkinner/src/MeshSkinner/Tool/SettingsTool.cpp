@@ -1,16 +1,16 @@
 #include "pch.h"
-#include "Settings.h"
+#include "SettingsTool.h"
 
-#include "Hierarchy.h"
+#include "HierarchyTool.h"
 #include "Core/Camera/CameraControllerComponent.h"
 
-Settings::Settings(const std::string &toolWindowName, CameraControllerComponent *controller) : Tool(toolWindowName), cameraController(controller)
+SettingsTool::SettingsTool(const std::string &toolWindowName, CameraControllerComponent *controller) : Tool(toolWindowName), cameraController(controller)
 {
 }
 
-void Settings::OnUpdateUI()
+void SettingsTool::OnUpdateUI()
 {
-    auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
+    auto selectedMesh = HierarchyTool::GetSelectedComponent<SkeletalMeshComponent>();
 
     // settings
     ImGui::Begin("Settings");

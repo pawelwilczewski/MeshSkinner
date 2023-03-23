@@ -3,11 +3,11 @@
 #include "Application/Core.h"
 #include "Tool.h"
 
-class ImportExport : public Tool
+class ImportExportTool : public Tool
 {
 public:
-	ImportExport(const std::string &toolWindowName = "Import Export", Scene *scene = nullptr);
-	virtual ~ImportExport() = default;
+	ImportExportTool(const std::string &toolWindowName = "Import Export", Scene *scene = nullptr);
+	virtual ~ImportExportTool() = default;
 
 protected:
 	virtual void OnUpdateUI() override;

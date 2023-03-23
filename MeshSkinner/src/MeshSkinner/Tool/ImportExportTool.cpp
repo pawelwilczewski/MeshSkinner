@@ -1,10 +1,10 @@
 #include "pch.h"
-#include "ImportExport.h"
+#include "ImportExportTool.h"
 
-#include "Hierarchy.h"
-#include "Settings.h"
+#include "HierarchyTool.h"
+#include "SettingsTool.h"
 
-ImportExport::ImportExport(const std::string &toolWindowName, Scene *scene) : Tool(toolWindowName), scene(scene)
+ImportExportTool::ImportExportTool(const std::string &toolWindowName, Scene *scene) : Tool(toolWindowName), scene(scene)
 {
     // materials
     ShaderLibrary::Load("Bone", "assets/shaders/Bone.vert", "assets/shaders/Bone.frag", 1);
@@ -14,9 +14,9 @@ ImportExport::ImportExport(const std::string &toolWindowName, Scene *scene) : To
     weightPaintMaterial = MakeRef<Material>(ShaderLibrary::Get("WeightPaint"));
 }
 
-void ImportExport::OnUpdateUI()
+void ImportExportTool::OnUpdateUI()
 {
-    auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
+    auto selectedMesh = HierarchyTool::GetSelectedComponent<SkeletalMeshComponent>();
 
     ImGui::Begin("Import Export");
 
@@ -57,7 +57,7 @@ void ImportExport::OnUpdateUI()
             Renderer::Submit(bone);
 
             // calculate the bone length with some default for tip bones
-            auto boneLength = Settings::tipBoneLength;
+            auto boneLength = SettingsTool::tipBoneLength;
             auto &children = bone->GetChildren();
             if (children.size() == 1)
                 boneLength = glm::length((*bone->GetChildren().begin())->transform.GetPosition());

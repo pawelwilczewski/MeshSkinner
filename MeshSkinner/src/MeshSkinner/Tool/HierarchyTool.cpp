@@ -1,14 +1,14 @@
 #include "pch.h"
-#include "Hierarchy.h"
+#include "HierarchyTool.h"
 
-Entity *Hierarchy::selectedEntity = nullptr;
+Entity *HierarchyTool::selectedEntity = nullptr;
 
-Hierarchy::Hierarchy(const std::string &toolWindowName, Entity *root) : Tool(toolWindowName), root(root)
+HierarchyTool::HierarchyTool(const std::string &toolWindowName, Entity *root) : Tool(toolWindowName), root(root)
 {
 
 }
 
-void Hierarchy::DrawTree(Entity *entity)
+void HierarchyTool::DrawTree(Entity *entity)
 {
     const auto &children = entity->GetChildren();
 
@@ -55,12 +55,12 @@ void Hierarchy::DrawTree(Entity *entity)
     }
 }
 
-Entity *Hierarchy::GetSelectedEntity()
+Entity *HierarchyTool::GetSelectedEntity()
 {
     return selectedEntity;
 }
 
-void Hierarchy::OnUpdateUI()
+void HierarchyTool::OnUpdateUI()
 {
     // hierarchy
     ImGui::Begin("Hierarchy");

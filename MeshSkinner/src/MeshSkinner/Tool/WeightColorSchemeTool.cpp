@@ -1,12 +1,12 @@
 #include "pch.h"
-#include "WeightColorScheme.h"
+#include "WeightColorSchemeTool.h"
 
-WeightColorScheme::WeightColorScheme(const std::string &toolWindowName) : Tool(toolWindowName)
+WeightColorSchemeTool::WeightColorSchemeTool(const std::string &toolWindowName) : Tool(toolWindowName)
 {
 
 }
 
-void WeightColorScheme::OnUpdateUI()
+void WeightColorSchemeTool::OnUpdateUI()
 {
 	ImGui::Begin("Color scheme");
 	ImGui::ColorEdit3("Colour   0%", glm::value_ptr(Renderer::color000));

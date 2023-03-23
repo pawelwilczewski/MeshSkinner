@@ -5,11 +5,11 @@
 
 class CameraControllerComponent;
 
-class Settings : public Tool
+class SettingsTool : public Tool
 {
 public:
-	Settings(const std::string &toolWindowName = "Settings", CameraControllerComponent *controller = nullptr);
-	virtual ~Settings() = default;
+	SettingsTool(const std::string &toolWindowName = "Settings", CameraControllerComponent *controller = nullptr);
+	virtual ~SettingsTool() = default;
 
 protected:
 	virtual void OnUpdateUI() override;

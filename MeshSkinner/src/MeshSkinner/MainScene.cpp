@@ -6,14 +6,14 @@
 #include "Core/Camera/Camera.h"
 #include "Core/Camera/CameraControllerComponent.h"
 
-#include "MeshSkinner/Tool/Brush.h"
-#include "MeshSkinner/Tool/Stroke.h"
-#include "MeshSkinner/Tool/Hierarchy.h"
-#include "MeshSkinner/Tool/AnimationControls.h"
-#include "MeshSkinner/Tool/SceneStats.h"
-#include "MeshSkinner/Tool/Settings.h"
-#include "MeshSkinner/Tool/WeightColorScheme.h"
-#include "MeshSkinner/Tool/ImportExport.h"
+#include "MeshSkinner/Tool/BrushTool.h"
+#include "MeshSkinner/Tool/StrokeTool.h"
+#include "MeshSkinner/Tool/HierarchyTool.h"
+#include "MeshSkinner/Tool/AnimationControlsTool.h"
+#include "MeshSkinner/Tool/SceneStatsTool.h"
+#include "MeshSkinner/Tool/SettingsTool.h"
+#include "MeshSkinner/Tool/WeightColorSchemeTool.h"
+#include "MeshSkinner/Tool/ImportExportTool.h"
 
 MainScene::MainScene() : Scene()
 {
@@ -24,21 +24,21 @@ MainScene::MainScene() : Scene()
     Renderer::activeCamera = camera;
 
     // tool initialisation
-    brush = MakeUnique<Brush>("Brush Parameters");
+    brush = MakeUnique<BrushTool>("Brush Parameters");
     brush->camera = camera;
-    stroke = MakeUnique<Stroke>("Stroke Parameters", [&](StrokeQueryInfo &info) {
-        auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
+    stroke = MakeUnique<StrokeTool>("Stroke Parameters", [&](StrokeQueryInfo &info) {
+        auto selectedMesh = HierarchyTool::GetSelectedComponent<SkeletalMeshComponent>();
         if (!selectedMesh) return;
 
         info.verts = Renderer::GetFinalVertPosData(selectedMesh.get());
         info.hitTarget = MathUtils::RayMeshIntersection(camera->ProjectViewportToWorld(info.viewportPosition), info.verts, selectedMesh->indices, info.position);
         });
-    hierarchy = MakeUnique<Hierarchy>("Hierarchy", GetRoot());
-    animationControls = MakeUnique<AnimationControls>();
-    sceneStats = MakeUnique<SceneStats>("Scene Stats");
-    settings = MakeUnique<Settings>("Settings", cameraController.get());
-    weightColorScheme = MakeUnique<WeightColorScheme>("Weight Color Scheme");
-    importExport = MakeUnique<ImportExport>("Import Export", this);
+    hierarchy = MakeUnique<HierarchyTool>("Hierarchy", GetRoot());
+    animationControls = MakeUnique<AnimationControlsTool>();
+    sceneStats = MakeUnique<SceneStatsTool>("Scene Stats");
+    settings = MakeUnique<SettingsTool>("Settings", cameraController.get());
+    weightColorScheme = MakeUnique<WeightColorSchemeTool>("Weight Color Scheme");
+    importExport = MakeUnique<ImportExportTool>("Import Export", this);
 
     // events
     onStrokeEmplaceCallback = MakeCallbackRef<StrokeQueryInfo>([&](const StrokeQueryInfo &info) { OnStrokeEmplace(info); });
@@ -88,7 +88,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
 {
     // weight painting logic
 
-    auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
+    auto selectedMesh = HierarchyTool::GetSelectedComponent<SkeletalMeshComponent>();
     if (!selectedMesh) return;
 
     auto vertIndices = MathUtils::GetVerticesInRadius(info.verts, info.position, brush->radius);
@@ -150,7 +150,7 @@ void MainScene::OnMouseButtonPressed(int button)
     // bone selection
     if (Input::IsKeyPressed(KEY_LEFT_CONTROL))
     {
-        auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
+        auto selectedMesh = HierarchyTool::GetSelectedComponent<SkeletalMeshComponent>();
         auto ray = camera->ProjectViewportToWorld(Input::GetMouseViewportPosition());
 
         int i = 0;
