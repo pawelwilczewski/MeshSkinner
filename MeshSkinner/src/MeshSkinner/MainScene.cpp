@@ -147,7 +147,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
 
 void MainScene::OnMouseButtonPressed(int button)
 {
-    // bone select
+    // bone selection
     if (Input::IsKeyPressed(KEY_LEFT_CONTROL))
     {
         auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
