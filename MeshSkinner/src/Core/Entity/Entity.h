@@ -4,7 +4,7 @@
 #include "EntityComponent.h"
 #include "Core/Entity/Transform.h"
 
-class Entity : public std::enable_shared_from_this<Entity>
+class Entity
 {
 public:
 	Entity(const std::string &name = "entity", const Transform &transform = Transform());
