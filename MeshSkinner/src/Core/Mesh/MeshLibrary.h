@@ -14,5 +14,5 @@ public:
 	static bool Import(const std::string &path, std::vector<Animation> &outAnimations);
 
 public:
-	static void ExportUpdated(const std::string &source, const std::string &target, const Ref<SkeletalMeshComponent> &inMesh);
+	static void ExportUpdated(const std::string &source, const std::string &target, const SkeletalMeshComponent *inMesh);
 };

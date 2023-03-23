@@ -10,7 +10,7 @@ SettingsTool::SettingsTool(const std::string &toolWindowName, CameraControllerCo
 
 void SettingsTool::OnUpdateUI()
 {
-    auto selectedMesh = HierarchyTool::GetSelectedComponent<SkeletalMeshComponent>();
+    auto selectedMesh = HierarchyTool::GetSelectedSkeletalMesh();
 
     // settings
     ImGui::Begin("Settings");
@@ -18,7 +18,7 @@ void SettingsTool::OnUpdateUI()
     InteractiveWidget(ImGui::DragFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.0001f, 0.0f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput));
 
     if (InteractiveWidget(ImGui::DragFloat("Bone radius", &boneRadius, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)) && selectedMesh)
-        Renderer::UpdateBoneRadius(selectedMesh.get());
+        Renderer::UpdateBoneRadius(selectedMesh, boneRadius);
 
     if (InteractiveWidget(ImGui::DragFloat("Tip bone length", &tipBoneLength, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)) && selectedMesh)
     {

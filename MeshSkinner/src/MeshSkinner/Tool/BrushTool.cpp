@@ -29,7 +29,7 @@ BrushTool::~BrushTool()
 
 void BrushTool::OnUpdate()
 {
-    auto mesh = HierarchyTool::GetSelectedComponent<SkeletalMeshComponent>().get();
+    auto mesh = HierarchyTool::GetSelectedSkeletalMesh();
 
     if (mesh)
     {

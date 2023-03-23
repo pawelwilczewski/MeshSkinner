@@ -17,7 +17,7 @@ AnimationControlsTool::~AnimationControlsTool()
 
 const std::vector<Animation> &AnimationControlsTool::GetAnimations() const
 {
-	auto mesh = HierarchyTool::GetSelectedComponent<SkeletalMeshComponent>().get();
+	auto mesh = HierarchyTool::GetSelectedSkeletalMesh();
 	if (mesh)
 		return animations.at(mesh).animations;
 
@@ -26,7 +26,7 @@ const std::vector<Animation> &AnimationControlsTool::GetAnimations() const
 
 void AnimationControlsTool::OnUpdateUI()
 {
-	auto mesh = HierarchyTool::GetSelectedComponent<SkeletalMeshComponent>().get();
+	auto mesh = HierarchyTool::GetSelectedSkeletalMesh();
 	if (!mesh)
 		return;
 
@@ -37,7 +37,7 @@ void AnimationControlsTool::OnUpdateUI()
 
 	ImGui::Begin(toolWindowName.c_str());
 
-	InteractiveWidget(ImGui::InputText("Animations file path", &sourceFile)); // TODO: for text inputs: unfocus if clicked in the viewport
+	InteractiveWidget(ImGui::InputText("Animations file path", &sourceFile));
 
 	auto dropped = Input::GetDroppedFiles();
 	if (ImGui::IsItemHovered() && dropped && dropped->size() > 0)

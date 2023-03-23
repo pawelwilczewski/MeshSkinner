@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "HierarchyTool.h"
 
-Entity *HierarchyTool::selectedEntity = nullptr;
-
 HierarchyTool::HierarchyTool(const std::string &toolWindowName, Entity *root) : Tool(toolWindowName), root(root)
 {
 
@@ -14,8 +12,8 @@ void HierarchyTool::DrawTree(Entity *entity)
 
     // workout the flag to use for this node
     auto flag = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow;
-    if (children.size() == 0)                   flag |= ImGuiTreeNodeFlags_Leaf;
-    if (selectedEntity == entity)    flag |= ImGuiTreeNodeFlags_Selected;
+    if (children.size() == 0)       flag |= ImGuiTreeNodeFlags_Leaf;
+    if (selectedBone == entity || (selectedBone == nullptr && selectedEntity == entity))   flag |= ImGuiTreeNodeFlags_Selected;
 
     if (ImGui::TreeNodeEx(entity->name.c_str(), flag))
     {
@@ -26,6 +24,7 @@ void HierarchyTool::DrawTree(Entity *entity)
             // if selected a bone - update selectedBone and select the skeletal mesh entity instead
             if (bone)
             {
+                selectedBone = bone;
                 auto p = bone->GetParent();
 
                 while (true)
@@ -33,10 +32,8 @@ void HierarchyTool::DrawTree(Entity *entity)
                     auto components = p->GetComponents<SkeletalMeshComponent>();
                     if (components.size() > 0)
                     {
-                        selectedEntity = p; // TODO: this shouldn't do this (but we would like to expand the bone's panel still - yet remain in the painting mode)
-
-                        auto &bones = (*components.begin())->skeleton->GetBones();
-                        Renderer::selectedBone = std::find(bones.begin(), bones.end(), entity) - bones.begin();
+                        selectedEntity = p;
+                        selectedSkeletalMesh = (*components.begin()).get();
                         break;
                     }
 
@@ -46,7 +43,14 @@ void HierarchyTool::DrawTree(Entity *entity)
             else
             {
                 selectedEntity = entity;
+                selectedBone = nullptr;
+                auto components = selectedEntity->GetComponents<SkeletalMeshComponent>();
+                selectedSkeletalMesh = components.size() > 0 ? (*components.begin()).get() : nullptr;
             }
+
+            Renderer::selectedEntity = selectedEntity;
+            if (selectedEntity && selectedBone)
+                Renderer::selectedBone = GetSelectedBoneIndex();
         }
 
         for (const auto &child : children)
@@ -60,6 +64,28 @@ Entity *HierarchyTool::GetSelectedEntity()
     return selectedEntity;
 }
 
+Bone *HierarchyTool::GetSelectedBone()
+{
+    return selectedBone;
+}
+
+SkeletalMeshComponent *HierarchyTool::GetSelectedSkeletalMesh()
+{
+    return selectedSkeletalMesh;
+}
+
+uint32_t HierarchyTool::GetSelectedBoneIndex()
+{
+    auto &bones = selectedSkeletalMesh->skeleton->GetBones();
+    return std::find(bones.begin(), bones.end(), HierarchyTool::GetSelectedBone()) - bones.begin();
+}
+
+void HierarchyTool::UpdateSelectedBone(uint32_t boneIndex)
+{
+    selectedBone = selectedSkeletalMesh->skeleton->GetBones()[boneIndex];
+    Renderer::selectedBone = GetSelectedBoneIndex();
+}
+
 void HierarchyTool::OnUpdateUI()
 {
     // hierarchy
@@ -68,17 +94,18 @@ void HierarchyTool::OnUpdateUI()
     ImGui::End();
 
     ImGui::Begin("Entity");
-    if (selectedEntity)
+    Entity *entity = selectedBone ? selectedBone : selectedEntity;
+    if (entity)
     {
-        ImGui::Text(selectedEntity->name.c_str());
+        ImGui::Text(entity->name.c_str());
         ImGui::Separator();
 
-        selectedEntity->transform.DisplayUI();
+        entity->transform.DisplayUI();
 
         ImGui::Separator();
         ImGui::Text("Components");
         ImGui::Separator();
-        for (const auto &component : selectedEntity->GetComponents<EntityComponent>())
+        for (const auto &component : entity->GetComponents<EntityComponent>())
         {
             component->DisplayUI();
             ImGui::Separator();

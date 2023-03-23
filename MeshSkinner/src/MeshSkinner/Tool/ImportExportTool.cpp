@@ -16,7 +16,7 @@ ImportExportTool::ImportExportTool(const std::string &toolWindowName, Scene *sce
 
 void ImportExportTool::OnUpdateUI()
 {
-    auto selectedMesh = HierarchyTool::GetSelectedComponent<SkeletalMeshComponent>();
+    auto selectedMesh = HierarchyTool::GetSelectedSkeletalMesh();
 
     ImGui::Begin("Import Export");
 
@@ -68,7 +68,7 @@ void ImportExportTool::OnUpdateUI()
         }
 
         Renderer::Submit(entity);
-        Renderer::UpdateBoneRadius(mesh.get());
+        Renderer::UpdateBoneRadius(mesh.get(), SettingsTool::boneRadius);
 
         Log::Info("Importing skeletal mesh finished");
     }

@@ -31,9 +31,17 @@ public:
 		return *components.begin();
 	}
 
+	static Bone *GetSelectedBone();
+	static SkeletalMeshComponent *GetSelectedSkeletalMesh();
+	static uint32_t GetSelectedBoneIndex();
+
+	static void UpdateSelectedBone(uint32_t boneIndex);
+
 public:
 	Entity *root;
 
 private:
-	static Entity *selectedEntity;
+	inline static Entity *selectedEntity = nullptr;
+	inline static SkeletalMeshComponent *selectedSkeletalMesh = nullptr;
+	inline static Bone *selectedBone = nullptr;
 };

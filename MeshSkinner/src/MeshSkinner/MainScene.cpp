@@ -27,10 +27,10 @@ MainScene::MainScene() : Scene()
     brush = MakeUnique<BrushTool>("Brush Parameters");
     brush->camera = camera;
     stroke = MakeUnique<StrokeTool>("Stroke Parameters", [&](StrokeQueryInfo &info) {
-        auto selectedMesh = HierarchyTool::GetSelectedComponent<SkeletalMeshComponent>();
+        auto selectedMesh = HierarchyTool::GetSelectedSkeletalMesh();
         if (!selectedMesh) return;
 
-        info.verts = Renderer::GetFinalVertPosData(selectedMesh.get());
+        info.verts = Renderer::GetFinalVertPosData(selectedMesh);
         info.hitTarget = MathUtils::RayMeshIntersection(camera->ProjectViewportToWorld(info.viewportPosition), info.verts, selectedMesh->indices, info.position);
         });
     hierarchy = MakeUnique<HierarchyTool>("Hierarchy", GetRoot());
@@ -88,7 +88,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
 {
     // weight painting logic
 
-    auto selectedMesh = HierarchyTool::GetSelectedComponent<SkeletalMeshComponent>();
+    auto selectedMesh = HierarchyTool::GetSelectedSkeletalMesh();
     if (!selectedMesh) return;
 
     auto vertIndices = MathUtils::GetVerticesInRadius(info.verts, info.position, brush->radius);
@@ -103,7 +103,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
         for (size_t i = 0; i < v.bones.length(); i++)
         {
             // the bone already exists in vertex info
-            if (v.bones[i] == Renderer::selectedBone)
+            if (v.bones[i] == HierarchyTool::GetSelectedBoneIndex())
             {
                 toUpdate = &v.weights[i];
                 updated = true;
@@ -127,7 +127,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
             }
 
             // update the weights
-            v.bones[minWeightBone] = Renderer::selectedBone;
+            v.bones[minWeightBone] = HierarchyTool::GetSelectedBoneIndex();
             v.weights[minWeightBone] = 0.f;
             toUpdate = &v.weights[minWeightBone];
         }
@@ -142,7 +142,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
         v.weights /= sum;
     }
 
-    Renderer::UpdateMeshVertices(selectedMesh.get());
+    Renderer::UpdateMeshVertices(selectedMesh);
 }
 
 void MainScene::OnMouseButtonPressed(int button)
@@ -150,7 +150,7 @@ void MainScene::OnMouseButtonPressed(int button)
     // bone selection
     if (Input::IsKeyPressed(KEY_LEFT_CONTROL))
     {
-        auto selectedMesh = HierarchyTool::GetSelectedComponent<SkeletalMeshComponent>();
+        auto selectedMesh = HierarchyTool::GetSelectedSkeletalMesh();
         auto ray = camera->ProjectViewportToWorld(Input::GetMouseViewportPosition());
 
         int i = 0;
@@ -162,7 +162,7 @@ void MainScene::OnMouseButtonPressed(int button)
 
             glm::vec3 pos;
             if (MathUtils::RayMeshIntersection(ray, verts, boneMesh->indices, pos))
-                Renderer::selectedBone = i;
+                HierarchyTool::UpdateSelectedBone(i);
 
             i++;
         }
