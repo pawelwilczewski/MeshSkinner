@@ -13,6 +13,7 @@
 #include "MeshSkinner/Tool/SceneStats.h"
 #include "MeshSkinner/Tool/Settings.h"
 #include "MeshSkinner/Tool/WeightColorScheme.h"
+#include "MeshSkinner/Tool/ImportExport.h"
 
 MainScene::MainScene() : Scene()
 {
@@ -36,12 +37,7 @@ MainScene::MainScene() : Scene()
     sceneStats = MakeUnique<SceneStats>("Scene Stats");
     settings = MakeUnique<Settings>("Settings", cameraController.get());
     weightColorScheme = MakeUnique<WeightColorScheme>("Weight Color Scheme");
-
-    // materials
-    ShaderLibrary::Load("Bone", "assets/shaders/Bone.vert", "assets/shaders/Bone.frag", 1);
-    ShaderLibrary::Load("WeightPaint", "assets/shaders/WeightPaint.vert", "assets/shaders/WeightPaint.frag", 0);
-
-    weightPaintMaterial = MakeRef<Material>(ShaderLibrary::Get("WeightPaint"));
+    importExport = MakeUnique<ImportExport>("Import Export", this);
 
     // events
     onDrawAdditionalViewportWidgetsCallback = MakeCallbackNoArgRef([&]() {
@@ -99,81 +95,7 @@ void MainScene::OnUpdate()
 
 void MainScene::OnUpdateUI()
 {
-    // TODO: all of these can be Tools - make that happen
 
-    auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
-
-    ImGui::Begin("Import Export");
-
-    InteractiveWidget(ImGui::InputText("Input file path", &sourceFile));
-
-    auto dropped = Input::GetDroppedFiles();
-    if (ImGui::IsItemHovered() && dropped && dropped->size() > 0)
-        sourceFile = dropped->at(0);
-
-    if (InteractiveWidget(ImGui::Button("Import as static")))
-    {
-        Log::Info("Importing static mesh from file {}", sourceFile);
-
-        auto entity = CreateEntity(new Entity());
-        entity->AddComponent(MeshLibrary::Import(sourceFile));
-        entity->name = std::filesystem::path(sourceFile).filename().string();
-
-        Renderer::Submit(entity);
-
-        Log::Info("Importing static mesh finished");
-    }
-
-    if (InteractiveWidget(ImGui::Button("Import as skeletal")))
-    {
-        Log::Info("Importing skeletal mesh from file {}", sourceFile);
-
-        auto entity = CreateEntity(new Entity());
-
-        auto mesh = MeshLibrary::Import(sourceFile, this, entity);
-        mesh->material = weightPaintMaterial;
-
-        entity->AddComponent(mesh);
-        entity->name = std::filesystem::path(sourceFile).filename().string();
-
-        // add bone meshes
-        auto boneMat = MakeRef<Material>(ShaderLibrary::Get("Bone"));
-        for (auto &bone : mesh->skeleton->GetBones())
-        {
-            Renderer::Submit(bone);
-
-            // calculate the bone length with some default for tip bones
-            auto boneLength = Settings::tipBoneLength;
-            auto &children = bone->GetChildren();
-            if (children.size() == 1)
-                boneLength = glm::length((*bone->GetChildren().begin())->transform.GetPosition());
-
-            auto boneMesh = MeshLibrary::GetBone(boneLength);
-            boneMesh->material = boneMat;
-            bone->AddComponent(boneMesh);
-        }
-
-        Renderer::UpdateBoneRadius(mesh.get());
-
-        Renderer::Submit(entity);
-
-        Log::Info("Importing skeletal mesh finished");
-    }
-
-    InteractiveWidget(ImGui::InputText("Export file path", &targetFile));
-    if (ImGui::IsItemHovered() && dropped && dropped->size() > 0)
-        targetFile = dropped->at(0);
-
-    if (InteractiveWidget(ImGui::Button("Export file")))
-    {
-        Log::Info("Exporting updated mesh from {} to {}", sourceFile, targetFile);
-
-        MeshLibrary::ExportUpdated(sourceFile, targetFile, selectedMesh);
-
-        Log::Info("Exporting finished");
-    }
-
-    ImGui::End();
 }
 
 void MainScene::OnLateUpdate()

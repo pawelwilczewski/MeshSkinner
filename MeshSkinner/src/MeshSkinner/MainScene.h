@@ -36,11 +36,7 @@ private:
 	Unique<class SceneStats> sceneStats;
 	Unique<class Settings> settings;
 	Unique<class WeightColorScheme> weightColorScheme;
-
-	std::string sourceFile;
-	std::string targetFile;
-
-	Ref<Material> weightPaintMaterial;
+	Unique<class ImportExport> importExport;
 
 	float brushCircleSize = 10.f;
 
