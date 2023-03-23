@@ -1,12 +1,47 @@
 #include "pch.h"
 #include "Brush.h"
 
+#include "Hierarchy.h"
+
 static constexpr std::array<const char *, 12> BrushBlendModeNames = { "Mix", "Add", "Subtract", "Lighten", "Darken", "Color Dodge", "Difference", "Screen", "Hard Light", "Overlay", "Soft Light", "Exclusion" };
 
 Brush::Brush(const std::string &toolWindowName, BlendMode blendMode, float weight, float radius, float falloff, float strength) :
     Tool(toolWindowName), blendMode(blendMode), weight(weight), radius(radius), falloff(falloff), strength(strength)
 {
+    onUpdateCallback = MakeCallbackNoArgRef([&]() { OnUpdate(); });
+    Application::OnUpdateSubscribe(onUpdateCallback);
 
+    onDrawAdditionalViewportWidgetsCallback = MakeCallbackNoArgRef([&]() {
+        if (Window::GetCursorVisibility())
+        {
+            auto mousePos = Input::GetMouseScreenPosition();
+            ImGui::GetWindowDrawList()->AddCircle(ImVec2(mousePos.x, mousePos.y), brushCircleSize, ImColor(0.8f, 0.8f, 0.8f, 1.f));
+        }
+        });
+    UserInterface::OnDrawAdditionalViewportWidgetsSubscribe(onDrawAdditionalViewportWidgetsCallback);
+}
+
+Brush::~Brush()
+{
+    Application::OnUpdateUnsubscribe(onUpdateCallback);
+    UserInterface::OnDrawAdditionalViewportWidgetsUnsubscribe(onDrawAdditionalViewportWidgetsCallback);
+}
+
+void Brush::OnUpdate()
+{
+    auto mesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>().get();
+
+    if (mesh)
+    {
+        glm::vec3 intersect;
+        if (MathUtils::RayMeshIntersection(camera->ProjectViewportToWorld(Input::GetMouseViewportPosition()), mesh, intersect))
+        {
+            auto offset = camera->transform.GetUpVector() * radius;
+            auto screenPos = camera->DeprojectWorldToViewport(intersect + offset);
+            auto mousePos = Input::GetMouseViewportPosition();
+            brushCircleSize = glm::distance(mousePos, screenPos);
+        }
+    }
 }
 
 void Brush::OnUpdateUI()

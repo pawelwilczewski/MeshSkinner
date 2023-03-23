@@ -38,11 +38,7 @@ private:
 	Unique<class WeightColorScheme> weightColorScheme;
 	Unique<class ImportExport> importExport;
 
-	float brushCircleSize = 10.f;
-
 private:
 	CallbackRef<StrokeQueryInfo> onStrokeEmplaceCallback;
-	CallbackNoArgRef onDrawAdditionalViewportWidgetsCallback;
-
 	CallbackRef<int> onMouseButtonPressedCallback;
 };

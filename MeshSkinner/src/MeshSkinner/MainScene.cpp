@@ -25,6 +25,7 @@ MainScene::MainScene() : Scene()
 
     // tool initialisation
     brush = MakeUnique<Brush>("Brush Parameters");
+    brush->camera = camera;
     stroke = MakeUnique<Stroke>("Stroke Parameters", [&](StrokeQueryInfo &info) {
         auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
         if (!selectedMesh) return;
@@ -40,15 +41,6 @@ MainScene::MainScene() : Scene()
     importExport = MakeUnique<ImportExport>("Import Export", this);
 
     // events
-    onDrawAdditionalViewportWidgetsCallback = MakeCallbackNoArgRef([&]() {
-        if (Window::GetCursorVisibility())
-        {
-            auto mousePos = Input::GetMouseScreenPosition();
-            ImGui::GetWindowDrawList()->AddCircle(ImVec2(mousePos.x, mousePos.y), brushCircleSize, ImColor(0.8f, 0.8f, 0.8f, 1.f));
-        }
-        });
-    UserInterface::OnDrawAdditionalViewportWidgetsSubscribe(onDrawAdditionalViewportWidgetsCallback);
-
     onStrokeEmplaceCallback = MakeCallbackRef<StrokeQueryInfo>([&](const StrokeQueryInfo &info) { OnStrokeEmplace(info); });
     stroke->OnStrokeEmplaceSubscribe(onStrokeEmplaceCallback);
 
@@ -58,17 +50,13 @@ MainScene::MainScene() : Scene()
 
 MainScene::~MainScene()
 {
-    UserInterface::OnDrawAdditionalViewportWidgetsUnsubscribe(onDrawAdditionalViewportWidgetsCallback);
     stroke->OnStrokeEmplaceUnsubscribe(onStrokeEmplaceCallback);
-
     Input::OnMouseButtonPressedUnsubscribe(onMouseButtonPressedCallback);
 }
 
 void MainScene::OnStart()
 {
-    // TODO: NOW: instead, have a sceneRoot entity and submit it in the renderer (recursively)
-    //  also we should be able to remove currently submitted entities
-    //  we may need to be able to update entities submitted in renderer
+
 }
 
 void MainScene::OnEarlyUpdate()
@@ -78,19 +66,7 @@ void MainScene::OnEarlyUpdate()
 
 void MainScene::OnUpdate()
 {
-    auto mesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>().get();
 
-    if (mesh)
-    {
-        glm::vec3 intersect;
-        if (MathUtils::RayMeshIntersection(camera->ProjectViewportToWorld(Input::GetMouseViewportPosition()), mesh, intersect))
-        {
-            auto offset = camera->transform.GetUpVector() * brush->radius;
-            auto screenPos = camera->DeprojectWorldToViewport(intersect + offset);
-            auto mousePos = Input::GetMouseViewportPosition();
-            brushCircleSize = glm::distance(mousePos, screenPos);
-        }
-    }
 }
 
 void MainScene::OnUpdateUI()
@@ -110,6 +86,8 @@ void MainScene::OnEnd()
 
 void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
 {
+    // weight painting logic
+
     auto selectedMesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>();
     if (!selectedMesh) return;
 
@@ -124,7 +102,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
         bool updated = false;
         for (size_t i = 0; i < v.bones.length(); i++)
         {
-            // the bone is one of the 
+            // the bone already exists in vertex info
             if (v.bones[i] == Renderer::selectedBone)
             {
                 toUpdate = &v.weights[i];
@@ -133,8 +111,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
             }
         }
 
-        // no such existing weight yet - replace the smallest influence
-        //  bone with our active one
+        // no such existing weight yet - replace the smallest influence bone with our active one
         if (!updated)
         {
             auto minWeightBone = 0;

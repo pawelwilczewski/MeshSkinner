@@ -11,9 +11,10 @@ public:
 
 public:
 	Brush(const std::string &toolWindowName, BlendMode blendMode = BlendMode::Mix, float weight = 1.f, float radius = 10.f, float falloff = 0.5f, float strength = 1.f);
-	virtual ~Brush() = default;
+	virtual ~Brush();
 
 protected:
+	void OnUpdate();
 	virtual void OnUpdateUI() override;
 
 public:
@@ -25,4 +26,14 @@ public:
 	float radius;
 	float falloff;
 	float strength;
+
+public:
+	Camera *camera;
+
+private:
+	float brushCircleSize = 10.f;
+
+private:
+	CallbackNoArgRef onUpdateCallback;
+	CallbackNoArgRef onDrawAdditionalViewportWidgetsCallback;
 };
