@@ -89,7 +89,8 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
     // weight painting logic
 
     auto selectedMesh = HierarchyTool::GetSelectedSkeletalMesh();
-    if (!selectedMesh) return;
+    auto selectedBone = HierarchyTool::GetSelectedBone();
+    if (!selectedMesh || !selectedBone) return;
 
     auto vertIndices = MathUtils::GetVerticesInRadius(info.verts, info.position, brush->radius);
 

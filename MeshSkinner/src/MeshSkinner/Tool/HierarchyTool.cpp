@@ -40,17 +40,25 @@ void HierarchyTool::DrawTree(Entity *entity)
                     p = p->GetParent();
                 }
             }
-            else
+            else if (entity)
             {
                 selectedEntity = entity;
-                selectedBone = nullptr;
                 auto components = selectedEntity->GetComponents<SkeletalMeshComponent>();
                 selectedSkeletalMesh = components.size() > 0 ? (*components.begin()).get() : nullptr;
+                selectedBone = nullptr;
+            }
+            else
+            {
+                selectedEntity = nullptr;
+                selectedBone = nullptr;
+                selectedSkeletalMesh = nullptr;
             }
 
             Renderer::selectedEntity = selectedEntity;
             if (selectedEntity && selectedBone)
                 Renderer::selectedBone = GetSelectedBoneIndex();
+            else
+                Renderer::selectedBone = -1;
         }
 
         for (const auto &child : children)

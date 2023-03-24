@@ -179,7 +179,7 @@ void Renderer::Render(const DrawCalls::iterator &it)
 	shader->Bind();
 	shader->UploadUniformMat4("u_ViewProjection", activeCamera->GetViewProjectionMatrix());
 	GLint selectedEntityIndex = -1;
-	if (selectedEntity)
+	if (selectedEntity && entities.find(selectedEntity) != entities.end())
 		selectedEntityIndex = entities[selectedEntity];
 	shader->UploadUniformInt("u_SelectedEntity", selectedEntityIndex);
 	shader->UploadUniformInt("u_SelectedBone", selectedBone);
