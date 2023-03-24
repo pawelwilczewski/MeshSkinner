@@ -490,7 +490,7 @@ bool MeshLibrary::Import(const std::string &path, std::vector<Animation> &outAni
 	return false;
 }
 
-void MeshLibrary::ExportUpdated(const std::string &source, const std::string &target, const Ref<SkeletalMeshComponent> &inMesh)
+void MeshLibrary::ExportUpdated(const std::string &source, const std::string &target, const SkeletalMeshComponent *inMesh)
 {
 	LoadGLTF(source);
 

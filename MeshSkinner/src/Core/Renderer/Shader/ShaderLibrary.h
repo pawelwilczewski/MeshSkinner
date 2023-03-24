@@ -20,6 +20,5 @@ private:
 	static Ref<Shader> FindShader(const std::string &displayedName);
 
 private:
-	// TODO: URGENT use map<string, ref<shader>> here instead (string key is displayedName)
 	static std::unordered_set<Ref<Shader>> shaders;
 };

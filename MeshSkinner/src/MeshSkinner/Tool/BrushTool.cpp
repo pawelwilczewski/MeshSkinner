@@ -1,15 +1,50 @@
 #include "pch.h"
-#include "Brush.h"
+#include "BrushTool.h"
+
+#include "HierarchyTool.h"
 
 static constexpr std::array<const char *, 12> BrushBlendModeNames = { "Mix", "Add", "Subtract", "Lighten", "Darken", "Color Dodge", "Difference", "Screen", "Hard Light", "Overlay", "Soft Light", "Exclusion" };
 
-Brush::Brush(const std::string &toolWindowName, BlendMode blendMode, float weight, float radius, float falloff, float strength) :
+BrushTool::BrushTool(const std::string &toolWindowName, BlendMode blendMode, float weight, float radius, float falloff, float strength) :
     Tool(toolWindowName), blendMode(blendMode), weight(weight), radius(radius), falloff(falloff), strength(strength)
 {
+    onUpdateCallback = MakeCallbackNoArgRef([&]() { OnUpdate(); });
+    Application::OnUpdateSubscribe(onUpdateCallback);
 
+    onDrawAdditionalViewportWidgetsCallback = MakeCallbackNoArgRef([&]() {
+        if (Window::GetCursorVisibility())
+        {
+            auto mousePos = Input::GetMouseScreenPosition();
+            ImGui::GetWindowDrawList()->AddCircle(ImVec2(mousePos.x, mousePos.y), brushCircleSize, ImColor(0.8f, 0.8f, 0.8f, 1.f));
+        }
+        });
+    UserInterface::OnDrawAdditionalViewportWidgetsSubscribe(onDrawAdditionalViewportWidgetsCallback);
 }
 
-void Brush::OnUpdateUI()
+BrushTool::~BrushTool()
+{
+    Application::OnUpdateUnsubscribe(onUpdateCallback);
+    UserInterface::OnDrawAdditionalViewportWidgetsUnsubscribe(onDrawAdditionalViewportWidgetsCallback);
+}
+
+void BrushTool::OnUpdate()
+{
+    auto mesh = HierarchyTool::GetSelectedSkeletalMesh();
+
+    if (mesh)
+    {
+        glm::vec3 intersect;
+        if (MathUtils::RayMeshIntersection(camera->ProjectViewportToWorld(Input::GetMouseViewportPosition()), mesh, intersect))
+        {
+            auto offset = camera->transform.GetUpVector() * radius;
+            auto screenPos = camera->DeprojectWorldToViewport(intersect + offset);
+            auto mousePos = Input::GetMouseViewportPosition();
+            brushCircleSize = glm::distance(mousePos, screenPos);
+        }
+    }
+}
+
+void BrushTool::OnUpdateUI()
 {
     ImGui::Begin(toolWindowName.c_str());
 
@@ -25,7 +60,7 @@ void Brush::OnUpdateUI()
     ImGui::End();
 }
 
-float Brush::Blend(float oldWeight, float distance)
+float BrushTool::Blend(float oldWeight, float distance)
 {
     auto alpha = glm::smoothstep(0.f, 1.f, glm::pow(1.f - distance / radius, falloff));
 

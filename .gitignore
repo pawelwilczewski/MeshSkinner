@@ -8,8 +8,8 @@
 **/intermediate/
 **/imgui.ini
 **/Makefile
-test
 *.blend*
+docs/
 
 # User-specific files
 *.rsuser

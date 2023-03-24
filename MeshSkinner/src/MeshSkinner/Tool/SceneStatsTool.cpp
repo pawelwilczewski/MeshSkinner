@@ -1,11 +1,11 @@
 #include "pch.h"
-#include "SceneStats.h"
+#include "SceneStatsTool.h"
 
-SceneStats::SceneStats(const std::string &toolWindowName) : Tool(toolWindowName)
+SceneStatsTool::SceneStatsTool(const std::string &toolWindowName) : Tool(toolWindowName)
 {
 }
 
-void SceneStats::OnUpdateUI()
+void SceneStatsTool::OnUpdateUI()
 {
     // debug fps info
     static float avgFps = 60.0;

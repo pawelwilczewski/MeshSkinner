@@ -51,12 +51,16 @@ private:
 
 public:
 	static void UpdateMeshVertices(const MeshComponent *mesh);
-
 	static std::vector<glm::vec4> GetFinalVertPosData(const MeshComponent *mesh);
+
+	static void UpdateBoneRadius(const SkeletalMeshComponent *mesh, float radius);
 
 public:
 	inline static Camera *activeCamera = nullptr;
-	inline static int selectedBone = 0; // TODO: make this available as static field in Hierarchy
+
+	// TODO: these could/should be handled via materials
+	inline static Entity *selectedEntity = nullptr;
+	inline static uint32_t selectedBone = 0;
 
 	inline static glm::vec3 color000 = glm::vec3(0.f, 0.f, 1.f);
 	inline static glm::vec3 color025 = glm::vec3(0.f, 1.f, 1.f);

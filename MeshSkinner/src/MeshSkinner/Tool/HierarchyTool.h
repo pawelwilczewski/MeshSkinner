@@ -3,11 +3,11 @@
 #include "Application/Core.h"
 #include "Tool.h"
 
-class Hierarchy : public Tool
+class HierarchyTool : public Tool
 {
 public:
-	Hierarchy(const std::string &toolWindowName, Entity *root);
-	virtual ~Hierarchy() = default;
+	HierarchyTool(const std::string &toolWindowName, Entity *root);
+	virtual ~HierarchyTool() = default;
 
 public:
 	virtual void OnUpdateUI() override;
@@ -31,9 +31,17 @@ public:
 		return *components.begin();
 	}
 
+	static Bone *GetSelectedBone();
+	static SkeletalMeshComponent *GetSelectedSkeletalMesh();
+	static uint32_t GetSelectedBoneIndex();
+
+	static void UpdateSelectedBone(uint32_t boneIndex);
+
 public:
 	Entity *root;
 
 private:
-	static Entity *selectedEntity;
+	inline static Entity *selectedEntity = nullptr;
+	inline static SkeletalMeshComponent *selectedSkeletalMesh = nullptr;
+	inline static Bone *selectedBone = nullptr;
 };

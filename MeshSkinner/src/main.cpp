@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Main/MainScene.h"
+#include "MeshSkinner/MainScene.h"
 
 int main(void)
 {

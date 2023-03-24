@@ -45,7 +45,7 @@
 #include "Application/Time.h"
 #include "Application/Window.h"
 #include "Application/UserInterface.h"
-#include "Application/Scene.h"
+#include "Core/Entity/Scene.h"
 #include "Core/Entity/Entity.h"
 #include "Core/Entity/EntityComponent.h"
 #include "Core/Entity/Transform.h"

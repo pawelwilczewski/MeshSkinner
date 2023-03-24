@@ -1,32 +1,32 @@
 #include "pch.h"
-#include "AnimationControls.h"
+#include "AnimationControlsTool.h"
 
-#include "Hierarchy.h"
+#include "HierarchyTool.h"
 
-AnimationControls::AnimationControls(const std::string &toolWindowName) : Tool(toolWindowName)
+AnimationControlsTool::AnimationControlsTool(const std::string &toolWindowName) : Tool(toolWindowName)
 {
 	onUpdateCallback = MakeCallbackNoArgRef([&]() { OnUpdate(); });
 
 	Application::OnUpdateSubscribe(onUpdateCallback);
 }
 
-AnimationControls::~AnimationControls()
+AnimationControlsTool::~AnimationControlsTool()
 {
 	Application::OnUpdateUnsubscribe(onUpdateCallback);
 }
 
-const std::vector<Animation> &AnimationControls::GetAnimations() const
+const std::vector<Animation> &AnimationControlsTool::GetAnimations() const
 {
-	auto mesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>().get();
+	auto mesh = HierarchyTool::GetSelectedSkeletalMesh();
 	if (mesh)
 		return animations.at(mesh).animations;
 
 	return std::vector<Animation>();
 }
 
-void AnimationControls::OnUpdateUI()
+void AnimationControlsTool::OnUpdateUI()
 {
-	auto mesh = Hierarchy::GetSelectedComponent<SkeletalMeshComponent>().get();
+	auto mesh = HierarchyTool::GetSelectedSkeletalMesh();
 	if (!mesh)
 		return;
 
@@ -37,7 +37,7 @@ void AnimationControls::OnUpdateUI()
 
 	ImGui::Begin(toolWindowName.c_str());
 
-	InteractiveWidget(ImGui::InputText("Animations file path", &sourceFile)); // TODO: for text inputs: unfocus if clicked in the viewport
+	InteractiveWidget(ImGui::InputText("Animations file path", &sourceFile));
 
 	auto dropped = Input::GetDroppedFiles();
 	if (ImGui::IsItemHovered() && dropped && dropped->size() > 0)
@@ -70,7 +70,7 @@ void AnimationControls::OnUpdateUI()
 	ImGui::End();
 }
 
-void AnimationControls::OnUpdate()
+void AnimationControlsTool::OnUpdate()
 {
 	for (auto &[mesh, info] : animations)
 	{

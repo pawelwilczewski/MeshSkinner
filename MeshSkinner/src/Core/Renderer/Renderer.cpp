@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "Renderer.h"
 
-#include "MeshSkinner/Tool/Hierarchy.h"
-
 const BufferLayout &VertexInfo::layout = BufferLayout({
 	{ "transformIndex", ShaderDataType::UnsignedInt },
 	{ "skeletonBonesIndex", ShaderDataType::UnsignedInt },
@@ -10,6 +8,11 @@ const BufferLayout &VertexInfo::layout = BufferLayout({
 	});
 
 VertexInfo::VertexInfo(GLuint transformIndex, GLuint skeletonBonesIndex, GLuint skeletonTransformsIndex) : transformIndex(transformIndex), skeletonBonesIndex(skeletonBonesIndex), skeletonTransformsIndex(skeletonTransformsIndex)
+{
+
+}
+
+DrawCallInfo::DrawCallInfo(const Ref<VertexArray<uint32_t>> &vao, const Ref<StorageBuffer<glm::vec4>> &finalPos) : vao(vao), finalPos(finalPos)
 {
 
 }
@@ -175,10 +178,10 @@ void Renderer::Render(const DrawCalls::iterator &it)
 
 	shader->Bind();
 	shader->UploadUniformMat4("u_ViewProjection", activeCamera->GetViewProjectionMatrix());
-	GLint selected = -1;
-	if (Hierarchy::GetSelectedEntity())
-		selected = entities[Hierarchy::GetSelectedEntity()];
-	shader->UploadUniformInt("u_SelectedEntity", selected);
+	GLint selectedEntityIndex = -1;
+	if (selectedEntity)
+		selectedEntityIndex = entities[selectedEntity];
+	shader->UploadUniformInt("u_SelectedEntity", selectedEntityIndex);
 	shader->UploadUniformInt("u_SelectedBone", selectedBone);
 	shader->UploadUniformFloat3("u_Color000", color000);
 	shader->UploadUniformFloat3("u_Color025", color025);
@@ -297,6 +300,23 @@ std::vector<glm::vec4> Renderer::GetFinalVertPosData(const MeshComponent *mesh)
 	return result;
 }
 
-DrawCallInfo::DrawCallInfo(const Ref<VertexArray<uint32_t>> &vao, const Ref<StorageBuffer<glm::vec4>> &finalPos) : vao(vao), finalPos(finalPos)
+void Renderer::UpdateBoneRadius(const SkeletalMeshComponent *mesh, float radius)
 {
+	auto &bones = mesh->skeleton->GetBones();
+	for (auto &bone : bones)
+	{
+		auto &boneMeshes = bone->GetComponents<StaticMeshComponent>();
+		if (boneMeshes.size() == 0) continue;
+
+		auto &boneMesh = *boneMeshes.begin();
+		if (!boneMesh) continue;
+
+		for (auto &vertex : boneMesh->vertices)
+		{
+			vertex.position.x = glm::sign(vertex.position.x) * radius;
+			vertex.position.z = glm::sign(vertex.position.z) * radius;
+		}
+
+		Renderer::UpdateMeshVertices(boneMesh.get());
+	}
 }

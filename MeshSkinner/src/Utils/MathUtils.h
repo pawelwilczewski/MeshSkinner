@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Application/Core.h"
-
 namespace MathUtils
 {
 	struct Ray

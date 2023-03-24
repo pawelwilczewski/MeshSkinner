@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Application/Core.h"
-#include "Application/Scene.h"
+#include "Core/Entity/Scene.h"
 
-#include "MeshSkinner/Tool/Stroke.h"
+struct StrokeQueryInfo;
 
 class MainScene : public Scene
 {
@@ -25,25 +25,20 @@ private:
 	void OnMouseButtonPressed(int button);
 
 private:
-	Unique<class Brush> brush;
-	Unique<Stroke> stroke;
-	Unique<class Hierarchy> hierarchy;
-	Unique<class AnimationControls> animationControls;
-	Unique<class SceneStats> sceneStats;
-
 	Camera *camera;
 	Ref<class CameraControllerComponent> cameraController;
 
-	std::string sourceFile;
-	std::string targetFile;
-
-	Ref<Material> weightPaintMaterial;
-
-	float brushCircleSize = 10.f;
+private:
+	Unique<class BrushTool> brush;
+	Unique<class StrokeTool> stroke;
+	Unique<class HierarchyTool> hierarchy;
+	Unique<class AnimationControlsTool> animationControls;
+	Unique<class SceneStatsTool> sceneStats;
+	Unique<class SettingsTool> settings;
+	Unique<class WeightColorSchemeTool> weightColorScheme;
+	Unique<class ImportExportTool> importExport;
 
 private:
 	CallbackRef<StrokeQueryInfo> onStrokeEmplaceCallback;
-	CallbackNoArgRef onDrawAdditionalViewportWidgetsCallback;
-
 	CallbackRef<int> onMouseButtonPressedCallback;
 };
