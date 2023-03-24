@@ -15,7 +15,7 @@ void HierarchyTool::DrawTree(Entity *entity)
     if (children.size() == 0)       flag |= ImGuiTreeNodeFlags_Leaf;
     if (selectedBone == entity || (selectedBone == nullptr && selectedEntity == entity))   flag |= ImGuiTreeNodeFlags_Selected;
 
-    if (ImGui::TreeNodeEx(entity->name.c_str(), flag))
+    if (ImGui::TreeNodeEx(entity, flag, entity->name.c_str()))
     {
         if (ImGui::IsItemActivated())
         {
