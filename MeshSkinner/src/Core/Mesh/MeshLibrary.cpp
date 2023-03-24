@@ -5,7 +5,6 @@
 
 Ref<StaticMeshComponent> MeshLibrary::GetCube()
 {
-	auto cubeMesh = MakeRef<StaticMeshComponent>();
 	return Import("assets/models/default/cube.glb");
 }
 
@@ -26,25 +25,21 @@ Ref<StaticMeshComponent> MeshLibrary::GetBone(float length)
 	return mesh;
 }
 
-static tinygltf::Model *model = nullptr;
-static tinygltf::TinyGLTF *loader = nullptr;
+static Unique<tinygltf::Model> model = nullptr;
+static Unique<tinygltf::TinyGLTF> loader = nullptr;
 static std::string err;
 static std::string warn;
 
 static bool LoadGLTF(const std::string &path)
 {
-	// why not static unique ptr for loader and model?
-	delete loader;
-	loader = new tinygltf::TinyGLTF();
-
-	delete model;
-	model = new tinygltf::Model();
+	loader = MakeUnique<tinygltf::TinyGLTF>();
+	model = MakeUnique<tinygltf::Model>();
 
 	bool success = false;
 	auto extension = std::filesystem::path(path).extension();
 
-	if (extension == ".gltf")		success = loader->LoadASCIIFromFile(model, &err, &warn, path);
-	else if (extension == ".glb")	success = loader->LoadBinaryFromFile(model, &err, &warn, path);
+	if (extension == ".gltf")		success = loader->LoadASCIIFromFile(model.get(), &err, &warn, path);
+	else if (extension == ".glb")	success = loader->LoadBinaryFromFile(model.get(), &err, &warn, path);
 
 	if (!warn.empty())	Log::Warn("GLTF Import from file {}: Warning: {}", path, warn);
 	if (!err.empty())	Log::Error("GLTF Import from file {}: Error: {}", path, err);
@@ -492,6 +487,8 @@ bool MeshLibrary::Import(const std::string &path, std::vector<Animation> &outAni
 
 void MeshLibrary::ExportUpdated(const std::string &source, const std::string &target, const SkeletalMeshComponent *inMesh)
 {
+	if (!inMesh) return;
+
 	LoadGLTF(source);
 
 	// import the mesh
@@ -536,5 +533,5 @@ void MeshLibrary::ExportUpdated(const std::string &source, const std::string &ta
 		}
 	}
 
-	loader->WriteGltfSceneToFile(model, target, true, true, true, FileUtils::FileExtension(target) == ".glb");
+	loader->WriteGltfSceneToFile(model.get(), target, true, true, true, FileUtils::FileExtension(target) == ".glb");
 }
