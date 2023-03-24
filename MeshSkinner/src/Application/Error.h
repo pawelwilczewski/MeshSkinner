@@ -1,6 +1,6 @@
 namespace Error
 {
-#define MIN_SEVERITY_LEVEL GL_DEBUG_SEVERITY_LOW
+#define MIN_SEVERITY_LEVEL GL_DEBUG_SEVERITY_HIGH
 
 #if defined DEBUG || defined RELEASE
 	void GLAPIENTRY CallbackGL(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)

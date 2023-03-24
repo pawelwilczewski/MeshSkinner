@@ -10,7 +10,9 @@ static glm::ivec2 previousBufferSize = glm::ivec2(0);
 
 void Window::Init(const glm::ivec2 &windowSize, const char *title, int vsync)
 {
+#if defined DEBUG || defined RELEASE
     glfwSetErrorCallback(Error::CallbackGLFW);
+#endif
 
     if (!glfwInit())
         exit(EXIT_FAILURE);

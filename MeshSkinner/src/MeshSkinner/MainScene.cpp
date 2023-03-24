@@ -151,6 +151,8 @@ void MainScene::OnMouseButtonPressed(int button)
     if (Input::IsKeyPressed(KEY_LEFT_CONTROL))
     {
         auto selectedMesh = HierarchyTool::GetSelectedSkeletalMesh();
+        if (!selectedMesh) return;
+
         auto ray = camera->ProjectViewportToWorld(Input::GetMouseViewportPosition());
 
         int i = 0;
