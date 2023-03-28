@@ -10,6 +10,7 @@
 **/Makefile
 *.blend*
 docs/
+Doxyfile
 
 # User-specific files
 *.rsuser
