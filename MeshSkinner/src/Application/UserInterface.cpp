@@ -119,10 +119,10 @@ void UserInterface::Init()
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+    ImGuiIO &io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // keyboard controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // docking
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // multi-viewport
     io.ConfigWindowsMoveFromTitleBarOnly = true;
 
 	defaultFont = io.Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 18 * Window::GetScreenSize().y / 1440.f);
