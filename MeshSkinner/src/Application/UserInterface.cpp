@@ -191,7 +191,6 @@ void UserInterface::OnDrawAdditionalViewportWidgetsUnsubscribe(const CallbackNoA
     onDrawAdditionalViewportWidgets.Unsubscribe(callback);
 }
 
-
 void UserInterface::OnMouseButtonDown(int button)
 {
     if (button == MOUSE_BUTTON_LEFT)
