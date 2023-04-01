@@ -49,6 +49,9 @@ void Window::Init(const glm::ivec2 &windowSize, const char *title, int vsync)
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     // create the framebuffer and framebuffer texture
     glCreateFramebuffers(1, &fbo);
     glCreateTextures(GL_TEXTURE_2D, 1, &framebufferTexture);

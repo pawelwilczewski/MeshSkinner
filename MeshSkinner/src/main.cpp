@@ -3,7 +3,7 @@
 
 int main(void)
 {
-    Application::Init({ 1600, 900 }, "MeshSkinner", 1);
+    Application::Init({ 1600, 900 }, "MeshSkinner", 0);
     auto scene = MakeUnique<MainScene>();
     Application::Run();
 }
