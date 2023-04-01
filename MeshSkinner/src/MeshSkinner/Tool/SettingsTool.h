@@ -20,5 +20,4 @@ public:
 public:
 	inline static float tipBoneLength = 50.f;
 	inline static float boneRadius = 5.f;
-	inline static float boneAlpha = 0.6f;
 };

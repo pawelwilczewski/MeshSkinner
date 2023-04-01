@@ -62,14 +62,14 @@ public:
 	inline static Entity *selectedEntity = nullptr;
 	inline static uint32_t selectedBone = 0;
 
-	inline static glm::vec3 color000 = glm::vec3(0.f, 0.f, 1.f);
-	inline static glm::vec3 color025 = glm::vec3(0.f, 1.f, 1.f);
-	inline static glm::vec3 color050 = glm::vec3(0.f, 1.f, 0.f);
-	inline static glm::vec3 color075 = glm::vec3(1.f, 1.f, 0.f);
-	inline static glm::vec3 color100 = glm::vec3(1.f, 0.f, 0.f);
+	inline static glm::vec3 color000 = glm::vec3(0.33f, 0.07f, 0.32f);
+	inline static glm::vec3 color025 = glm::vec3(0.23f, 0.37f, 0.55f);
+	inline static glm::vec3 color050 = glm::vec3(0.18f, 0.60f, 0.63f);
+	inline static glm::vec3 color075 = glm::vec3(0.06f, 0.65f, 0.24f);
+	inline static glm::vec3 color100 = glm::vec3(1.00f, 0.81f, 0.13f);
 
 	// will be passed as uniform and can be used in shaders for rendering as semi-transparent
-	inline static float finalAlpha = 1.f;
+	inline static float finalAlpha = 0.6f;
 
 private:
 	inline static DrawCalls staticMeshDrawCalls;

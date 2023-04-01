@@ -11,4 +11,6 @@ public:
 
 protected:
 	virtual void OnUpdateUI() override;
+
+	int colorSchemeIndex = 0;
 };
