@@ -188,6 +188,7 @@ void Renderer::Render(const DrawCalls::iterator &it)
 	shader->UploadUniformFloat3("u_Color050", color050);
 	shader->UploadUniformFloat3("u_Color075", color075);
 	shader->UploadUniformFloat3("u_Color100", color100);
+	shader->UploadUniformFloat("u_FinalAlpha", finalAlpha);
 	shader->SetupStorageBuffer("ss_Transforms", transforms->GetID());
 	shader->SetupStorageBuffer("ss_Bones", bones->GetID());
 	shader->SetupStorageBuffer("ss_FinalPos", finalPos->GetID());

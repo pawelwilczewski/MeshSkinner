@@ -68,6 +68,9 @@ public:
 	inline static glm::vec3 color075 = glm::vec3(1.f, 1.f, 0.f);
 	inline static glm::vec3 color100 = glm::vec3(1.f, 0.f, 0.f);
 
+	// will be passed as uniform and can be used in shaders for rendering as semi-transparent
+	inline static float finalAlpha = 1.f;
+
 private:
 	inline static DrawCalls staticMeshDrawCalls;
 	inline static DrawCalls skeletalMeshDrawCalls;

@@ -41,5 +41,8 @@ void SettingsTool::OnUpdateUI()
         }
     }
 
+    if (InteractiveWidget(ImGui::SliderFloat("Bone alpha", &boneAlpha, 0.f, 1.f, "%.3f", ImGuiSliderFlags_ClampOnInput)))
+        Renderer::finalAlpha = boneAlpha;
+
     ImGui::End();
 }
