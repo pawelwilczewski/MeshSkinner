@@ -90,3 +90,8 @@ void AnimationControlsTool::OnUpdate()
 		}
 	}
 }
+
+void AnimationControlsTool::ImportAnimations(const std::string &path, SkeletalMeshComponent *mesh)
+{
+	MeshLibrary::Import(path, animations[mesh].animations);
+}

@@ -3,6 +3,7 @@
 
 #include "HierarchyTool.h"
 #include "SettingsTool.h"
+#include "AnimationControlsTool.h"
 
 ImportExportTool::ImportExportTool(const std::string &toolWindowName, Scene *scene) : Tool(toolWindowName), scene(scene)
 {
@@ -35,6 +36,8 @@ void ImportExportTool::OnUpdateUI()
         entity->name = std::filesystem::path(sourceFile).filename().string();
 
         Renderer::Submit(entity);
+
+        HierarchyTool::UpdateSelectedEntity(entity);
 
         Log::Info("Importing static mesh finished");
     }
@@ -69,6 +72,9 @@ void ImportExportTool::OnUpdateUI()
 
         Renderer::Submit(entity);
         Renderer::UpdateBoneRadius(mesh.get(), SettingsTool::boneRadius);
+
+        HierarchyTool::UpdateSelectedEntity(entity);
+        AnimationControlsTool::ImportAnimations(sourceFile, mesh.get());
 
         Log::Info("Importing skeletal mesh finished");
     }

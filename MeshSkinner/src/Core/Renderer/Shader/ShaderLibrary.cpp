@@ -14,7 +14,7 @@ Ref<Shader> ShaderLibrary::FindShader(const std::string &displayedName)
 
 void ShaderLibrary::Init()
 {
-	ShaderLibrary::Load("Default", "assets/shaders/Default.vert", "assets/shaders/Default.frag");
+	ShaderLibrary::Load("Default", "assets/shaders/Default.vert", "assets/shaders/Default.frag", 0);
 	ShaderLibrary::Load("DefaultOverlay", "assets/shaders/Default.vert", "assets/shaders/Default.frag", -1);
 }
 

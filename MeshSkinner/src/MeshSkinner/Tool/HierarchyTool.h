@@ -36,6 +36,7 @@ public:
 	static uint32_t GetSelectedBoneIndex();
 
 	static void UpdateSelectedBone(uint32_t boneIndex);
+	static void UpdateSelectedEntity(Entity *entity);
 
 public:
 	Entity *root;

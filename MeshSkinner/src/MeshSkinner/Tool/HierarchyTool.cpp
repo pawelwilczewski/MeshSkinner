@@ -42,10 +42,7 @@ void HierarchyTool::DrawTree(Entity *entity)
             }
             else if (entity)
             {
-                selectedEntity = entity;
-                auto components = selectedEntity->GetComponents<SkeletalMeshComponent>();
-                selectedSkeletalMesh = components.size() > 0 ? (*components.begin()).get() : nullptr;
-                selectedBone = nullptr;
+                UpdateSelectedEntity(entity);
             }
             else
             {
@@ -92,6 +89,20 @@ void HierarchyTool::UpdateSelectedBone(uint32_t boneIndex)
 {
     selectedBone = selectedSkeletalMesh->skeleton->GetBones()[boneIndex];
     Renderer::selectedBone = GetSelectedBoneIndex();
+}
+
+void HierarchyTool::UpdateSelectedEntity(Entity *entity)
+{
+    selectedEntity = entity;
+    auto components = selectedEntity->GetComponents<SkeletalMeshComponent>();
+    selectedSkeletalMesh = components.size() > 0 ? (*components.begin()).get() : nullptr;
+    selectedBone = nullptr;
+
+    Renderer::selectedEntity = selectedEntity;
+    if (selectedEntity && selectedBone)
+        Renderer::selectedBone = GetSelectedBoneIndex();
+    else
+        Renderer::selectedBone = -1;
 }
 
 void HierarchyTool::OnUpdateUI()

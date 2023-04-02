@@ -24,9 +24,12 @@ protected:
 	virtual void OnUpdateUI() override;
 	void OnUpdate();
 
+public:
+	static void ImportAnimations(const std::string &path, SkeletalMeshComponent *mesh);
+
 private:
 	std::string sourceFile;
 
-	std::unordered_map<SkeletalMeshComponent *, AnimationInfo> animations;
+	static inline std::unordered_map<SkeletalMeshComponent *, AnimationInfo> animations;
 	CallbackNoArgRef onUpdateCallback;
 };
