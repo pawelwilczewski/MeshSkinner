@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Application/Core.h"
 #include "Keyframe.h"
 
 enum class AnimationInterpolationMode { Linear = 0, Step, CubicSpline };

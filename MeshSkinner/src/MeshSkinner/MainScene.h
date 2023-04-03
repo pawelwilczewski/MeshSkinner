@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Application/Core.h"
 #include "Core/Entity/Scene.h"
 
 struct StrokeQueryInfo;

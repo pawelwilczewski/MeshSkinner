@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Application/Core.h"
 #include "Core/Renderer/Buffer/BufferLayout.h"
 
 struct Vertex

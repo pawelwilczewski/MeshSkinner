@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Application/Core.h"
-#include "Core/Entity/Transform.h"
-
 template <typename T>
 struct Keyframe
 {

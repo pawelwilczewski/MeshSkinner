@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Application/Core.h"
 #include "Vertex.h"
 #include "Core/Renderer/Material/Material.h"
 #include "Core/Entity/EntityComponent.h"

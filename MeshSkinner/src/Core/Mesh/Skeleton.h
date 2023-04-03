@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Application/Core.h"
 #include "Core/Entity/Transform.h"
 
 class Bone : public Entity

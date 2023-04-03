@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Application/Core.h"
 #include "Tool.h"
 
 class HierarchyTool : public Tool

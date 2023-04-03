@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Application/Core.h"
 #include "Camera.h"
 
 class CameraControllerComponent : public EntityComponent

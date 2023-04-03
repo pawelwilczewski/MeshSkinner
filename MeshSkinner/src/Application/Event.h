@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Core.h"
-
 // single arugment callback helpers
 template<typename T> using Callback = std::function<void(const T &)>;
 template<typename T> using CallbackRef = Ref<Callback<T>>;

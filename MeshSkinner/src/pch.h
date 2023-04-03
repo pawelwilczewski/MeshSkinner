@@ -1,8 +1,23 @@
 #pragma once
 
+// memory
+#include <memory>
+
+template<typename T>
+using Unique = std::unique_ptr<T>;
+template<typename T, typename ...Args>
+constexpr Unique<T> MakeUnique(Args &&...args) { return std::make_unique<T>(std::forward<Args>(args)...); }
+
+template<typename T>
+using Ref = std::shared_ptr<T>;
+template<typename T, typename ...Args>
+constexpr Ref<T> MakeRef(Args &&...args) { return std::make_shared<T>(std::forward<Args>(args)...); }
+
+template<typename T>
+using Weak = std::weak_ptr<T>;
+
 // standard libraries
 #include <iostream>
-#include <memory>
 #include <utility>
 #include <algorithm>
 #include <functional>
@@ -12,8 +27,9 @@
 #include <sstream>
 #include <array>
 #include <vector>
-#include <set>
+#include <map>
 #include <unordered_map>
+#include <set>
 #include <unordered_set>
 #include <filesystem>
 #include <functional>
@@ -37,18 +53,21 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// utils
+#include "Utils/FileUtils.h"
+#include "Utils/MathUtils.h"
+
 // 1st party code
 #include "Application/Application.h"
-#include "Application/Core.h"
 #include "Application/Log.h"
 #include "Application/Input.h"
 #include "Application/Time.h"
 #include "Application/Window.h"
 #include "Application/UserInterface.h"
+#include "Core/Entity/Transform.h"
 #include "Core/Entity/Scene.h"
 #include "Core/Entity/Entity.h"
 #include "Core/Entity/EntityComponent.h"
-#include "Core/Entity/Transform.h"
 #include "Core/Renderer/Renderer.h"
 #include "Core/Renderer/Shader/Shader.h"
 #include "Core/Renderer/Shader/ShaderLibrary.h"
@@ -61,10 +80,3 @@
 #include "Core/Mesh/Animation.h"
 #include "Core/Mesh/MeshLibrary.h"
 
-#include "Utils/FileUtils.h"
-#include "Utils/MathUtils.h"
-
-// platform-variable
-#ifdef PLATFORM_WINDOWS
-#include <Windows.h>
-#endif

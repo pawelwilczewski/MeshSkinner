@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Application/Core.h"
-
 class Transform
 {
 public:

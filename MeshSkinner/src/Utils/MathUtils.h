@@ -1,5 +1,7 @@
 #pragma once
 
+class MeshComponent;
+
 namespace MathUtils
 {
 	struct Ray

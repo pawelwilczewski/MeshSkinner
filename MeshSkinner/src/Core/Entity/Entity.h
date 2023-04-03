@@ -1,8 +1,6 @@
 #pragma once
 
-#include "Application/Core.h"
-#include "EntityComponent.h"
-#include "Core/Entity/Transform.h"
+class EntityComponent;
 
 class Entity
 {

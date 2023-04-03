@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Application/Core.h"
 #include "VertexArray.h"
 #include "Core/Mesh/MeshComponent.h"
 #include "Core/Mesh/StaticMeshComponent.h"
