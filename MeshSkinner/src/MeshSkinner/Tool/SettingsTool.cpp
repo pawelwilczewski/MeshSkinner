@@ -17,10 +17,10 @@ void SettingsTool::OnUpdateUI()
 
     InteractiveWidget(ImGui::DragFloat("Mouse sensitivity", &cameraController->mouseSensitivity, 0.0001f, 0.0f, 10.f, "%.3f", ImGuiSliderFlags_ClampOnInput));
 
-    if (InteractiveWidget(ImGui::DragFloat("Bone radius", &boneRadius, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)) && selectedMesh)
-        Renderer::UpdateBoneRadius(selectedMesh, boneRadius);
+    if (InteractiveWidget(ImGui::DragFloat("Bone radius", &Context::Get().boneRadius, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)) && selectedMesh)
+        Renderer::UpdateBoneRadius(selectedMesh, Context::Get().boneRadius);
 
-    if (InteractiveWidget(ImGui::DragFloat("Tip bone length", &tipBoneLength, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)) && selectedMesh)
+    if (InteractiveWidget(ImGui::DragFloat("Tip bone length", &Context::Get().tipBoneLength, 1.f, 0.f, 10000.f, "%.3f", ImGuiSliderFlags_ClampOnInput | ImGuiSliderFlags_Logarithmic)) && selectedMesh)
     {
         auto &bones = selectedMesh->skeleton->GetBones();
         for (auto &bone : bones)
@@ -35,7 +35,7 @@ void SettingsTool::OnUpdateUI()
 
             for (auto &vertex : boneMesh->vertices)
                 if (vertex.position.y > glm::epsilon<float>())
-                    vertex.position.y = tipBoneLength;
+                    vertex.position.y = Context::Get().tipBoneLength;
 
             Renderer::UpdateMeshVertices(boneMesh.get());
         }

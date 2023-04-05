@@ -15,8 +15,4 @@ protected:
 
 public:
 	CameraControllerComponent *cameraController = nullptr;
-
-public:
-	inline static float tipBoneLength = 50.f;
-	inline static float boneRadius = 5.f;
 };

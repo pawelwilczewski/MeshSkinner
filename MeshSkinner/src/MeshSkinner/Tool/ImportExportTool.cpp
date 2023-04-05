@@ -1,9 +1,6 @@
 #include "pch.h"
 #include "ImportExportTool.h"
 
-#include "SettingsTool.h"
-#include "AnimationControlsTool.h"
-
 #include "MeshSkinner/Context.h"
 
 ImportExportTool::ImportExportTool(const std::string &toolWindowName, Scene *scene) : Tool(toolWindowName), scene(scene)
@@ -61,7 +58,7 @@ void ImportExportTool::OnUpdateUI()
             Renderer::Submit(bone);
 
             // calculate the bone length with some default for tip bones
-            auto boneLength = SettingsTool::tipBoneLength;
+            auto boneLength = Context::Get().tipBoneLength;
             auto &children = bone->GetChildren();
             if (children.size() == 1)
                 boneLength = glm::length((*bone->GetChildren().begin())->transform.GetPosition());
@@ -72,7 +69,7 @@ void ImportExportTool::OnUpdateUI()
         }
 
         Renderer::Submit(entity);
-        Renderer::UpdateBoneRadius(mesh.get(), SettingsTool::boneRadius);
+        Renderer::UpdateBoneRadius(mesh.get(), Context::Get().boneRadius);
 
         Context::Get().UpdateSelection(entity);
         Context::Get().ImportAnimations(sourceFile, mesh.get());

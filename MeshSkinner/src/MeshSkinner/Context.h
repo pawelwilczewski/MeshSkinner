@@ -52,6 +52,11 @@ private:
 	Bone *selectedBone = nullptr;
 
 	std::unordered_map<SkeletalMeshComponent *, AnimationInfo> animations;
+
+	// SETTINGS
+public:
+	float tipBoneLength = 50.f;
+	float boneRadius = 5.f;
 };
 
 struct AnimationInfo
