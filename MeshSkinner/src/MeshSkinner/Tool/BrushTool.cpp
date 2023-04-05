@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "BrushTool.h"
 
-#include "HierarchyTool.h"
+#include "MeshSkinner/Context.h"
 
 static constexpr std::array<const char *, 12> BrushBlendModeNames = { "Mix", "Add", "Subtract", "Lighten", "Darken", "Color Dodge", "Difference", "Screen", "Hard Light", "Overlay", "Soft Light", "Exclusion" };
 
@@ -29,7 +29,7 @@ BrushTool::~BrushTool()
 
 void BrushTool::OnUpdate()
 {
-    auto mesh = HierarchyTool::GetSelectedSkeletalMesh();
+    auto mesh = Context::Get().GetSelectedSkeletalMesh();
 
     if (mesh)
     {

@@ -1,9 +1,10 @@
 #include "pch.h"
 #include "ImportExportTool.h"
 
-#include "HierarchyTool.h"
 #include "SettingsTool.h"
 #include "AnimationControlsTool.h"
+
+#include "MeshSkinner/Context.h"
 
 ImportExportTool::ImportExportTool(const std::string &toolWindowName, Scene *scene) : Tool(toolWindowName), scene(scene)
 {
@@ -17,7 +18,7 @@ ImportExportTool::ImportExportTool(const std::string &toolWindowName, Scene *sce
 
 void ImportExportTool::OnUpdateUI()
 {
-    auto selectedMesh = HierarchyTool::GetSelectedSkeletalMesh();
+    auto selectedMesh = Context::Get().GetSelectedSkeletalMesh();
 
     ImGui::Begin("Import Export");
 
@@ -37,7 +38,7 @@ void ImportExportTool::OnUpdateUI()
 
         Renderer::Submit(entity);
 
-        HierarchyTool::UpdateSelectedEntity(entity);
+        Context::Get().UpdateSelection(entity);
 
         Log::Info("Importing static mesh finished");
     }
@@ -73,7 +74,7 @@ void ImportExportTool::OnUpdateUI()
         Renderer::Submit(entity);
         Renderer::UpdateBoneRadius(mesh.get(), SettingsTool::boneRadius);
 
-        HierarchyTool::UpdateSelectedEntity(entity);
+        Context::Get().UpdateSelection(entity);
         AnimationControlsTool::ImportAnimations(sourceFile, mesh.get());
 
         Log::Info("Importing skeletal mesh finished");

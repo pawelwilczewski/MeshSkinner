@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "SettingsTool.h"
 
-#include "HierarchyTool.h"
 #include "Core/Camera/CameraControllerComponent.h"
+#include "MeshSkinner/Context.h"
 
 SettingsTool::SettingsTool(const std::string &toolWindowName, CameraControllerComponent *controller) : Tool(toolWindowName), cameraController(controller)
 {
@@ -10,7 +10,7 @@ SettingsTool::SettingsTool(const std::string &toolWindowName, CameraControllerCo
 
 void SettingsTool::OnUpdateUI()
 {
-    auto selectedMesh = HierarchyTool::GetSelectedSkeletalMesh();
+    auto selectedMesh = Context::Get().GetSelectedSkeletalMesh();
 
     // settings
     ImGui::Begin("Settings");

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "AnimationControlsTool.h"
 
-#include "HierarchyTool.h"
+#include "MeshSkinner/Context.h"
 
 AnimationControlsTool::AnimationControlsTool(const std::string &toolWindowName) : Tool(toolWindowName)
 {
@@ -17,7 +17,7 @@ AnimationControlsTool::~AnimationControlsTool()
 
 const std::vector<Animation> &AnimationControlsTool::GetAnimations() const
 {
-	auto mesh = HierarchyTool::GetSelectedSkeletalMesh();
+	auto mesh = Context::Get().GetSelectedSkeletalMesh();
 	if (mesh)
 		return animations.at(mesh).animations;
 
@@ -26,7 +26,7 @@ const std::vector<Animation> &AnimationControlsTool::GetAnimations() const
 
 void AnimationControlsTool::OnUpdateUI()
 {
-	auto mesh = HierarchyTool::GetSelectedSkeletalMesh();
+	auto mesh = Context::Get().GetSelectedSkeletalMesh();
 	if (!mesh)
 		return;
 

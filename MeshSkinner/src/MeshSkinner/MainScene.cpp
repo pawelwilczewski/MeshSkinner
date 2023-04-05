@@ -15,6 +15,8 @@
 #include "MeshSkinner/Tool/WeightColorSchemeTool.h"
 #include "MeshSkinner/Tool/ImportExportTool.h"
 
+#include "Context.h"
+
 MainScene::MainScene() : Scene()
 {
     // camera setup
@@ -27,7 +29,7 @@ MainScene::MainScene() : Scene()
     brush = MakeUnique<BrushTool>("Brush Parameters");
     brush->camera = camera;
     stroke = MakeUnique<StrokeTool>("Stroke Parameters", [&](StrokeQueryInfo &info) {
-        auto selectedMesh = HierarchyTool::GetSelectedSkeletalMesh();
+        auto selectedMesh = Context::Get().GetSelectedSkeletalMesh();
         if (!selectedMesh) return;
 
         info.verts = Renderer::GetFinalVertPosData(selectedMesh);
@@ -88,8 +90,8 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
 {
     // weight painting logic
 
-    auto selectedMesh = HierarchyTool::GetSelectedSkeletalMesh();
-    auto selectedBone = HierarchyTool::GetSelectedBone();
+    auto selectedMesh = Context::Get().GetSelectedSkeletalMesh();
+    auto selectedBone = Context::Get().GetSelectedBone();
     if (!selectedMesh || !selectedBone) return;
 
     auto vertIndices = MathUtils::GetVerticesInRadius(info.verts, info.position, brush->radius);
@@ -104,7 +106,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
         for (size_t i = 0; i < v.bones.length(); i++)
         {
             // the bone already exists in vertex info
-            if (v.bones[i] == HierarchyTool::GetSelectedBoneIndex())
+            if (v.bones[i] == Context::Get().GetSelectedBoneIndex())
             {
                 toUpdate = &v.weights[i];
                 updated = true;
@@ -128,7 +130,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
             }
 
             // update the weights
-            v.bones[minWeightBone] = HierarchyTool::GetSelectedBoneIndex();
+            v.bones[minWeightBone] = Context::Get().GetSelectedBoneIndex();
             v.weights[minWeightBone] = 0.f;
             toUpdate = &v.weights[minWeightBone];
         }
@@ -151,7 +153,7 @@ void MainScene::OnMouseButtonPressed(int button)
     // bone selection
     if (Input::IsKeyPressed(KEY_LEFT_CONTROL))
     {
-        auto selectedMesh = HierarchyTool::GetSelectedSkeletalMesh();
+        auto selectedMesh = Context::Get().GetSelectedSkeletalMesh();
         if (!selectedMesh) return;
 
         auto ray = camera->ProjectViewportToWorld(Input::GetMouseViewportPosition());
@@ -165,7 +167,7 @@ void MainScene::OnMouseButtonPressed(int button)
 
             glm::vec3 pos;
             if (MathUtils::RayMeshIntersection(ray, verts, boneMesh->indices, pos))
-                HierarchyTool::UpdateSelectedBone(i);
+                Context::Get().UpdateSelectedBone(i);
 
             i++;
         }
