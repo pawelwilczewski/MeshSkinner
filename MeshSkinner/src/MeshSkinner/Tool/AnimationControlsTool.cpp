@@ -15,21 +15,13 @@ AnimationControlsTool::~AnimationControlsTool()
 	Application::OnUpdateUnsubscribe(onUpdateCallback);
 }
 
-const std::vector<Animation> &AnimationControlsTool::GetAnimations() const
-{
-	auto mesh = Context::Get().GetSelectedSkeletalMesh();
-	if (mesh)
-		return animations.at(mesh).animations;
-
-	return std::vector<Animation>();
-}
-
 void AnimationControlsTool::OnUpdateUI()
 {
 	auto mesh = Context::Get().GetSelectedSkeletalMesh();
 	if (!mesh)
 		return;
 
+	auto &animations = Context::Get().GetAnimationsRaw();
 	if (animations.find(mesh) == animations.end())
 		animations.insert({ mesh, AnimationInfo() });
 
@@ -72,7 +64,7 @@ void AnimationControlsTool::OnUpdateUI()
 
 void AnimationControlsTool::OnUpdate()
 {
-	for (auto &[mesh, info] : animations)
+	for (auto &[mesh, info] : Context::Get().GetAnimationsRaw())
 	{
 		if (info.animationIndex < info.animations.size())
 		{
@@ -89,9 +81,4 @@ void AnimationControlsTool::OnUpdate()
 			}
 		}
 	}
-}
-
-void AnimationControlsTool::ImportAnimations(const std::string &path, SkeletalMeshComponent *mesh)
-{
-	MeshLibrary::Import(path, animations[mesh].animations);
 }

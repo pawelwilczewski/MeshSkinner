@@ -73,3 +73,22 @@ void Context::UpdateSelectedBone(uint32_t boneIndex)
     selectedBone = Context::Get().selectedSkeletalMesh->skeleton->GetBones()[boneIndex];
     Renderer::selectedBone = GetSelectedBoneIndex();
 }
+
+const std::vector<Animation> &Context::GetAnimations() const
+{
+    auto mesh = Context::Get().GetSelectedSkeletalMesh();
+    if (mesh)
+        return animations.at(mesh).animations;
+
+    return std::vector<Animation>();
+}
+
+std::unordered_map<SkeletalMeshComponent *, AnimationInfo> &Context::GetAnimationsRaw()
+{
+    return animations;
+}
+
+void Context::ImportAnimations(const std::string &path, SkeletalMeshComponent *mesh)
+{
+    MeshLibrary::Import(path, animations[mesh].animations);
+}

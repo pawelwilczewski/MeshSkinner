@@ -75,7 +75,7 @@ void ImportExportTool::OnUpdateUI()
         Renderer::UpdateBoneRadius(mesh.get(), SettingsTool::boneRadius);
 
         Context::Get().UpdateSelection(entity);
-        AnimationControlsTool::ImportAnimations(sourceFile, mesh.get());
+        Context::Get().ImportAnimations(sourceFile, mesh.get());
 
         Log::Info("Importing skeletal mesh finished");
     }
