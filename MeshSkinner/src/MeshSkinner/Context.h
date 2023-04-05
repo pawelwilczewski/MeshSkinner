@@ -46,17 +46,17 @@ public:
 	std::unordered_map<SkeletalMeshComponent *, AnimationInfo> &GetAnimationsRaw();
 	void ImportAnimations(const std::string &path, SkeletalMeshComponent *mesh);
 
+	// SETTINGS
+public:
+	float tipBoneLength = 50.f;
+	float boneRadius = 5.f;
+
 private:
 	Entity *selectedEntity = nullptr;
 	SkeletalMeshComponent *selectedSkeletalMesh = nullptr;
 	Bone *selectedBone = nullptr;
 
 	std::unordered_map<SkeletalMeshComponent *, AnimationInfo> animations;
-
-	// SETTINGS
-public:
-	float tipBoneLength = 50.f;
-	float boneRadius = 5.f;
 };
 
 struct AnimationInfo
