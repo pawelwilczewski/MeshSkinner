@@ -14,6 +14,8 @@ protected:
 	void OnMouseScrolled(const glm::vec2 &delta);
 	void OnMouseMoved(const glm::vec2 &delta);
 
+	void OnMeshImported(const MeshComponent *mesh);
+
 	virtual void OnAttached() override;
 	virtual void OnDetached() override;
 
@@ -34,4 +36,7 @@ private:
 	CallbackNoArgRef onUpdateCallback;
 	CallbackRef<glm::vec2> onMouseScrolledCallback;
 	CallbackRef<glm::vec2> onMouseMovedCallback;
+
+	CallbackRef<StaticMeshComponent *> onStaticMeshImportedCallback;
+	CallbackRef<SkeletalMeshComponent *> onSkeletalMeshImportedCallback;
 };

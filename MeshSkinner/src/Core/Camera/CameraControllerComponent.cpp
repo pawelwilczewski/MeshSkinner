@@ -6,10 +6,14 @@ CameraControllerComponent::CameraControllerComponent(const std::string &name, fl
 	onUpdateCallback = MakeCallbackNoArgRef([&]() { OnUpdate(); });
 	onMouseScrolledCallback = MakeCallbackRef<glm::vec2>([&](const glm::vec2 &delta) { OnMouseScrolled(delta); });
 	onMouseMovedCallback = MakeCallbackRef<glm::vec2>([&](const glm::vec2 &delta) { OnMouseMoved(delta); });
+	onStaticMeshImportedCallback = MakeCallbackRef<StaticMeshComponent *>([&](StaticMeshComponent *mesh) { OnMeshImported(mesh); });
+	onSkeletalMeshImportedCallback = MakeCallbackRef<SkeletalMeshComponent *>([&](SkeletalMeshComponent *mesh) { OnMeshImported(mesh); });
 
 	Application::OnUpdateSubscribe(onUpdateCallback);
 	Input::OnMouseScrolledSubscribe(onMouseScrolledCallback);
 	Input::OnMouseMovedSubscribe(onMouseMovedCallback);
+	MeshLibrary::OnStaticMeshImportedSubscribe(onStaticMeshImportedCallback);
+	MeshLibrary::OnSkeletalMeshImportedSubscribe(onSkeletalMeshImportedCallback);
 }
 
 CameraControllerComponent::~CameraControllerComponent()
@@ -17,6 +21,8 @@ CameraControllerComponent::~CameraControllerComponent()
 	Application::OnUpdateUnsubscribe(onUpdateCallback);
 	Input::OnMouseScrolledUnsubscribe(onMouseScrolledCallback);
 	Input::OnMouseMovedUnsubscribe(onMouseMovedCallback);
+	MeshLibrary::OnStaticMeshImportedUnsubscribe(onStaticMeshImportedCallback);
+	MeshLibrary::OnSkeletalMeshImportedUnsubscribe(onSkeletalMeshImportedCallback);
 }
 
 void CameraControllerComponent::OnUpdate()
@@ -59,6 +65,35 @@ void CameraControllerComponent::OnMouseMoved(const glm::vec2 &position)
 	auto delta = Input::GetMouseDelta();
 	auto newRotation = camera->transform.GetRotation() + glm::vec3(-delta.y, delta.x, 0.f) * mouseSensitivity;
 	camera->transform.SetRotation(glm::vec3(glm::clamp(newRotation.x, -90.f, 90.f), newRotation.y, newRotation.z));
+}
+
+void CameraControllerComponent::OnMeshImported(const MeshComponent *mesh)
+{
+	// optimally offset the camera upon importing a mesh
+
+	auto verts = mesh->GetVertices();
+	auto vertsLength = mesh->GetVerticesLength();
+	auto &layout = mesh->GetVertexBufferLayout();
+	auto offset = layout["position"].offset;
+
+	glm::vec3 centre = glm::vec3(0.f);
+	auto v = (char *) verts;
+	for (size_t i = 0; i < vertsLength; i++)
+	{
+		auto pos = *(glm::vec3 *)(v + layout.GetStride() * i + offset);
+		centre += pos;
+	}
+	centre /= vertsLength;
+
+	float maxOffset = 0.f;
+	for (size_t i = 0; i < vertsLength; i++)
+	{
+		auto pos = *(glm::vec3 *)(v + layout.GetStride() * i + offset);
+		maxOffset = glm::max(maxOffset, glm::distance2(centre, pos));
+	}
+	maxOffset = glm::sqrt(maxOffset);
+
+	camera->transform.SetPosition(centre + camera->transform.GetRightVector() * maxOffset * 2.f);
 }
 
 void CameraControllerComponent::OnAttached()

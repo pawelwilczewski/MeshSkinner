@@ -5,13 +5,13 @@
 
 Ref<StaticMeshComponent> MeshLibrary::GetCube()
 {
-	return Import("assets/models/default/cube.glb");
+	return Import("assets/models/default/cube.glb", false);
 }
 
 Ref<StaticMeshComponent> MeshLibrary::GetBone(float length)
 {
 	// take cube, offset the vertices accordingly and set the color to random (gradient)
-	auto mesh = Import("assets/models/default/cube.glb");
+	auto mesh = Import("assets/models/default/cube.glb", false);
 
 	// offset to correct the origin
 	for (auto &vertex : mesh->vertices)
@@ -110,7 +110,7 @@ static bool UpdateIndices(const tinygltf::Primitive &primitive, const Ref<MeshCo
 	return true;
 }
 
-Ref<StaticMeshComponent> MeshLibrary::Import(const std::string &path)
+Ref<StaticMeshComponent> MeshLibrary::Import(const std::string &path, bool triggerEvent)
 {
 	if (!LoadFromFile(path))
 		return nullptr;
@@ -179,6 +179,9 @@ Ref<StaticMeshComponent> MeshLibrary::Import(const std::string &path)
 			}
 		}
 	}
+
+	if (triggerEvent)
+		onStaticMeshImported.Invoke(resultMesh.get());
 
 	return resultMesh;
 }
@@ -368,6 +371,7 @@ Ref<SkeletalMeshComponent> MeshLibrary::Import(const std::string &path, Scene *s
 		}
 	}
 
+	onSkeletalMeshImported.Invoke(resultMesh.get());
 	return resultMesh;
 }
 
@@ -534,4 +538,24 @@ void MeshLibrary::ExportUpdated(const std::string &source, const std::string &ta
 	}
 
 	loader->WriteGltfSceneToFile(model.get(), target, true, true, true, FileUtils::FileExtension(target) == ".glb");
+}
+
+void MeshLibrary::OnStaticMeshImportedSubscribe(const CallbackRef<StaticMeshComponent *> &callback)
+{
+	onStaticMeshImported.Subscribe(callback);
+}
+
+void MeshLibrary::OnStaticMeshImportedUnsubscribe(const CallbackRef<StaticMeshComponent *> &callback)
+{
+	onStaticMeshImported.Unsubscribe(callback);
+}
+
+void MeshLibrary::OnSkeletalMeshImportedSubscribe(const CallbackRef<SkeletalMeshComponent *> &callback)
+{
+	onSkeletalMeshImported.Subscribe(callback);
+}
+
+void MeshLibrary::OnSkeletalMeshImportedUnsubscribe(const CallbackRef<SkeletalMeshComponent *> &callback)
+{
+	onSkeletalMeshImported.Unsubscribe(callback);
 }
