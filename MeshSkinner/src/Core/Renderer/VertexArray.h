@@ -30,7 +30,7 @@ static GLenum ShaderTypeToGL(const ShaderDataType &type)
 	case ShaderDataType::UnsignedShort3:	return GL_UNSIGNED_SHORT;
 	case ShaderDataType::UnsignedShort4:	return GL_UNSIGNED_SHORT;
 	case ShaderDataType::Bool:				return GL_BOOL;
-	default:								assert(false); return 0;
+	default:								assert(false);
 	}
 }
 

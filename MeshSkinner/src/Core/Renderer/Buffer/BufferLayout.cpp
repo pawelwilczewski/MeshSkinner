@@ -28,7 +28,7 @@ static uint32_t GetShaderDataTypeSize(ShaderDataType type)
 	case ShaderDataType::UnsignedShort3:	return 2 * 3;
 	case ShaderDataType::UnsignedShort4:	return 2 * 4;
 	case ShaderDataType::Bool:				return 1;
-	default:								assert(false); return 0;
+	default:								assert(false);
 	}
 }
 
@@ -64,7 +64,7 @@ uint32_t BufferElement::GetComponentCount() const
 	case ShaderDataType::UnsignedShort3:	return 3;
 	case ShaderDataType::UnsignedShort4:	return 4;
 	case ShaderDataType::Bool:				return 1;
-	default:								assert(false); return 0;
+	default:								assert(false);
 	}
 }
 

@@ -105,7 +105,7 @@ static bool UpdateIndices(const tinygltf::Primitive &primitive, const Ref<MeshCo
 		break;
 	}
 	default:
-		return false;
+		assert(false);
 	}
 	return true;
 }

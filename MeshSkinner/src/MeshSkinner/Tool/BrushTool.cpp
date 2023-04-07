@@ -79,7 +79,7 @@ float BrushTool::Blend(float oldWeight, float distance)
     case BlendMode::Overlay:    newWeight = MathUtils::BlendOverlay(oldWeight, weight, alpha); break;
     case BlendMode::SoftLight:  newWeight = MathUtils::BlendSoftLight(oldWeight, weight, alpha); break;
     case BlendMode::Exclusion:  newWeight = MathUtils::BlendExclusion(oldWeight, weight, alpha); break;
-    default:                    assert(false); break;
+    default:                    assert(false);
     }
 
     return glm::clamp(oldWeight + (newWeight - oldWeight) * strength, 0.f, 1.f);
