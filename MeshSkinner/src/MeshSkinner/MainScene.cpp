@@ -12,7 +12,6 @@
 #include "MeshSkinner/Tool/AnimationControlsTool.h"
 #include "MeshSkinner/Tool/SceneStatsTool.h"
 #include "MeshSkinner/Tool/SettingsTool.h"
-#include "MeshSkinner/Tool/WeightColorSchemeTool.h"
 #include "MeshSkinner/Tool/ImportExportTool.h"
 
 #include "Context.h"
@@ -39,7 +38,6 @@ MainScene::MainScene() : Scene()
     animationControls = MakeUnique<AnimationControlsTool>();
     sceneStats = MakeUnique<SceneStatsTool>("Scene Stats");
     settings = MakeUnique<SettingsTool>("Settings", cameraController.get());
-    weightColorScheme = MakeUnique<WeightColorSchemeTool>("Weight Color Scheme");
     importExport = MakeUnique<ImportExportTool>("Import Export", this);
 
     // events

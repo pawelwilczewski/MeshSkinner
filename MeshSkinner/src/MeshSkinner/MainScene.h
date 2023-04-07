@@ -34,7 +34,6 @@ private:
 	Unique<class AnimationControlsTool> animationControls;
 	Unique<class SceneStatsTool> sceneStats;
 	Unique<class SettingsTool> settings;
-	Unique<class WeightColorSchemeTool> weightColorScheme;
 	Unique<class ImportExportTool> importExport;
 
 private:

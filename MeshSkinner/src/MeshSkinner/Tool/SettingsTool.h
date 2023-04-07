@@ -15,4 +15,9 @@ protected:
 
 public:
 	CameraControllerComponent *cameraController = nullptr;
+
+private:
+	int colorSchemeIndex = 0;
+
+	Camera *camera = nullptr;
 };
