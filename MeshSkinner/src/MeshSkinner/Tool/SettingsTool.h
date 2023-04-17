@@ -8,7 +8,7 @@ class SettingsTool : public Tool
 {
 public:
 	SettingsTool(const std::string &toolWindowName = "Settings", CameraControllerComponent *controller = nullptr);
-	virtual ~SettingsTool() = default;
+	virtual ~SettingsTool();
 
 protected:
 	virtual void OnUpdateUI() override;
@@ -20,4 +20,6 @@ private:
 	int colorSchemeIndex = 0;
 
 	Camera *camera = nullptr;
+
+	CallbackNoArgRef onDrawAdditionalViewportWidgetsCallback;
 };

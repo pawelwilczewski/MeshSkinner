@@ -109,4 +109,13 @@ namespace MathUtils
         float val = (0.5f - (2.0f * (oldWeight - 0.5f) * (goalWeight - 0.5f)));
         return (1.0f - alpha) * oldWeight + val * alpha;
     }
+
+    constexpr uint32_t ColorToUInt32(const glm::vec3 &color)
+    {
+        return
+            static_cast<uint32_t>(color.r * 255.f) << 0 |
+            static_cast<uint32_t>(color.g * 255.f) << 8 |
+            static_cast<uint32_t>(color.b * 255.f) << 16 |
+            255U << 24;
+    }
 }

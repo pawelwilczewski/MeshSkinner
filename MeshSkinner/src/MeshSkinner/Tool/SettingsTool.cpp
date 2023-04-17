@@ -9,6 +9,54 @@ static const char *colorSchemes[] = { "Viridis", "Magma", "Rainbow" };
 SettingsTool::SettingsTool(const std::string &toolWindowName, CameraControllerComponent *controller) : Tool(toolWindowName), cameraController(controller)
 {
 	camera = dynamic_cast<Camera *>(cameraController->GetEntity());
+
+	onDrawAdditionalViewportWidgetsCallback = MakeCallbackNoArgRef([&]() {
+
+		// draw color legend in the top right corner of the viewport
+
+		// setup
+		static const std::string legendText = "Weight Color Legend";
+		auto textSize = ImGui::CalcTextSize(legendText.c_str());
+		auto marginSize = ImVec2(30.f, 50.f);
+		auto barSize = ImVec2(150.f, textSize.y);
+		auto textBarGapSize = 5.f;
+
+		auto windowPos = ImGui::GetWindowPos();
+		auto windowSize = ImGui::GetWindowSize();
+
+		// calculate positions
+		auto barPos = ImVec2(windowPos.x + windowSize.x - marginSize.x - barSize.x, windowPos.y + marginSize.y);
+		auto textPos = ImVec2(barPos.x - textBarGapSize - textSize.x, barPos.y);
+
+		ImU32 colors[5] = {
+			MathUtils::ColorToUInt32(Renderer::color000),
+			MathUtils::ColorToUInt32(Renderer::color025),
+			MathUtils::ColorToUInt32(Renderer::color050),
+			MathUtils::ColorToUInt32(Renderer::color075),
+			MathUtils::ColorToUInt32(Renderer::color100)
+		};
+
+		auto drawList = ImGui::GetWindowDrawList();
+
+		// render the text
+		drawList->AddText(textPos, 0xffffffff, legendText.c_str());
+		drawList->AddText(ImVec2(barPos.x, barPos.y + textSize.y), 0xffffffff, "0%");
+		drawList->AddText(ImVec2(barPos.x + barSize.x - ImGui::CalcTextSize("100%").x, barPos.y + textSize.y), 0xffffffff, "100%");
+
+		// render the bar
+		for (int i = 0; i < 4; ++i)
+			drawList->AddRectFilledMultiColor(
+				ImVec2(barPos.x + i * (barSize.x / 4), barPos.y),
+				ImVec2(barPos.x + (i + 1) * (barSize.x / 4), barPos.y + barSize.y),
+				colors[i], colors[i + 1], colors[i + 1], colors[i]
+			);
+		});
+	UserInterface::OnDrawAdditionalViewportWidgetsSubscribe(onDrawAdditionalViewportWidgetsCallback);
+}
+
+SettingsTool::~SettingsTool()
+{
+	UserInterface::OnDrawAdditionalViewportWidgetsUnsubscribe(onDrawAdditionalViewportWidgetsCallback);
 }
 
 void SettingsTool::OnUpdateUI()

@@ -5,7 +5,7 @@
 class CameraControllerComponent : public EntityComponent
 {
 public:
-	CameraControllerComponent(const std::string &name = "CameraControllerComponent", float moveSpeed = 10.f, float moveSpeedMultiplier = 1.f, float moveSpeedMultiplierDelta = 0.2f, float maxSpeed = 10000.f, float minSpeed = 0.1f);
+	CameraControllerComponent(const std::string &name = "CameraControllerComponent", float moveSpeed = 300.f, float moveSpeedMultiplier = 1.f, float moveSpeedMultiplierDelta = 0.2f, float maxSpeed = 10000.f, float minSpeed = 0.1f);
 	virtual ~CameraControllerComponent();
 
 protected:
