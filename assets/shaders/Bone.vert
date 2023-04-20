@@ -19,7 +19,7 @@ void main()
 	if (u_SelectedEntity == in_SkeletonTransformsIndex - 1 && u_SelectedBone == in_TransformIndex - in_SkeletonTransformsIndex)
 		io_Color = vec3(0.7, 0.1, 0.8);
 	else
-		io_Color = vec3(0.8);
+		io_Color = vec3(1.0);
 
 	vec4 worldPosition = transforms[in_TransformIndex] * vec4(in_Position, 1.0);
 	positions[gl_VertexID] = worldPosition;

@@ -16,7 +16,7 @@ SettingsTool::SettingsTool(const std::string &toolWindowName, CameraControllerCo
 
 		// setup
 		static const std::string legendText = "Weight Color Legend";
-		auto textSize = ImGui::CalcTextSize(legendText.c_str());
+		static const auto textSize = ImGui::CalcTextSize(legendText.c_str());
 		auto marginSize = ImVec2(30.f, 50.f);
 		auto barSize = ImVec2(150.f, textSize.y);
 		auto textBarGapSize = 5.f;
@@ -41,7 +41,8 @@ SettingsTool::SettingsTool(const std::string &toolWindowName, CameraControllerCo
 		// render the text
 		drawList->AddText(textPos, 0xffffffff, legendText.c_str());
 		drawList->AddText(ImVec2(barPos.x, barPos.y + textSize.y), 0xffffffff, "0%");
-		drawList->AddText(ImVec2(barPos.x + barSize.x - ImGui::CalcTextSize("100%").x, barPos.y + textSize.y), 0xffffffff, "100%");
+		static const auto size100 = ImGui::CalcTextSize("100%");
+		drawList->AddText(ImVec2(barPos.x + barSize.x - size100.x, barPos.y + textSize.y), 0xffffffff, "100%");
 
 		// render the bar
 		for (int i = 0; i < 4; ++i)
