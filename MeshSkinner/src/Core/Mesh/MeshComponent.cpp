@@ -6,7 +6,7 @@ MeshComponent::MeshComponent(const std::string &name, const std::vector<uint32_t
 
 }
 
-const BufferLayout &MeshComponent::GetVertexBufferLayout() const
+BufferLayout MeshComponent::GetVertexBufferLayout() const
 {
     switch (GetVertexType())
     {
@@ -16,5 +16,6 @@ const BufferLayout &MeshComponent::GetVertexBufferLayout() const
         return SkeletalVertex::layout;
     default:
         assert(false);
+        return BufferLayout({});
     }
 }

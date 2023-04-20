@@ -104,7 +104,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
         for (size_t i = 0; i < v.bones.length(); i++)
         {
             // the bone already exists in vertex info
-            if (v.bones[i] == Context::Get().GetSelectedBoneIndex())
+            if ((uint32_t)v.bones[i] == Context::Get().GetSelectedBoneIndex())
             {
                 toUpdate = &v.weights[i];
                 updated = true;

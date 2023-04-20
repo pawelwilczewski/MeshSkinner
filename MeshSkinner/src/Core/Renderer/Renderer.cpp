@@ -100,7 +100,7 @@ void Renderer::SubmitMesh(Entity *entity, const MeshComponent *mesh, DrawCalls &
 
 	// init final pos
 	std::vector<glm::vec4> finalPosInit(vao->GetVertexBuffer(0)->GetLength(), glm::vec4(0.f));
-	finalPos->AppendData(finalPosInit.data(), finalPosInit.size());
+	finalPos->AppendData(finalPosInit.data(), (GLuint)finalPosInit.size());
 
 	// update meshes offset info
 	if (meshes.find(mesh) == meshes.end())
@@ -116,7 +116,7 @@ void Renderer::SubmitMesh(Entity *entity, const MeshComponent *mesh, DrawCalls &
 
 	// append the indices to the ibo
 	auto &ibo = vao->GetIndexBuffer();
-	ibo->AppendData(indicesOffset.data(), indicesOffset.size());
+	ibo->AppendData(indicesOffset.data(), (GLuint)indicesOffset.size());
 }
 
 void Renderer::SubmitMesh(Entity *entity, const Ref<StaticMeshComponent> &mesh)

@@ -37,7 +37,7 @@ public:
 	std::vector<BufferElement>::const_iterator begin() const;
 	std::vector<BufferElement>::const_iterator end() const;
 
-	const BufferElement &operator[](const std::string &elementName) const;
+	BufferElement operator[](const std::string &elementName) const;
 
 private:
 	std::vector<BufferElement> elements;

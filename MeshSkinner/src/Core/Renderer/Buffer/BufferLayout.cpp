@@ -28,7 +28,7 @@ static uint32_t GetShaderDataTypeSize(ShaderDataType type)
 	case ShaderDataType::UnsignedShort3:	return 2 * 3;
 	case ShaderDataType::UnsignedShort4:	return 2 * 4;
 	case ShaderDataType::Bool:				return 1;
-	default:								assert(false);
+	default:								assert(false); return 0;
 	}
 }
 
@@ -64,7 +64,7 @@ uint32_t BufferElement::GetComponentCount() const
 	case ShaderDataType::UnsignedShort3:	return 3;
 	case ShaderDataType::UnsignedShort4:	return 4;
 	case ShaderDataType::Bool:				return 1;
-	default:								assert(false);
+	default:								assert(false); return 0;
 	}
 }
 
@@ -88,11 +88,12 @@ std::vector<BufferElement>::iterator BufferLayout::end() { return elements.end()
 std::vector<BufferElement>::const_iterator BufferLayout::begin() const { return elements.begin(); }
 std::vector<BufferElement>::const_iterator BufferLayout::end() const { return elements.end(); }
 
-const BufferElement &BufferLayout::operator[](const std::string &elementName) const
+BufferElement BufferLayout::operator[](const std::string &elementName) const
 {
 	for (const auto &element : elements)
 		if (element.name == elementName)
 			return element;
 
 	assert(false);
+	return BufferElement("none", ShaderDataType::None);
 }

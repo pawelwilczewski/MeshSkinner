@@ -25,7 +25,7 @@ Bone *Context::GetSelectedBone() const
 uint32_t Context::GetSelectedBoneIndex() const
 {
     auto &bones = selectedSkeletalMesh->skeleton->GetBones();
-    return std::find(bones.begin(), bones.end(), GetSelectedBone()) - bones.begin();
+    return (uint32_t)(std::find(bones.begin(), bones.end(), GetSelectedBone()) - bones.begin());
 }
 
 void Context::UpdateSelection(Entity *entity)

@@ -6,7 +6,7 @@ enum class AnimationInterpolationMode { Linear = 0, Step, CubicSpline };
 
 struct AnimationTrack
 {
-	AnimationInterpolationMode interpolation;
+	AnimationInterpolationMode interpolation = AnimationInterpolationMode::Linear;
 	std::vector<Keyframe<glm::vec3>> translationKeyframes;
 	std::vector<Keyframe<glm::quat>> rotationKeyframes;
 	std::vector<Keyframe<glm::vec3>> scaleKeyframes;

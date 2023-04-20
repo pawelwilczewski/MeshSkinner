@@ -30,7 +30,7 @@ static GLenum ShaderTypeToGL(const ShaderDataType &type)
 	case ShaderDataType::UnsignedShort3:	return GL_UNSIGNED_SHORT;
 	case ShaderDataType::UnsignedShort4:	return GL_UNSIGNED_SHORT;
 	case ShaderDataType::Bool:				return GL_BOOL;
-	default:								assert(false);
+	default:								assert(false); return GL_NONE;
 	}
 }
 
@@ -59,7 +59,7 @@ public:
 		glBindVertexArray(0);
 	}
 
-	void SetVertexBuffer(Ref<GenericVertexBuffer> vertexBuffer, size_t bindingIndex)
+	void SetVertexBuffer(Ref<GenericVertexBuffer> vertexBuffer, GLuint bindingIndex)
 	{
 		if (bindingIndex + 1 > vertexBuffers.size())
 			vertexBuffers.resize(bindingIndex + 1);

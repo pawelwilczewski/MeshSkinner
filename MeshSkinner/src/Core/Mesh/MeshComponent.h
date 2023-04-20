@@ -18,7 +18,7 @@ public:
 	virtual const void *GetVertices() const = 0;
 	virtual size_t GetVerticesLength() const = 0;
 	virtual VertexType GetVertexType() const = 0;
-	const BufferLayout &GetVertexBufferLayout() const;
+	BufferLayout GetVertexBufferLayout() const;
 
 public:
 	std::vector<uint32_t> indices;
