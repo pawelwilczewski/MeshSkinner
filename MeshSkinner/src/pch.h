@@ -53,10 +53,6 @@ using Weak = std::weak_ptr<T>;
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// utils
-#include "Utils/FileUtils.h"
-#include "Utils/MathUtils.h"
-
 // 1st party code
 #include "Application/Application.h"
 #include "Application/Log.h"
@@ -79,3 +75,7 @@ using Weak = std::weak_ptr<T>;
 #include "Core/Mesh/Skeleton.h"
 #include "Core/Mesh/Animation.h"
 #include "Core/Mesh/MeshLibrary.h"
+
+// utils
+#include "Core/Utils/FileUtils.h"
+#include "Core/Utils/MathUtils.h"

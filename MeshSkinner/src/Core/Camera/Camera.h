@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/Utils/MathUtils.h"
+
 class Camera : public Entity
 {
 	enum class ProjectionMode
