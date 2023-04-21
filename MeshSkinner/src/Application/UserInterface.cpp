@@ -1,13 +1,6 @@
 #include "pch.h"
 #include "UserInterface.h"
 
-#ifndef IMGUI_IMPL_OPENGL_LOADER_GLAD
-#define IMGUI_IMPL_OPENGL_LOADER_GLAD
-#endif
-
-#include "../imgui/backends/imgui_impl_opengl3.cpp"
-#include "../imgui/backends/imgui_impl_glfw.cpp"
-
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
