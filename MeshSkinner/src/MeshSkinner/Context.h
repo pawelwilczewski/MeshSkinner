@@ -1,6 +1,12 @@
 #pragma once
 
-struct AnimationInfo;
+struct AnimationInfo
+{
+	std::vector<Animation> animations;
+	bool play = true;
+	float playbackTime = 0.f;
+	int animationIndex = 0;
+};
 
 // singleton context class for ease of use
 class Context
@@ -56,12 +62,4 @@ private:
 	Bone *selectedBone = nullptr;
 
 	std::unordered_map<SkeletalMeshComponent *, AnimationInfo> animations;
-};
-
-struct AnimationInfo
-{
-	std::vector<Animation> animations;
-	bool play = true;
-	float playbackTime = 0.f;
-	int animationIndex = 0;
 };
