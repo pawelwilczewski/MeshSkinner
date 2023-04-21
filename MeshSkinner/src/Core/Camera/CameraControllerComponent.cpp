@@ -73,7 +73,7 @@ void CameraControllerComponent::OnMeshImported(const MeshComponent *mesh)
 
 	auto verts = mesh->GetVertices();
 	auto vertsLength = mesh->GetVerticesLength();
-	auto &layout = mesh->GetVertexBufferLayout();
+	auto layout = mesh->GetVertexBufferLayout();
 	auto offset = layout["position"].offset;
 
 	glm::vec3 centre = glm::vec3(0.f);
