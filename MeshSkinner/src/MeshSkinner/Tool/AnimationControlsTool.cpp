@@ -46,7 +46,7 @@ void AnimationControlsTool::OnUpdateUI()
 	for (const auto &animation : info.animations)
 		animationNames.push_back(animation.name.c_str());
 
-	if (InteractiveWidget(ImGui::ListBox("Select animation", &info.animationIndex, animationNames.data(), animationNames.size())))
+	if (InteractiveWidget(ImGui::ListBox("Select animation", &info.animationIndex, animationNames.data(), (int)animationNames.size())))
 		info.playbackTime = 0.f;
 
 	if (info.animationIndex < info.animations.size())

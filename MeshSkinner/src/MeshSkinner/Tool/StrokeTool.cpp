@@ -125,7 +125,7 @@ void StrokeTool::OnUpdateUI()
 	ImGui::Begin(toolWindowName.c_str());
 
 	Type tempType = type;
-	if (InteractiveWidget(ImGui::ListBox("Stroke update type", (int *)(&tempType), strokeUpdateTypeNames.data(), strokeUpdateTypeNames.size())))
+	if (InteractiveWidget(ImGui::ListBox("Stroke update type", (int *)(&tempType), strokeUpdateTypeNames.data(), (int)strokeUpdateTypeNames.size())))
 		SetType(tempType);
 
 	switch (type)

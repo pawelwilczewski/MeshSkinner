@@ -48,7 +48,7 @@ void BrushTool::OnUpdateUI()
 {
     ImGui::Begin(toolWindowName.c_str());
 
-    InteractiveWidget(ImGui::ListBox("Brush blend mode", (int *)(&blendMode), (const char **)BrushBlendModeNames.data(), BrushBlendModeNames.size()));
+    InteractiveWidget(ImGui::ListBox("Brush blend mode", (int *)(&blendMode), (const char **)BrushBlendModeNames.data(), (int)BrushBlendModeNames.size()));
 
     InteractiveWidget(ImGui::SliderFloat("Brush weight", &weight, 0.f, 1.f, "%.3f", ImGuiSliderFlags_ClampOnInput));
     //if (blendMode == BlendMode::Mix || blendMode == BlendMode::Linear)

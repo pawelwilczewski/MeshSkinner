@@ -101,7 +101,7 @@ void MainScene::OnStrokeEmplace(const StrokeQueryInfo &info)
         // try to update an already existing weight
         float *toUpdate;
         bool updated = false;
-        for (size_t i = 0; i < v.bones.length(); i++)
+        for (glm::vec4::length_type i = 0; i < v.bones.length(); i++)
         {
             // the bone already exists in vertex info
             if ((uint32_t)v.bones[i] == Context::Get().GetSelectedBoneIndex())

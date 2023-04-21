@@ -42,7 +42,6 @@ public:
 
 	// ANIMATIONS
 public:
-	const std::vector<Animation> &GetAnimations() const;
 	std::unordered_map<SkeletalMeshComponent *, AnimationInfo> &GetAnimationsRaw();
 	void ImportAnimations(const std::string &path, SkeletalMeshComponent *mesh);
 

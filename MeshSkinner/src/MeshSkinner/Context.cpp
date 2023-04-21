@@ -57,8 +57,13 @@ void Context::UpdateSelection(Entity *entity)
         selectedEntity = entity;
         selectedBone = nullptr;
 
-        auto components = entity->GetComponents<SkeletalMeshComponent>();
-        selectedSkeletalMesh = components.size() > 0 ? (*components.begin()).get() : nullptr;
+        if (entity)
+        {
+            auto components = entity->GetComponents<SkeletalMeshComponent>();
+            selectedSkeletalMesh = components.size() > 0 ? (*components.begin()).get() : nullptr;
+        }
+        else
+            selectedSkeletalMesh = nullptr;
     }
 
     Renderer::selectedEntity = selectedEntity;
@@ -72,15 +77,6 @@ void Context::UpdateSelectedBone(uint32_t boneIndex)
 {
     selectedBone = Context::Get().selectedSkeletalMesh->skeleton->GetBones()[boneIndex];
     Renderer::selectedBone = GetSelectedBoneIndex();
-}
-
-const std::vector<Animation> &Context::GetAnimations() const
-{
-    auto mesh = Context::Get().GetSelectedSkeletalMesh();
-    if (mesh)
-        return animations.at(mesh).animations;
-
-    return std::vector<Animation>();
 }
 
 std::unordered_map<SkeletalMeshComponent *, AnimationInfo> &Context::GetAnimationsRaw()

@@ -8,12 +8,12 @@ SceneStatsTool::SceneStatsTool(const std::string &toolWindowName) : Tool(toolWin
 void SceneStatsTool::OnUpdateUI()
 {
     // debug fps info
-    static float avgFps = 60.0;
-    static float avgFrametime = 0.1667;
+    static float avgFps = 60.f;
+    static float avgFrametime = 0.1667f;
     static float decayAlpha = 0.99f;
 
-    avgFps = decayAlpha * avgFps + (1.0 - decayAlpha) * Time::GetFPS();
-    avgFrametime = decayAlpha * avgFrametime + (1.0 - decayAlpha) * Time::GetDeltaSeconds();
+    avgFps = decayAlpha * avgFps + (1.f - decayAlpha) * Time::GetFPS();
+    avgFrametime = decayAlpha * avgFrametime + (1.f - decayAlpha) * Time::GetDeltaSeconds();
 
     // scene stats
     ImGui::Begin("Scene Stats");
