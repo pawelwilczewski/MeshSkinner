@@ -73,7 +73,7 @@ using Weak = std::weak_ptr<T>;
 #include "Core/Mesh/StaticMeshComponent.h"
 #include "Core/Mesh/SkeletalMeshComponent.h"
 #include "Core/Mesh/Skeleton.h"
-#include "Core/Mesh/Animation.h"
+#include "Core/Animation/Animation.h"
 #include "Core/Mesh/MeshLibrary.h"
 
 // utils
