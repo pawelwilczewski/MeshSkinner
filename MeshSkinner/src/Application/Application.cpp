@@ -15,7 +15,7 @@ void Application::Init(const glm::ivec2 &windowSize, const char *title, int vsyn
     Window::Init(windowSize, title, vsync);
     Input::Init();
     UserInterface::Init();
-    Renderer::Init();
+    Renderer::Init(); // TODO: these should be executed from Core (subscribe to Application::Init())
     ShaderLibrary::Init();
     MaterialLibrary::Init();
 
